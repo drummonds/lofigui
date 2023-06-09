@@ -17,6 +17,7 @@ I have used Bulma as a CSS framework to make it look prettier as I am terrible a
 
 ## Elements
 
+- model view controller architecture
 - templating 
 - style sheets
 - buffering
@@ -24,6 +25,9 @@ I have used Bulma as a CSS framework to make it look prettier as I am terrible a
 Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.
 
 Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.
+
+### model view controller architecture
+All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver.  The view is the html templating and the browser.
 
 ### Buffer
 In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.

@@ -20,11 +20,13 @@ class PrintContext:
 # Slightly more involved but allows both single threaded use and option multithreaded
 _ctx = PrintContext()
 
+
 def buffer(ctx=None):
     if ctx is None:
         ctx = _ctx
     ctx.read()  # drain buffer
     return ctx.buffer
+
 
 def reset(ctx=None):
     if ctx is None:

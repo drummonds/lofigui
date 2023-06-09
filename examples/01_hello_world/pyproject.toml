@@ -10,6 +10,7 @@ packages = [{include = "01_hello_world"}]
 python = "^3.10"
 uvicorn = "^0.22.0"
 fastapi = "^0.96.0"
+lofigui = "^0.2.0"
 
 
 [build-system]
