@@ -1,13 +1,14 @@
 [tool.poetry]
 name = "lofigui"
-version = "0.1.0"
+version = "0.2.0"
 description = "Lofi GUI tooling"
 authors = ["Humphrey Drummond <hum3@drummond.info>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
+markdown = "^3.4.3"
 
 
 [build-system]
