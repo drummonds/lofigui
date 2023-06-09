@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "01-hello-world"
+version = "0.1.0"
+description = ""
+authors = ["Humphrey Drummond <hum3@drummond.info>"]
+readme = "README.md"
+packages = [{include = "01_hello_world"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.22.0"
+fastapi = "^0.96.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
