@@ -1,8 +1,8 @@
 from lofigui import buffer
 import lofigui as lg
 
-from fastapi import FastAPI, Request, BackgroundTasks
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import uvicorn
 
@@ -33,10 +33,12 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
+    lg.reset()  # If you don't have this the runs keep concatenating.
+    model()
     return templates.TemplateResponse(
         "hello.html", controller.state_dict({"request": request})
     )
 
 
 if __name__ == "__main__":
-    uvicorn.run("test07:app", host="127.0.0.1", port=1340, reload=True)
+    uvicorn.run("hello:app", host="127.0.0.1", port=1340, reload=True)

@@ -21,6 +21,7 @@ I have used Bulma as a CSS framework to make it look prettier as I am terrible a
 - templating 
 - style sheets
 - buffering
+- not really using forms
 
 Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.
 
@@ -32,6 +33,8 @@ All I really want to do is to write the model.  The controller and view (in the 
 ### Buffer
 In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
 
+### Forms
+lofigui relies on hyperlinks to perform updates.  Forms are useful for nice buttons but in general to get the right level of interactivity (click on somthing and it changes) you don't want to have forms.  HTMLx would play nicely here if you were intersted in improving interactivity and spending a bit more time on the UI.
 
 ## Alternative approaches
 
