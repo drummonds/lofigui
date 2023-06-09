@@ -1,0 +1,30 @@
+plz-out
+.idea
+**/__pycache__
+# configuration file with TM Vault tokens
+common/test_utils/contracts/simulation/test_config.json
+
+# Visual studio code
+.vscode/
+
+# Local playground for testing, files that will not be checked in
+.playpen*
+# Don't keep any Ipython notebook checkpoints
+.ipynb_checkpoints/
+# Don't keep log files
+pyThoughtMachine_log*
+
+# Sphinx build
+_build/
+
+# Python artefacts
+*.pyc
+*.pyz
+.DS_Store
+.pytest_cache/
+poetry.lock
+
+# Test artefacts
+tests/test_error.yaml
+tests/test_reload.yaml
+tm_*.sqlite
