@@ -17,12 +17,16 @@ I have used Bulma as a CSS framework to make it look prettier as I am terrible a
 
 ## Elements
 
+- templating 
+- style sheets
+- buffering
+
 Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.
 
 Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.
 
 ### Buffer
-In order to be able
+In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
 
 
 ## Alternative approaches
