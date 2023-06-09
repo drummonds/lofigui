@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lofigui"
-version = "0.2.2"
+version = "0.2.3"
 description = "Lofi GUI tooling"
 authors = ["Humphrey Drummond <hum3@drummond.info>"]
 license = "MIT"
