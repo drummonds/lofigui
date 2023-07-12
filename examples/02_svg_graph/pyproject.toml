@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "02_svg_graph"
+version = "0.1.0"
+description = ""
+authors = ["Humphrey Drummond <hum3@drummond.info>"]
+readme = "README.md"
+packages = [{include = "02_hello_world"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.22.0"
+fastapi = "^0.96.0"
+lofigui = "^0.2.2"
+pygal = "^3.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
