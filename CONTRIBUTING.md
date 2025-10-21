@@ -25,22 +25,22 @@ Before creating a bug report, check existing issues. Include:
 ```bash
 git clone https://github.com/YOUR-USERNAME/lofigui.git
 cd lofigui
-poetry install
+uv sync --all-extras
 ```
 
 ## Running Tests
 
 ```bash
-poetry run pytest
-poetry run pytest --cov=lofigui
+uv run pytest
+uv run pytest --cov=lofigui
 ```
 
 ## Code Quality
 
 ```bash
-poetry run black lofigui tests
-poetry run flake8 lofigui tests --max-line-length=100
-poetry run mypy lofigui
+uv run black lofigui tests
+uv run flake8 lofigui tests --max-line-length=100
+uv run mypy lofigui
 ```
 
 ## Coding Standards

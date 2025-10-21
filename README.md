@@ -47,10 +47,10 @@ lofigui relies on hyperlinks to perform updates.  Forms are useful for nice butt
 pip install lofigui
 ```
 
-### Using Poetry
+### Using uv
 
 ```bash
-poetry add lofigui
+uv add lofigui
 ```
 
 ### From source
@@ -58,7 +58,7 @@ poetry add lofigui
 ```bash
 git clone https://github.com/drummonds/lofigui.git
 cd lofigui
-poetry install
+uv sync --all-extras
 ```
 
 ## Quick Start
@@ -221,8 +221,8 @@ See the `examples/` directory for complete working examples:
 To run an example:
 ```bash
 cd examples/01_hello_world
-poetry install
-poetry run python hello.py
+uv sync
+uv run python hello.py
 ```
 
 Visit `http://127.0.0.1:1340`
@@ -234,30 +234,30 @@ Visit `http://127.0.0.1:1340`
 ```bash
 git clone https://github.com/drummonds/lofigui.git
 cd lofigui
-poetry install
+uv sync --all-extras
 ```
 
 ### Running Tests
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 With coverage:
 ```bash
-poetry run pytest --cov=lofigui --cov-report=html
+uv run pytest --cov=lofigui --cov-report=html
 ```
 
 ### Type Checking
 
 ```bash
-poetry run mypy lofigui
+uv run mypy lofigui
 ```
 
 ### Code Formatting
 
 ```bash
-poetry run black lofigui tests
+uv run black lofigui tests
 ```
 
 ## Comparison with Alternatives

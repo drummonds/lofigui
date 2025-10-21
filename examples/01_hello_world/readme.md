@@ -26,13 +26,13 @@ This example shows:
 From this directory:
 
 ```bash
-poetry install
+uv sync
 ```
 
 ## Running the Example
 
 ```bash
-poetry run python hello.py
+uv run python hello.py
 ```
 
 Then open your browser to: http://127.0.0.1:1340
