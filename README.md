@@ -189,6 +189,38 @@ with PrintContext() as ctx:
 ctx = PrintContext(max_buffer_size=10000)
 ```
 
+### Favicon Support
+
+#### `get_favicon_response()`
+
+Get a FastAPI/Starlette Response object for serving the favicon.
+
+**Example:**
+```python
+@app.get("/favicon.ico")
+async def favicon():
+    return lg.get_favicon_response()
+```
+
+#### `get_favicon_html_tag()`
+
+Get an HTML link tag with embedded favicon data URI.
+
+**Example:**
+```python
+# In your template <head>
+{{ get_favicon_html_tag()|safe }}
+```
+
+#### `save_favicon_ico(path)`
+
+Save the favicon to a file.
+
+**Example:**
+```python
+lg.save_favicon_ico("static/favicon.ico")
+```
+
 ## Architecture
 
 ### MVC Pattern

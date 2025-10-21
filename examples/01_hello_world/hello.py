@@ -31,6 +31,12 @@ controller = Controller()
 templates = Jinja2Templates(directory="templates")
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    """Serve the lofigui favicon"""
+    return lg.get_favicon_response()
+
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     lg.reset()  # If you don't have this the runs keep concatenating.

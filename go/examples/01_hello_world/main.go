@@ -59,6 +59,7 @@ func main() {
 	ctrl := NewController()
 
 	http.HandleFunc("/", ctrl.handleRoot)
+	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 
 	addr := ":1340"
 	log.Printf("Starting server on http://localhost%s", addr)

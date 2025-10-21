@@ -1,0 +1,8 @@
+<!-- Lofigui Favicon - Simple "L" logo -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#3273dc" rx="4"/>
+
+  <!-- Letter "L" in white -->
+  <path d="M 10 8 L 10 24 L 22 24 L 22 21 L 13 21 L 13 8 Z" fill="#ffffff"/>
+</svg>
