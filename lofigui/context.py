@@ -56,10 +56,11 @@ class PrintContext:
         # Warn if buffer is getting large (optional feature)
         if self.max_buffer_size and len(self.buffer) > self.max_buffer_size:
             import warnings
+
             warnings.warn(
                 f"Buffer size ({len(self.buffer)} chars) exceeds max_buffer_size "
                 f"({self.max_buffer_size} chars). Consider calling reset() more frequently.",
-                RuntimeWarning
+                RuntimeWarning,
             )
 
     def __enter__(self) -> "PrintContext":

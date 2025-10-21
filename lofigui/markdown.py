@@ -60,7 +60,7 @@ def table(
     table: Sequence[Sequence[Any]],
     header: List[str] = None,
     ctx: Optional[PrintContext] = None,
-    escape: bool = True
+    escape: bool = True,
 ) -> None:
     """Generate an HTML table and add to buffer.
 
@@ -90,7 +90,7 @@ def table(
 
     try:
         # Validate table structure
-        if table and not all(hasattr(row, '__iter__') for row in table):
+        if table and not all(hasattr(row, "__iter__") for row in table):
             raise ValueError("All table rows must be iterable")
 
         result = '<table class="table is-bordered is-striped">\n'
