@@ -26,13 +26,18 @@ This example shows:
 From this directory:
 
 ```bash
-uv sync
+uv sync --no-install-project
 ```
 
 ## Running the Example
 
 ```bash
-uv run python hello.py
+uv run --no-project python hello.py
+```
+
+Or using Task from repo root:
+```bash
+task example-01
 ```
 
 Then open your browser to: http://127.0.0.1:1340
