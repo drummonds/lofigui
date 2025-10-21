@@ -14,9 +14,10 @@ app = FastAPI()
 def model():
     lg.print("Hello to graph.")
     # add graph
-    bar_chart = pygal.Bar()                                            # Then create a bar graph object
-    bar_chart.add('Fibonacci', [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55])  # Add some values
-    lg.html(bar_chart.render().decode("utf-8") )
+    bar_chart = pygal.Bar()  # Then create a bar graph object
+    bar_chart.add("Fibonacci", [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55])  # Add some values
+    lg.html(bar_chart.render().decode("utf-8"))
+
 
 class Controller:
     """Async controller class for datacolour, but also combined with model"""
@@ -38,9 +39,7 @@ templates = Jinja2Templates(directory="templates")
 async def root(request: Request):
     lg.reset()  # If you don't have this the runs keep concatenating.
     model()
-    return templates.TemplateResponse(
-        "hello.html", controller.state_dict({"request": request})
-    )
+    return templates.TemplateResponse("hello.html", controller.state_dict({"request": request}))
 
 
 if __name__ == "__main__":

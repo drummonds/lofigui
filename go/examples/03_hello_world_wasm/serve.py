@@ -15,8 +15,8 @@ class WASMHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def end_headers(self):
         # Set WASM MIME type
-        if self.path.endswith('.wasm'):
-            self.send_header('Content-Type', 'application/wasm')
+        if self.path.endswith(".wasm"):
+            self.send_header("Content-Type", "application/wasm")
 
         # Enable CORS for local development
         self.send_header("Access-Control-Allow-Origin", "*")

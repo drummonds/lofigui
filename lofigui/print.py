@@ -4,7 +4,9 @@ from typing import Optional
 from .context import _ctx, PrintContext
 
 
-def print(msg: str = "", ctx: Optional[PrintContext] = None, end: str = "\n", escape: bool = True) -> None:
+def print(
+    msg: str = "", ctx: Optional[PrintContext] = None, end: str = "\n", escape: bool = True
+) -> None:
     """Print text to the buffer as HTML.
 
     Args:
