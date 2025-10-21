@@ -1,6 +1,6 @@
 [project]
 name = "lofigui"
-version = "0.2.3"
+version = "0.4.1"
 description = "Lofi GUI tooling"
 authors = [
     {name = "Humphrey Drummond", email = "hum3@drummond.info"}

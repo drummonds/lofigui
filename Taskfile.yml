@@ -4,7 +4,6 @@ version: '3'
 
 vars:
   PYTHON: python3
-  WASM_DIR: examples/03_hello_world_wasm
 
 tasks:
   default:
@@ -66,39 +65,15 @@ tasks:
     desc: Run example 01 (Hello World with FastAPI)
     dir: examples/01_hello_world
     cmds:
-      - uv sync
-      - uv run python hello.py
+      - uv sync --no-install-project
+      - uv run --no-project python hello.py
 
   example-02:
     desc: Run example 02 (SVG Graph with Pygal)
     dir: examples/02_svg_graph
     cmds:
-      - uv sync
-      - uv run python graph.py
-
-  example-03:
-    desc: Run example 03 (WASM in browser) - serves on http://localhost:8000
-    aliases: [wasm, serve-wasm]
-    dir: "{{.WASM_DIR}}"
-    cmds:
-      - echo "Starting WASM example server..."
-      - echo "Open http://localhost:8000 in your browser"
-      - echo "Press Ctrl+C to stop"
-      - "{{.PYTHON}} serve.py"
-
-  test-wasm-python:
-    desc: Test the Python model code from WASM example
-    dir: "{{.WASM_DIR}}"
-    cmds:
-      - echo "Testing hello_model.py..."
-      - "{{.PYTHON}} hello_model.py"
-
-  build-wasm:
-    desc: Build/validate WASM example (info about Python to WASM compilation)
-    dir: "{{.WASM_DIR}}"
-    cmds:
-      - chmod +x build.sh
-      - ./build.sh
+      - uv sync --no-install-project
+      - uv run --no-project python graph.py
 
   # Go example tasks
   go-example-01:
@@ -133,37 +108,3 @@ tasks:
       - chmod +x build.sh
       - ./build.sh
 
-  # Utility tasks
-  clean:
-    desc: Clean build artifacts and cache
-    cmds:
-      - rm -rf dist/
-      - rm -rf build/
-      - rm -rf *.egg-info
-      - rm -rf .pytest_cache
-      - rm -rf htmlcov
-      - rm -rf .coverage
-      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-      - find . -type f -name "*.pyc" -delete
-
-  help:
-    desc: Show help information
-    cmds:
-      - echo "Lofigui Task Runner"
-      - echo ""
-      - echo "Common tasks:"
-      - echo "  task install          - Install dependencies"
-      - echo "  task test             - Run tests"
-      - echo "  task lint             - Run linters"
-      - echo "  task format           - Format code"
-      - echo "  task example-01       - Run Python FastAPI example"
-      - echo "  task example-02       - Run Python SVG graph example"
-      - echo "  task example-03       - Run Python WASM browser example"
-      - echo "  task go-example-01    - Run Go Hello World example"
-      - echo "  task go-example-02    - Run Go SVG graph example"
-      - echo "  task go-wasm          - Build and run Go WASM example"
-      - echo "  task test-wasm-python - Test Python WASM code"
-      - echo "  task build-wasm       - Python WASM info"
-      - echo "  task build-go-wasm    - Build Go WASM binary"
-      - echo ""
-      - echo "Use 'task --list' to see all available tasks"

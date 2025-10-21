@@ -26,15 +26,20 @@ This example shows:
 From this directory:
 
 ```bash
-uv sync
+uv sync --no-install-project
 ```
 
-This will install both lofigui and pygal.
+This will install both lofigui and pygal dependencies.
 
 ## Running the Example
 
 ```bash
-uv run python graph.py
+uv run --no-project python graph.py
+```
+
+Or using Task from repo root:
+```bash
+task example-02
 ```
 
 Then open your browser to: http://127.0.0.1:1340
