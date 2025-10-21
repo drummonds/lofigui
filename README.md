@@ -1,52 +1,340 @@
 # lofigui
 
-This is tooling for me as a go and python programmer to provide really simple front ends.  They serve the same area as:
+**Lofi GUI** - A minimalist Python library for creating simple web-based GUIs for CLI tools and small projects.
 
-It provides a way to build a very simple web app that can be bundled if required.
-The use cases are:
-- quick and simple
-- more than a static website
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The use cases are:
-- providing a gui for a command line tool
-- 1-10 users
-- more for front ends for single physical object or a single process
+## Overview
 
+`lofigui` provides a print-like interface for building lightweight web applications with minimal complexity. Perfect for:
 
-I have used Bulma as a CSS framework to make it look prettier as I am terrible at design.
+- Creating quick GUIs for command-line tools
+- Internal tools for small teams (1-10 users)
+- Single-process or single-object front-ends
+- Rapid prototyping without JavaScript overhead
 
-## Elements
+## Key Features
 
-- model view controller architecture
-- templating 
-- style sheets
-- buffering
-- not really using forms
+- **Simple API**: Print-like interface (`print()`, `markdown()`, `html()`, `table()`)
+- **No JavaScript**: Pure HTML/CSS using the Bulma framework
+- **MVC Architecture**: Clean separation of model, view, and controller
+- **Async-ready**: Built on asyncio for modern web frameworks (FastAPI, etc.)
+- **Type-safe**: Full type hints and mypy support
+- **Secure**: HTML escaping by default to prevent XSS attacks
 
-Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.
+## Installation
 
-Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.
+### Using pip
 
-### model view controller architecture
-All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver.  The view is the html templating and the browser.
+```bash
+pip install lofigui
+```
 
-### Buffer
-In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
+### Using Poetry
 
-### Forms
-lofigui relies on hyperlinks to perform updates.  Forms are useful for nice buttons but in general to get the right level of interactivity (click on somthing and it changes) you don't want to have forms.  HTMLx would play nicely here if you were intersted in improving interactivity and spending a bit more time on the UI.
+```bash
+poetry add lofigui
+```
 
-## Alternative approaches
+### From source
 
-- [pywebio](https://www.pyweb.io/)
-- [streamlit](https://streamlit.io/)
-- [textual](https://pypi.org/project/textual/)
+```bash
+git clone https://github.com/drummonds/lofigui.git
+cd lofigui
+poetry install
+```
 
-The difference is that this approach should be very simple and easily understandable.
-For the moment no Javascript is used.
+## Quick Start
 
+Here's a minimal example using FastAPI:
+
+```python
+from lofigui import buffer, print, reset
+import lofigui as lg
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+import uvicorn
+
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
+def model():
+    """Your business logic here."""
+    lg.print("Hello world!")
+    lg.markdown("## This is a heading")
+    lg.table([["Alice", 30], ["Bob", 25]], header=["Name", "Age"])
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    reset()  # Clear previous output
+    model()  # Generate content
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "results": buffer()}
+    )
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+```
+
+**templates/index.html:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            {{results | safe}}
+        </div>
+    </section>
+</body>
+</html>
+```
+
+Run the app and visit `http://127.0.0.1:8000`!
+
+## API Reference
+
+### Output Functions
+
+#### `print(msg, ctx=None, end="\n", escape=True)`
+
+Print text to the buffer as HTML paragraphs.
+
+**Parameters:**
+- `msg` (str): Message to print
+- `ctx` (PrintContext, optional): Custom context (default: global context)
+- `end` (str): End character - `"\n"` for paragraphs, `""` for inline
+- `escape` (bool): Escape HTML entities (default: True)
+
+**Example:**
+```python
+import lofigui as lg
+
+lg.print("Hello world")  # <p>Hello world</p>
+lg.print("Inline", end="")  # &nbsp;Inline&nbsp;
+lg.print("<script>alert('safe')</script>")  # Escaped by default
+lg.print("<b>Bold</b>", escape=False)  # Raw HTML (use with caution!)
+```
+
+#### `markdown(msg, ctx=None)`
+
+Convert markdown to HTML and add to buffer.
+
+**Parameters:**
+- `msg` (str): Markdown-formatted text
+- `ctx` (PrintContext, optional): Custom context
+
+**Example:**
+```python
+lg.markdown("# Heading\n\nThis is **bold** text")
+```
+
+#### `html(msg, ctx=None)`
+
+Add raw HTML to buffer (no escaping).
+
+**WARNING:** Only use with trusted input to avoid XSS vulnerabilities.
+
+**Parameters:**
+- `msg` (str): Raw HTML
+- `ctx` (PrintContext, optional): Custom context
+
+**Example:**
+```python
+lg.html("<div class='notification is-info'>Custom HTML</div>")
+```
+
+#### `table(table, header=None, ctx=None, escape=True)`
+
+Generate an HTML table with Bulma styling.
+
+**Parameters:**
+- `table` (Sequence[Sequence]): Table data as nested sequences
+- `header` (List[str], optional): Column headers
+- `ctx` (PrintContext, optional): Custom context
+- `escape` (bool): Escape cell content (default: True)
+
+**Example:**
+```python
+data = [
+    ["Alice", 30, "Engineer"],
+    ["Bob", 25, "Designer"],
+]
+lg.table(data, header=["Name", "Age", "Role"])
+```
+
+### Buffer Management
+
+#### `buffer(ctx=None)`
+
+Get accumulated HTML output.
+
+**Returns:** str
+
+**Example:**
+```python
+content = lg.buffer()
+```
+
+#### `reset(ctx=None)`
+
+Clear the buffer.
+
+**Example:**
+```python
+lg.reset()
+```
+
+### Context Management
+
+#### `PrintContext(max_buffer_size=None)`
+
+Context manager for buffering HTML output.
+
+**Parameters:**
+- `max_buffer_size` (int, optional): Warn if buffer exceeds this size
+
+**Example:**
+```python
+from lofigui import PrintContext, print
+
+# Using context manager (auto-cleanup)
+with PrintContext() as ctx:
+    print("Hello", ctx=ctx)
+    # Buffer automatically reset on exit
+
+# Or create manually
+ctx = PrintContext(max_buffer_size=10000)
+```
+
+## Architecture
+
+### MVC Pattern
+
+`lofigui` follows the Model-View-Controller pattern:
+
+- **Model**: Your business logic (functions that call `lg.print()`, etc.)
+- **View**: Jinja2 templates that render the buffered HTML
+- **Controller**: FastAPI/Flask routes that orchestrate model and view
+
+### Buffering Strategy
+
+Server-side buffering simplifies the architecture:
+1. Model functions write to a queue
+2. `buffer()` drains the queue and returns HTML
+3. Templates render the complete HTML
+4. Full page refresh (no partial DOM updates)
+
+This approach trades interactivity for simplicity - perfect for internal tools.
+
+### Security
+
+By default, all output functions escape HTML to prevent XSS attacks:
+
+```python
+lg.print("<script>alert('xss')</script>")
+# Output: <p>&lt;script&gt;alert('xss')&lt;/script&gt;</p>
+```
+
+Use `escape=False` or `html()` only with trusted input.
+
+## Examples
+
+See the `examples/` directory for complete working examples:
+
+- **01_hello_world**: Minimal FastAPI application
+- **02_svg_graph**: Chart rendering with Pygal
+
+To run an example:
+```bash
+cd examples/01_hello_world
+poetry install
+poetry run python hello.py
+```
+
+Visit `http://127.0.0.1:1340`
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/drummonds/lofigui.git
+cd lofigui
+poetry install
+```
+
+### Running Tests
+
+```bash
+poetry run pytest
+```
+
+With coverage:
+```bash
+poetry run pytest --cov=lofigui --cov-report=html
+```
+
+### Type Checking
+
+```bash
+poetry run mypy lofigui
+```
+
+### Code Formatting
+
+```bash
+poetry run black lofigui tests
+```
+
+## Comparison with Alternatives
+
+| Feature | lofigui | Streamlit | PyWebIO | Textual |
+|---------|---------|-----------|---------|---------|
+| JavaScript | No | Yes | Yes | No |
+| Complexity | Very Low | Medium | Medium | Medium |
+| Use Case | Internal tools | Data apps | Web apps | Terminal UIs |
+| Learning Curve | Minimal | Moderate | Moderate | Moderate |
+| Partial Updates | No | Yes | Yes | Yes |
+
+**Choose lofigui if:**
+- You want maximum simplicity
+- You're building internal tools
+- You don't need fancy interactivity
+- You want to understand every line of code
+
+**Choose alternatives if:**
+- You need rich interactivity
+- You're building public-facing apps
+- You want widgets and components
 
 ## Roadmap
 
-- A go version, will be event simpler
-- A go wasm version for deploying serverless (no physical object)
+- **Go version**: Even simpler implementation
+- **Go WASM**: Serverless deployment option
+- **HTMX integration**: Optional partial page updates
+- **More examples**: Forms, authentication, file uploads
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Author
+
+Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
+
+## Links
+
+- **GitHub**: https://github.com/drummonds/lofigui
+- **PyPI**: https://pypi.org/project/lofigui/
+- **Documentation**: https://github.com/drummonds/lofigui/blob/main/README.md
+- **Issues**: https://github.com/drummonds/lofigui/issues
