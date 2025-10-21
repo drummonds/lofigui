@@ -26,7 +26,7 @@ This example shows:
 From this directory:
 
 ```bash
-poetry install
+uv sync
 ```
 
 This will install both lofigui and pygal.
@@ -34,7 +34,7 @@ This will install both lofigui and pygal.
 ## Running the Example
 
 ```bash
-poetry run python graph.py
+uv run python graph.py
 ```
 
 Then open your browser to: http://127.0.0.1:1340
