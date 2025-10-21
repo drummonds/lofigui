@@ -1,15 +1,85 @@
-# Hello World
+# Example 01: Hello World
 
-This is put into a single file apart from the HTML
+A minimal example demonstrating the basic usage of lofigui with FastAPI.
 
-This has more infrastructure than I would like, however you could remove it but as soon as the project becomes real you will start adding it back.
+## Overview
 
-PS something odd with caching of poetry versions possible due to WS bug on datatimes.  poetry is not updating versions.
+This example shows:
+- Basic project structure for a lofigui application
+- Integration with FastAPI and Uvicorn
+- Simple print output to web page
+- MVC architecture pattern
 
-## Run the demo
+## Structure
 
-In this directory:
 ```
-poetry update
+01_hello_world/
+├── hello.py           # Main application (Model + Controller)
+├── templates/
+│   └── hello.html    # View (Jinja2 template)
+├── pyproject.toml    # Dependencies
+└── readme.md         # This file
+```
+
+## Installation
+
+From this directory:
+
+```bash
+poetry install
+```
+
+## Running the Example
+
+```bash
 poetry run python hello.py
 ```
+
+Then open your browser to: http://127.0.0.1:1340
+
+## How It Works
+
+### 1. Model (`model()` function)
+
+The model contains your business logic:
+
+```python
+def model():
+    lg.print("Hello world.")
+```
+
+This simply outputs "Hello world" to the buffer.
+
+### 2. Controller (`Controller` class and route)
+
+The controller manages state and routing:
+
+```python
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    lg.reset()  # Clear previous output
+    model()     # Generate new output
+    return templates.TemplateResponse(
+        "hello.html", controller.state_dict({"request": request})
+    )
+```
+
+### 3. View (`templates/hello.html`)
+
+The view renders the buffered HTML:
+
+```html
+<h1>Test start</h1>
+{{results | safe}}
+```
+
+The `results` variable contains the accumulated HTML from lofigui.
+
+## Next Steps
+
+- Try adding more `lg.print()` calls to the model
+- Add markdown output with `lg.markdown("## Heading")`
+- Add a table with `lg.table([["row1"]], header=["Column"])`
+- Add hyperlinks to make it interactive
+
+See example 02 for a more complex example with charts.
