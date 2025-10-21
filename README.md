@@ -1,6 +1,8 @@
 # lofigui
 
-**Lofi GUI** - A minimalist Python library for creating simple web-based GUIs for CLI tools and small projects.
+**Lofi GUI** - A minimalist Python library for creating really simple web-based GUIs for CLI tools and small projects.  It is written for me as a go and python programmer to try and have a really simple interface
+both as a user and as a programmer.
+It is also mea to make writing UI's for realtime actions and machines easier.
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -17,11 +19,25 @@
 ## Key Features
 
 - **Simple API**: Print-like interface (`print()`, `markdown()`, `html()`, `table()`)
-- **No JavaScript**: Pure HTML/CSS using the Bulma framework
-- **MVC Architecture**: Clean separation of model, view, and controller
+- **No JavaScript**: Pure HTML/CSS using the Bulma framework to make it look prettier as I am terrible at design.
+- **MVC Architecture**: Model, view, and controller architecture
 - **Async-ready**: Built on asyncio for modern web frameworks (FastAPI, etc.)
 - **Type-safe**: Full type hints and mypy support
 - **Secure**: HTML escaping by default to prevent XSS attacks
+
+## Element
+Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.
+
+Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.
+
+### model view controller architecture
+All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver.  The view is the html templating and the browser.
+
+### Buffer
+In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
+
+### Forms
+lofigui relies on hyperlinks to perform updates.  Forms are useful for nice buttons but in general to get the right level of interactivity (click on somthing and it changes) you don't want to have forms.  HTMLx would play nicely here if you were intersted in improving interactivity and spending a bit more time on the UI.
 
 ## Installation
 
@@ -47,55 +63,7 @@ poetry install
 
 ## Quick Start
 
-Here's a minimal example using FastAPI:
-
-```python
-from lofigui import buffer, print, reset
-import lofigui as lg
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-import uvicorn
-
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-
-def model():
-    """Your business logic here."""
-    lg.print("Hello world!")
-    lg.markdown("## This is a heading")
-    lg.table([["Alice", 30], ["Bob", 25]], header=["Name", "Age"])
-
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    reset()  # Clear previous output
-    model()  # Generate content
-    return templates.TemplateResponse(
-        "index.html", {"request": request, "results": buffer()}
-    )
-
-if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
-```
-
-**templates/index.html:**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-</head>
-<body>
-    <section class="section">
-        <div class="container">
-            {{results | safe}}
-        </div>
-    </section>
-</body>
-</html>
-```
-
-Run the app and visit `http://127.0.0.1:8000`!
+Look at the example for a quick start.
 
 ## API Reference
 

@@ -20,7 +20,7 @@ Unacceptable behavior includes:
 
 ## Enforcement
 
-Report unacceptable behavior to hum3@drummond.info.
+Report unacceptable behavior to the project owner.
 
 ## Attribution
 
