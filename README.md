@@ -215,10 +215,12 @@ Use `escape=False` or `html()` only with trusted input.
 
 See the `examples/` directory for complete working examples:
 
-- **01_hello_world**: Minimal FastAPI application
-- **02_svg_graph**: Chart rendering with Pygal
+- **01_hello_world**: Minimal FastAPI application (server-side)
+- **02_svg_graph**: Chart rendering with Pygal (server-side)
+- **03_hello_world_wasm**: Python as WebAssembly in browser (no server needed!)
 
-To run an example:
+### Running Server-Side Examples (01 & 02)
+
 ```bash
 cd examples/01_hello_world
 uv sync
@@ -226,6 +228,17 @@ uv run python hello.py
 ```
 
 Visit `http://127.0.0.1:1340`
+
+### Running WASM Example (03)
+
+```bash
+cd examples/03_hello_world_wasm
+python3 serve.py
+```
+
+Visit `http://localhost:8000`
+
+This example runs Python entirely in your browser using Pyodide and can be deployed to GitHub Pages for free!
 
 ## Development
 
@@ -283,10 +296,12 @@ uv run black lofigui tests
 
 ## Roadmap
 
+- ✅ **Python WASM**: Example running Python in browser via Pyodide (see example 03)
 - **Go version**: Even simpler implementation
 - **Go WASM**: Serverless deployment option
 - **HTMX integration**: Optional partial page updates
 - **More examples**: Forms, authentication, file uploads
+- **Lofigui WASM library**: Native browser version of lofigui for client-side use
 
 ## Contributing
 
