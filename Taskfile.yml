@@ -3,10 +3,122 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  PYTHON: python3
+  WASM_DIR: examples/03_hello_world_wasm
 
 tasks:
   default:
+    desc: Show available tasks
     cmds:
-      - echo "{{.GREETING}}"
+      - task --list
     silent: true
+
+  # Development tasks
+  install:
+    desc: Install development dependencies
+    cmds:
+      - uv sync --all-extras
+
+  test:
+    desc: Run tests
+    cmds:
+      - uv run pytest
+
+  test-coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - uv run pytest --cov=lofigui --cov-report=html --cov-report=term-missing
+
+  lint:
+    desc: Run all linters
+    cmds:
+      - task: lint-black
+      - task: lint-flake8
+      - task: lint-mypy
+
+  lint-black:
+    desc: Check code formatting with black
+    cmds:
+      - uv run black --check lofigui tests
+
+  lint-flake8:
+    desc: Run flake8 linter
+    cmds:
+      - uv run flake8 lofigui tests --max-line-length=100 --extend-ignore=E203,W503
+
+  lint-mypy:
+    desc: Run mypy type checker
+    cmds:
+      - uv run mypy lofigui
+
+  format:
+    desc: Format code with black
+    cmds:
+      - uv run black lofigui tests
+
+  build:
+    desc: Build package distribution
+    cmds:
+      - uv build
+
+  # Example tasks
+  example-01:
+    desc: Run example 01 (Hello World with FastAPI)
+    dir: examples/01_hello_world
+    cmds:
+      - uv sync
+      - uv run python hello.py
+
+  example-02:
+    desc: Run example 02 (SVG Graph with Pygal)
+    dir: examples/02_svg_graph
+    cmds:
+      - uv sync
+      - uv run python graph.py
+
+  example-03:
+    desc: Run example 03 (WASM in browser) - serves on http://localhost:8000
+    aliases: [wasm, serve-wasm]
+    dir: "{{.WASM_DIR}}"
+    cmds:
+      - echo "Starting WASM example server..."
+      - echo "Open http://localhost:8000 in your browser"
+      - echo "Press Ctrl+C to stop"
+      - "{{.PYTHON}} serve.py"
+
+  test-wasm-python:
+    desc: Test the Python model code from WASM example
+    dir: "{{.WASM_DIR}}"
+    cmds:
+      - echo "Testing hello_model.py..."
+      - "{{.PYTHON}} hello_model.py"
+
+  # Utility tasks
+  clean:
+    desc: Clean build artifacts and cache
+    cmds:
+      - rm -rf dist/
+      - rm -rf build/
+      - rm -rf *.egg-info
+      - rm -rf .pytest_cache
+      - rm -rf htmlcov
+      - rm -rf .coverage
+      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+      - find . -type f -name "*.pyc" -delete
+
+  help:
+    desc: Show help information
+    cmds:
+      - echo "Lofigui Task Runner"
+      - echo ""
+      - echo "Common tasks:"
+      - echo "  task install          - Install dependencies"
+      - echo "  task test             - Run tests"
+      - echo "  task lint             - Run linters"
+      - echo "  task format           - Format code"
+      - echo "  task example-01       - Run FastAPI example"
+      - echo "  task example-02       - Run SVG graph example"
+      - echo "  task example-03       - Run WASM browser example"
+      - echo "  task test-wasm-python - Test WASM Python code"
+      - echo ""
+      - echo "Use 'task --list' to see all available tasks"

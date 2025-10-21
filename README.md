@@ -227,6 +227,11 @@ uv sync
 uv run python hello.py
 ```
 
+Or using Task:
+```bash
+task example-01  # or task example-02
+```
+
 Visit `http://127.0.0.1:1340`
 
 ### Running WASM Example (03)
@@ -236,9 +241,33 @@ cd examples/03_hello_world_wasm
 python3 serve.py
 ```
 
+Or using Task:
+```bash
+task example-03  # aliases: task wasm
+```
+
 Visit `http://localhost:8000`
 
 This example runs Python entirely in your browser using Pyodide and can be deployed to GitHub Pages for free!
+
+### Using Taskfile
+
+The project includes a [Taskfile](Taskfile.yml) for common development tasks:
+
+```bash
+task --list              # Show all available tasks
+task install             # Install dependencies
+task test                # Run tests
+task test-coverage       # Run tests with coverage
+task lint                # Run all linters
+task format              # Format code with black
+task build               # Build package
+task example-01          # Run example 01
+task example-02          # Run example 02
+task wasm                # Run WASM example (alias for example-03)
+task test-wasm-python    # Test WASM Python code
+task clean               # Clean build artifacts
+```
 
 ## Development
 
