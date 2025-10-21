@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lofigui Go WASM Example - Hello World</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .hero {
+            margin-bottom: 2rem;
+        }
+        #output {
+            min-height: 200px;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        .buttons {
+            margin: 1rem 0;
+        }
+        #status {
+            margin-bottom: 1rem;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <p class="title">
+                Lofigui Go WASM Example
+            </p>
+            <p class="subtitle">
+                Go compiled to WebAssembly running in your browser
+            </p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="content">
+            <h2>Interactive Demo</h2>
+            <p>This page demonstrates running Go code compiled to WebAssembly in your browser.
+            Go WASM is much smaller and faster than Pyodide!</p>
+
+            <div id="status" class="notification is-info">
+                <p id="status-text">Loading Go WASM module...</p>
+            </div>
+
+            <div class="buttons">
+                <button id="runBasic" class="button is-primary" disabled>
+                    <span>Run Basic Example</span>
+                </button>
+                <button id="runAdvanced" class="button is-info" disabled>
+                    <span>Run Advanced Example</span>
+                </button>
+                <button id="reload" class="button is-warning">
+                    <span>Reload Page</span>
+                </button>
+            </div>
+
+            <div class="box">
+                <h3>Output</h3>
+                <div id="output">
+                    <div class="loading">
+                        <progress class="progress is-primary" max="100">Loading Go WASM...</progress>
+                        <p>Loading WebAssembly module (typically &lt;1 second)...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h3>How It Works</h3>
+                <ol>
+                    <li><strong>Compile Go to WASM</strong>: Go code is compiled to WebAssembly using <code>GOOS=js GOARCH=wasm go build</code></li>
+                    <li><strong>Load WASM Module</strong>: The browser loads the WASM binary (~2MB)</li>
+                    <li><strong>Execute on Click</strong>: JavaScript calls Go functions exposed via <code>js.Global()</code></li>
+                    <li><strong>Results Display</strong>: Go returns HTML strings that are displayed in the page</li>
+                </ol>
+
+                <h3>Benefits vs Pyodide</h3>
+                <ul>
+                    <li><strong>5x smaller</strong>: ~2MB vs ~10MB for Pyodide</li>
+                    <li><strong>10x faster startup</strong>: Instant vs 3-5 seconds</li>
+                    <li><strong>Native performance</strong>: Compiled code, no interpreter</li>
+                    <li><strong>Type-safe</strong>: Compile-time type checking</li>
+                    <li><strong>Simpler deployment</strong>: Just .wasm + .html files</li>
+                </ul>
+
+                <h3>Trade-offs</h3>
+                <ul>
+                    <li>Requires build step (compile Go to WASM)</li>
+                    <li>Less dynamic than Python (statically typed)</li>
+                    <li>Smaller ecosystem than Python in browser</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h3>Go Source Code</h3>
+                <p>The Go code running in your browser:</p>
+                <div class="code-block" id="go-source">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Lofigui Go WASM Example</strong> - Go compiled to WebAssembly
+            </p>
+        </div>
+    </footer>
+
+    <!-- Load the WASM exec helper -->
+    <script src="wasm_exec.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

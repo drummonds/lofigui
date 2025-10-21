@@ -93,6 +93,46 @@ tasks:
       - echo "Testing hello_model.py..."
       - "{{.PYTHON}} hello_model.py"
 
+  build-wasm:
+    desc: Build/validate WASM example (info about Python to WASM compilation)
+    dir: "{{.WASM_DIR}}"
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+
+  # Go example tasks
+  go-example-01:
+    desc: Run Go example 01 (Hello World with net/http)
+    dir: go/examples/01_hello_world
+    cmds:
+      - go mod download
+      - go run main.go
+
+  go-example-02:
+    desc: Run Go example 02 (SVG Graph)
+    dir: go/examples/02_svg_graph
+    cmds:
+      - go mod download
+      - go run main.go
+
+  go-example-03:
+    desc: Build and serve Go WASM example
+    aliases: [go-wasm]
+    dir: go/examples/03_hello_world_wasm
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+      - echo ""
+      - echo "Build complete! Starting server..."
+      - "{{.PYTHON}} serve.py"
+
+  build-go-wasm:
+    desc: Build Go WASM binary only (no serve)
+    dir: go/examples/03_hello_world_wasm
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+
   # Utility tasks
   clean:
     desc: Clean build artifacts and cache
@@ -116,9 +156,14 @@ tasks:
       - echo "  task test             - Run tests"
       - echo "  task lint             - Run linters"
       - echo "  task format           - Format code"
-      - echo "  task example-01       - Run FastAPI example"
-      - echo "  task example-02       - Run SVG graph example"
-      - echo "  task example-03       - Run WASM browser example"
-      - echo "  task test-wasm-python - Test WASM Python code"
+      - echo "  task example-01       - Run Python FastAPI example"
+      - echo "  task example-02       - Run Python SVG graph example"
+      - echo "  task example-03       - Run Python WASM browser example"
+      - echo "  task go-example-01    - Run Go Hello World example"
+      - echo "  task go-example-02    - Run Go SVG graph example"
+      - echo "  task go-wasm          - Build and run Go WASM example"
+      - echo "  task test-wasm-python - Test Python WASM code"
+      - echo "  task build-wasm       - Python WASM info"
+      - echo "  task build-go-wasm    - Build Go WASM binary"
       - echo ""
       - echo "Use 'task --list' to see all available tasks"
