@@ -1,11 +1,20 @@
 # lofigui
 
-**Lofi GUI** - A minimalist Python library for creating really simple web-based GUIs for CLI tools and small projects.  It is written for me as a go and python programmer to try and have a really simple interface
-both as a user and as a programmer.
-It is also mea to make writing UI's for realtime actions and machines easier.
+**Lofi GUI** - A minimalist library for creating really simple web-based GUIs for CLI tools and small projects. Available in both **Python** and **Go**, it provides a print-like interface for building lightweight web UIs with minimal complexity.
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/dl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Now Available in Go!
+
+Check out the **[Go version](go/README.md)** for:
+- **10-100x faster** performance
+- **Single binary** deployment
+- **WebAssembly** support (~2MB vs ~10MB for Python)
+- **Type safety** at compile time
+
+Choose the version that fits your needs - same simple API, different strengths!
 
 ## Overview
 

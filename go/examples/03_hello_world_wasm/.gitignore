@@ -1,0 +1,7 @@
+# Compiled WASM
+main.wasm
+wasm_exec.js
+
+# OS
+.DS_Store
+Thumbs.db
