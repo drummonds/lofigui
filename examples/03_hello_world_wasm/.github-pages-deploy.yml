@@ -1,0 +1,49 @@
+# GitHub Actions Workflow for deploying WASM example to GitHub Pages
+# Copy this file to .github/workflows/deploy-wasm-example.yml in your repo root
+
+name: Deploy WASM Example to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'examples/03_hello_world_wasm/**'
+  workflow_dispatch:  # Allow manual triggering
+
+# Sets permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        # Upload the WASM example directory
+        path: 'examples/03_hello_world_wasm'
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+    - name: Display deployment URL
+      run: echo "Deployed to ${{ steps.deployment.outputs.page_url }}"
