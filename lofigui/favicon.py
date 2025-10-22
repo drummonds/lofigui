@@ -8,13 +8,7 @@ from pathlib import Path
 
 # Base64 encoded favicon.ico (16x16 pixels, simple "L" logo)
 # This is a minimal ICO file that works in all browsers
-FAVICON_ICO_BASE64 = """
-AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAA
-AAAAAAAAAAAAMnPcAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEQEQ
-EQEQEREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREf
-////8P////D////w////8P////D////w////8P////D////w////8AAAAA
-""".strip().replace('\n', '')
+FAVICON_ICO_BASE64 = "AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAMnPcAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEQEQEQEQEREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREf////8P////D////w////8P////D////w////8P////D////w////8AAAAA=="
 
 # Path to SVG favicon
 STATIC_DIR = Path(__file__).parent / "static"
@@ -27,6 +21,7 @@ def get_favicon_ico() -> bytes:
     Returns the base64-decoded ICO file
     """
     import base64
+
     return base64.b64decode(FAVICON_ICO_BASE64)
 
 
@@ -39,10 +34,10 @@ def get_favicon_svg() -> str:
         return FAVICON_SVG_PATH.read_text()
     else:
         # Fallback inline SVG
-        return '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+        return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" fill="#3273dc" rx="4"/>
   <path d="M 10 8 L 10 24 L 22 24 L 22 21 L 13 21 L 13 8 Z" fill="#ffffff"/>
-</svg>'''
+</svg>"""
 
 
 def get_favicon_data_uri() -> str:
@@ -82,16 +77,15 @@ def get_favicon_response():
     """
     try:
         from fastapi.responses import Response
-        return Response(
-            content=get_favicon_ico(),
-            media_type="image/x-icon"
-        )
+
+        return Response(content=get_favicon_ico(), media_type="image/x-icon")
     except ImportError:
         # Fallback for plain Python
         class SimpleResponse:
             def __init__(self, content, media_type):
                 self.content = content
                 self.media_type = media_type
+
         return SimpleResponse(content=get_favicon_ico(), media_type="image/x-icon")
 
 
