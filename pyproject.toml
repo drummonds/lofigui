@@ -18,8 +18,15 @@ dev = [
     "black>=23.3.0",
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
     "mypy>=1.4.0",
     "flake8>=6.0.0",
+]
+examples = [
+    "fastapi>=0.96.0",
+    "uvicorn>=0.22.0",
+    "pygal>=3.0.0",
+    "httpx>=0.24.0",
 ]
 
 [build-system]
@@ -38,6 +45,10 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
 ]
+markers = [
+    "asyncio: marks tests as async (deselect with '-m \"not asyncio\"')",
+]
+asyncio_mode = "auto"
 
 [tool.mypy]
 python_version = "3.8"

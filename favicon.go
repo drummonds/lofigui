@@ -11,7 +11,7 @@ const FaviconICOBase64 = `AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAA
 AAAAAAAAAAAAMnPcAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEQEQ
 EQEQEREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREf
-////8P////D////w////8P////D////w////8P////D////w////8AAAAA`
+////8P////D////w////8P////D////w////8P////D////w////8AAAAA==`
 
 // FaviconSVG is the SVG version of the favicon
 const FaviconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
@@ -41,7 +41,8 @@ func GetFaviconHTMLTag() string {
 
 // ServeFavicon is an http.HandlerFunc that serves the favicon
 // Usage:
-//   http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
+//
+//	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 func ServeFavicon(w http.ResponseWriter, r *http.Request) {
 	favicon, err := GetFaviconICO()
 	if err != nil {

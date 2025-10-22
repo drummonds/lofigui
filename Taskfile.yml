@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 vars:
   PYTHON: python3
@@ -16,12 +16,13 @@ tasks:
   install:
     desc: Install development dependencies
     cmds:
-      - uv sync --all-extras
+      - uv sync --all-extrass
 
   test:
     desc: Run tests
     cmds:
       - uv run pytest
+      - go test ./...
 
   test-coverage:
     desc: Run tests with coverage report
@@ -60,17 +61,19 @@ tasks:
     cmds:
       - uv build
 
-  # Example tasks
+  # Python example tasks
   example-01:
-    desc: Run example 01 (Hello World with FastAPI)
-    dir: examples/01_hello_world
+    desc: Run Python example 01 (Hello World with FastAPI)
+    aliases: [py01]
+    dir: examples/01_hello_world/python
     cmds:
       - uv sync --no-install-project
       - uv run --no-project python hello.py
 
   example-02:
-    desc: Run example 02 (SVG Graph with Pygal)
-    dir: examples/02_svg_graph
+    desc: Run Python example 02 (SVG Graph with Pygal)
+    aliases: [py02]
+    dir: examples/02_svg_graph/python
     cmds:
       - uv sync --no-install-project
       - uv run --no-project python graph.py
@@ -78,33 +81,34 @@ tasks:
   # Go example tasks
   go-example-01:
     desc: Run Go example 01 (Hello World with net/http)
-    dir: go/examples/01_hello_world
+    aliases: [go01]
+    dir: examples/01_hello_world/go
     cmds:
       - go mod download
       - go run main.go
 
   go-example-02:
     desc: Run Go example 02 (SVG Graph)
-    dir: go/examples/02_svg_graph
+    aliases: [go02]
+    dir: examples/02_svg_graph/go
     cmds:
       - go mod download
       - go run main.go
 
   go-example-03:
     desc: Build and serve Go WASM example
-    aliases: [go-wasm]
-    dir: go/examples/03_hello_world_wasm
+    aliases: [go03, go-wasm]
+    dir: examples/03_hello_world_wasm/go
     cmds:
       - chmod +x build.sh
       - ./build.sh
       - echo ""
       - echo "Build complete! Starting server..."
-      - "{{.PYTHON}} serve.py"
+      - cd .. && "{{.PYTHON}} serve.py"
 
   build-go-wasm:
     desc: Build Go WASM binary only (no serve)
-    dir: go/examples/03_hello_world_wasm
+    dir: examples/03_hello_world_wasm/go
     cmds:
       - chmod +x build.sh
       - ./build.sh
-
