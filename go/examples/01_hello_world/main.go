@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/drummonds/lofigui/go/lofigui"
+	"github.com/drummonds/lofigui"
 )
 
 // Model function - contains business logic

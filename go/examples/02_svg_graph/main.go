@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/drummonds/lofigui/go/lofigui"
+	"github.com/drummonds/lofigui"
 	"github.com/wcharczuk/go-chart/v2"
 )
 
@@ -29,10 +29,10 @@ func model() {
 	}
 
 	barChart := chart.BarChart{
-		Title: "Fibonacci Sequence",
-		Width: 800,
+		Title:  "Fibonacci Sequence",
+		Width:  800,
 		Height: 400,
-		Bars: bars,
+		Bars:   bars,
 	}
 
 	// Render to SVG
