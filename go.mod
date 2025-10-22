@@ -1,4 +1,4 @@
-module github.com/drummonds/lofigui/go/lofigui
+module github.com/drummonds/lofigui
 
 go 1.21
 

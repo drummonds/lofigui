@@ -1,3 +1,4 @@
+//go:build js && wasm
 // +build js,wasm
 
 package main
@@ -5,7 +6,7 @@ package main
 import (
 	"syscall/js"
 
-	"github.com/drummonds/lofigui/go/lofigui"
+	"github.com/drummonds/lofigui"
 )
 
 // model generates the basic output
@@ -58,8 +59,8 @@ func advancedModel() string {
 		cumsum += num
 		tableData[i] = []string{
 			string(rune('0' + i)),      // Index
-			string(rune('0' + num)),     // Value (simple conversion for demo)
-			string(rune('0' + cumsum)),  // Cumulative sum
+			string(rune('0' + num)),    // Value (simple conversion for demo)
+			string(rune('0' + cumsum)), // Cumulative sum
 		}
 	}
 
