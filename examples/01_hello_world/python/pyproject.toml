@@ -1,0 +1,16 @@
+[project]
+name = "01-hello-world"
+version = "0.1.0"
+description = "Hello World example for lofigui"
+authors = [
+    {name = "Humphrey Drummond", email = "hum3@drummond.info"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "uvicorn>=0.22.0",
+    "fastapi>=0.96.0",
+    "lofigui",
+]
+
+[tool.uv.sources]
+lofigui = { path = "../../../", editable = true }
