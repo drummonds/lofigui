@@ -22,6 +22,7 @@ func model() {
 		{"Carol", "35", "Manager"},
 	}
 	lofigui.Table(data, lofigui.WithHeader([]string{"Name", "Age", "Role"}))
+
 }
 
 // Controller manages state and routing
