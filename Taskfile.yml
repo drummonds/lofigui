@@ -79,12 +79,43 @@ tasks:
       - uv run --no-project python graph.py
 
   # Go example tasks
+  tidy:
+    desc: Run go tidy and update for all
+    deps: [t_main,t_01,t_02,t_03]
+
+  t_main:
+    desc: Run go tidy and update main
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
+  t_01:
+    desc: Run go tidy an update
+    dir: examples/01_hello_world/go
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
+  t_02:
+    desc: Run go tidy an update
+    dir: examples/02_svg_graph/go
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
+  t_03:
+    desc: Run go tidy an update
+    dir: examples/03_hello_world_wasm/go
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
   go-example-01:
     desc: Run Go example 01 (Hello World with net/http)
     aliases: [go01]
     dir: examples/01_hello_world/go
     cmds:
-      - go mod download
+      - go mod tidy
       - go run main.go
 
   go-example-02:
