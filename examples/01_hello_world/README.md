@@ -6,10 +6,11 @@ A minimal example demonstrating the basic usage of lofigui with FastAPI.
 
 This example shows:
 - Basic project structure for a lofigui application
-- Integration with FastAPI and Uvicorn
+- Integration with FastAPI (Python) and net/http (Go)
 - Simple real time print output to web page
 - Action and display pattern of urls
 - MVC architecture pattern
+- Shared Jinja2 templates between Python and Go using pongo2
 
 It is a litle verbose but these are the bits that you will extend for your own project.
 
@@ -26,8 +27,7 @@ It is a litle verbose but these are the bits that you will extend for your own p
 │   ├── go.mod             # Go dependencies
 │   └── go.sum             # Go checksums
 ├── templates/
-│   ├── hello.html         # View for Python (Jinja2 template)
-│   └── hello_go.html      # View for Go (html/template)
+│   └── hello.html         # Shared Jinja2 template (used by both Python and Go)
 └── README.md              # This file
 ```
 
@@ -115,7 +115,7 @@ The `lg.create_app()` function provides:
 
 ### 3. View (`templates/hello.html`)
 
-The view renders the buffered HTML:
+The view renders the buffered HTML using Jinja2 syntax:
 
 ```html
 <h1>Test start</h1>
@@ -123,6 +123,8 @@ The view renders the buffered HTML:
 ```
 
 The `results` variable contains the accumulated HTML from lofigui.
+
+**Note**: The Go version uses [pongo2](https://github.com/flosch/pongo2), a Django/Jinja2-compatible template engine for Go. This allows both Python and Go implementations to share the exact same template files.
 
 
 See example 02 for a more complex example with charts.

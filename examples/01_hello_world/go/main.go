@@ -1,11 +1,11 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/drummonds/lofigui"
+	"github.com/flosch/pongo2/v6"
 )
 
 // Model function - contains business logic
@@ -26,13 +26,17 @@ func model() {
 
 // Controller manages state and routing
 type Controller struct {
-	templates *template.Template
+	template *pongo2.Template
 }
 
 func NewController() *Controller {
-	tmpl := template.Must(template.ParseFiles("../templates/hello_go.html"))
+	// Load Jinja2-style template using pongo2
+	tmpl, err := pongo2.FromFile("../templates/hello.html")
+	if err != nil {
+		log.Fatalf("Failed to load template: %v", err)
+	}
 	return &Controller{
-		templates: tmpl,
+		template: tmpl,
 	}
 }
 
@@ -41,15 +45,15 @@ func (ctrl *Controller) handleRoot(w http.ResponseWriter, r *http.Request) {
 	lofigui.Reset()
 	model()
 
-	// Prepare template data
-	data := struct {
-		Results string
-	}{
-		Results: lofigui.Buffer(),
+	// Prepare template data using lowercase 'results' to match Python version
+	// pongo2 automatically marks content as safe when using the 'safe' filter in templates
+	data := pongo2.Context{
+		"results": lofigui.Buffer(),
+		"refresh": "", // Empty refresh for now
 	}
 
 	// Render template
-	if err := ctrl.templates.ExecuteTemplate(w, "hello_go.html", data); err != nil {
+	if err := ctrl.template.ExecuteWriter(data, w); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
