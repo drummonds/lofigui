@@ -86,7 +86,7 @@ type Controller struct {
 }
 
 func NewController() *Controller {
-	tmpl := template.Must(template.ParseFiles("../templates/hello_go.html"))
+	tmpl := template.Must(template.ParseFiles("../templates/hello.html"))
 	return &Controller{
 		templates: tmpl,
 	}
@@ -105,7 +105,7 @@ func (ctrl *Controller) handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Render template
-	if err := ctrl.templates.ExecuteTemplate(w, "hello_go.html", data); err != nil {
+	if err := ctrl.templates.ExecuteTemplate(w, "hello.html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

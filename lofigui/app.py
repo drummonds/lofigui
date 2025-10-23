@@ -29,7 +29,7 @@ class App(FastAPI):
         if self.startup:
             self.startup = False
             self.startup_bounce_count += 1
-            if self.startup_bounce_count <= 3:
+            if self.startup_bounce_count <= 3 and request.url.path != "/":
                 # Redirect to home page
                 return '<head><meta http-equiv="Refresh" content="0; URL=/"/></head>'
         if self.controller:
