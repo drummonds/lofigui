@@ -71,7 +71,7 @@ ipython_config.py
 
 # pyenv
 .python-version
-
+Can you change the go version to match the python versions so that in example/01 they give the same output.
 # pipenv
 Pipfile.lock
 
@@ -128,6 +128,7 @@ Thumbs.db
 pyThoughtMachine_log*
 plz-out
 .playpen*
+hello_go
 
 # Poetry - keep lock file for examples but not for library
 # Note: examples should have their own poetry.lock

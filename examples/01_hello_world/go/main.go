@@ -1,69 +1,49 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/drummonds/lofigui"
-	"github.com/flosch/pongo2/v6"
 )
 
 // Model function - contains business logic
-func model() {
-	lofigui.Print("Hello world from Go!")
-	lofigui.Print("This is the lofigui Go version.")
-
-	lofigui.Markdown("## Key Features\n\n- **Simple API**: Similar to Python version\n- **Type-safe**: Go's strong typing\n- **Fast**: Compiled performance\n- **Concurrent**: Safe for concurrent use")
-
-	// Add a table
-	data := [][]string{
-		{"Alice", "30", "Engineer"},
-		{"Bob", "25", "Designer"},
-		{"Carol", "35", "Manager"},
+func model(ctrl *lofigui.Controller) {
+	lofigui.Print("Hello world.")
+	for i := 0; i < 5; i++ {
+		time.Sleep(1 * time.Second)
+		lofigui.Print(fmt.Sprintf("Count %d", i))
 	}
-	lofigui.Table(data, lofigui.WithHeader([]string{"Name", "Age", "Role"}))
-
-}
-
-// Controller manages state and routing
-type Controller struct {
-	template *pongo2.Template
-}
-
-func NewController() *Controller {
-	// Load Jinja2-style template using pongo2
-	tmpl, err := pongo2.FromFile("../templates/hello.html")
-	if err != nil {
-		log.Fatalf("Failed to load template: %v", err)
-	}
-	return &Controller{
-		template: tmpl,
-	}
-}
-
-func (ctrl *Controller) handleRoot(w http.ResponseWriter, r *http.Request) {
-	// Reset buffer and run model
-	lofigui.Reset()
-	model()
-
-	// Prepare template data using lowercase 'results' to match Python version
-	// pongo2 automatically marks content as safe when using the 'safe' filter in templates
-	data := pongo2.Context{
-		"results": lofigui.Buffer(),
-		"refresh": "", // Empty refresh for now
-	}
-
-	// Render template
-	if err := ctrl.template.ExecuteWriter(data, w); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	lofigui.Markdown("<a href='/'>Restart</a>")
+	lofigui.Print("Done.")
+	ctrl.EndAction()
 }
 
 func main() {
-	ctrl := NewController()
+	// Create controller with custom template directory and settings
+	// The template directory can be anywhere, not just the default location
+	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
+		TemplatePath: "../templates/hello.html", // Custom location
+		RefreshTime:  1,                         // Refresh every 1 second
+		DisplayURL:   "/display",                // Where to show results
+	})
+	if err != nil {
+		log.Fatalf("Failed to create controller: %v", err)
+	}
 
-	http.HandleFunc("/", ctrl.handleRoot)
+	// Root endpoint - starts the action
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctrl.HandleRoot(w, r, model, true)
+	})
+
+	// Display endpoint - shows progress
+	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
+		ctrl.HandleDisplay(w, r, nil)
+	})
+
+	// Favicon endpoint
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 
 	addr := ":1340"
