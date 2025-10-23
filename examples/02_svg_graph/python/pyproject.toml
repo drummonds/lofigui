@@ -1,0 +1,17 @@
+[project]
+name = "02_svg_graph"
+version = "0.1.0"
+description = "SVG Graph example for lofigui"
+authors = [
+    {name = "Humphrey Drummond", email = "hum3@drummond.info"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "uvicorn>=0.22.0",
+    "fastapi>=0.96.0",
+    "lofigui",
+    "pygal>=3.0.0",
+]
+
+[tool.uv.sources]
+lofigui = { path = "../../../", editable = true }

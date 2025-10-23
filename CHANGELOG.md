@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2025-10-23
+ - restructuring to put core controller function into lofigui
+ - refactored example 01 to show this currently python only
+
+## v0.4.0
 
 ### Added
 - Comprehensive test suite with pytest

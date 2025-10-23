@@ -101,6 +101,26 @@ def save_favicon_ico(path: str) -> None:
     print(f"Favicon saved to: {favicon_path}")
 
 
+def add_favicon_route(app):
+    """
+    Add the default favicon route to a FastAPI app
+
+    Usage:
+        from lofigui import add_favicon_route
+
+        app = FastAPI()
+        add_favicon_route(app)
+
+    Args:
+        app: FastAPI application instance
+    """
+
+    @app.get("/favicon.ico")
+    async def favicon():
+        """Serve the lofigui favicon"""
+        return get_favicon_response()
+
+
 if __name__ == "__main__":
     # CLI tool to save favicon
     import sys
