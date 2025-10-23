@@ -117,32 +117,39 @@ class TestPythonExamplesWithFastAPI:
     async def test_example_01_fastapi_endpoint(self):
         """Test example 01 FastAPI endpoint returns valid response."""
         pytest.importorskip("fastapi")
-        
+
         example_path = Path(__file__).parent.parent / "examples" / "01_hello_world" / "python"
         original_dir = os.getcwd()
         sys.path.insert(0, str(example_path))
-        
+
         try:
             # Change to example directory so template paths work
             os.chdir(example_path)
-            
+
             from fastapi.testclient import TestClient
             import hello
-            
+            import lofigui
+
             client = TestClient(hello.app)
-            
-            # Test root endpoint
-            response = client.get("/")
+
+            # Disable startup protection for testing
+            hello.app.startup = False
+
+            # Test display endpoint without action (should show initial state)
+            # First manually trigger model to populate buffer
+            lofigui.reset()
+            lofigui.print("Test message")
+            response = client.get("/display")
             assert response.status_code == 200
             assert "text/html" in response.headers["content-type"]
-            assert "Hello world" in response.text
-            
+            assert "Test message" in response.text
+
             # Test favicon endpoint
             response = client.get("/favicon.ico")
             assert response.status_code == 200
             assert response.headers["content-type"] == "image/x-icon"
             assert len(response.content) > 0
-            
+
         finally:
             os.chdir(original_dir)
             sys.path.remove(str(example_path))
