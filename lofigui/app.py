@@ -20,15 +20,53 @@ class App(FastAPI):
         super(App,self).__init__()
         # Attach templates helper
         self.templates = Jinja2Templates(directory=template_dir)
-        self.controller = controller
+        self._controller = None  # Private storage for controller
+        self.controller = controller  # Use property setter for initialization
         self.startup = True  #If you go to an action page before you
         # have triggered it nothing will display.  startup finds this condition.
         self.startup_bounce_count = 0  # prevent endless loop
 
+    @property
+    def controller(self) -> Optional[Controller]:
+        """Get the current controller."""
+        return self._controller
+
+    @controller.setter
+    def controller(self, new_controller: Optional[Controller]):
+        """
+        Set a new controller with safe cleanup of existing controller.
+
+        If there's an existing controller with a running action, this will
+        safely attempt to stop it before replacing with the new controller.
+
+        Args:
+            new_controller: The new controller to set (or None to clear)
+        """
+        # If there's an existing controller, try to clean it up
+        if self._controller is not None:
+            # Safely check if action is running
+            try:
+                if hasattr(self._controller, 'is_action_running') and callable(self._controller.is_action_running):
+                    if self._controller.is_action_running():
+                        # Action is running, try to end it
+                        if hasattr(self._controller, 'end_action') and callable(self._controller.end_action):
+                            try:
+                                self._controller.end_action()
+                            except Exception:
+                                # Silently ignore errors during cleanup
+                                # We're replacing the controller anyway
+                                pass
+            except Exception:
+                # Silently ignore any errors during cleanup check
+                pass
+
+        # Set the new controller
+        self._controller = new_controller
+
     def template_response(self, request, templateName, extra= {}):
         if self.startup:
             self.startup = False
-            self.startup_bounce_count += 1
+            self.startup_bounce_count += 1Lets make controller a property.  When assiging  new controller can we make sure that if there is an existing controller we safely check if is_action_running (ie assume it might not be implemented as we have no control over the controller) and if action is running saafely call controller.end_action
             if self.startup_bounce_count <= 3 and request.url.path != "/":
                 # Redirect to home page
                 return '<head><meta http-equiv="Refresh" content="0; URL=/"/></head>'
@@ -69,7 +107,7 @@ def create_app(template_dir: str = "templates", **fastapi_kwargs) ->App:
     # Add favicon route automatically
     @app.get("/favicon.ico")
     async def favicon():
-        """Serve the lofigui favicon"""
+        """Serve the loLets make controller a property.  When assiging  new controller can we make sure that if there is an existing controller we safely check if is_action_running (ie assume it might not be implemented as we have no control over the controller) and if action is running saafely call controller.end_actionfigui favicon"""
         return get_favicon_response()
 
     return app
