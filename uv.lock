@@ -490,7 +490,7 @@ wheels = [
 
 [[package]]
 name = "lofigui"
-version = "0.7.0"
+version = "0.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
@@ -505,6 +505,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "types-markdown" },
 ]
 examples = [
     { name = "fastapi" },
@@ -526,6 +527,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "types-markdown", marker = "extra == 'dev'", specifier = ">=3.4.0" },
     { name = "uvicorn", marker = "extra == 'examples'", specifier = ">=0.22.0" },
 ]
 provides-extras = ["dev", "examples"]
@@ -1065,6 +1067,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/46/cc36c679f09f27ded940281c38607716c86cf8ba4a518d524e349c8b4874/tomli-2.3.0-cp314-cp314t-win32.whl", hash = "sha256:a1f7f282fe248311650081faafa5f4732bdbfef5d45fe3f2e702fbc6f2d496e0", size = 107563, upload-time = "2025-10-08T22:01:44.233Z" },
     { url = "https://files.pythonhosted.org/packages/84/ff/426ca8683cf7b753614480484f6437f568fd2fda2edbdf57a2d3d8b27a0b/tomli-2.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:70a251f8d4ba2d9ac2542eecf008b3c8a9fc5c3f9f02c56a9d7952612be2fdba", size = 119756, upload-time = "2025-10-08T22:01:45.234Z" },
     { url = "https://files.pythonhosted.org/packages/77/b8/0135fadc89e73be292b473cb820b4f5a08197779206b33191e801feeae40/tomli-2.3.0-py3-none-any.whl", hash = "sha256:e95b1af3c5b07d9e643909b5abbec77cd9f1217e6d0bca72b0234736b9fb1f1b", size = 14408, upload-time = "2025-10-08T22:01:46.04Z" },
+]
+
+[[package]]
+name = "types-markdown"
+version = "3.9.0.20250906"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/dd/8a91a5f4dce705eff6862e01e8fd9984cdc55e6d6c3cfcadc68410c43abf/types_markdown-3.9.0.20250906.tar.gz", hash = "sha256:f02dc1a2d130b093de4910c64b2d0a811ae7020f03624df41c667818d2fee050", size = 19439, upload-time = "2025-09-06T02:45:23.617Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/17/b0b9d315422eae106af1d30e51afe4b59c18b42311605fed9068ac6aa065/types_markdown-3.9.0.20250906-py3-none-any.whl", hash = "sha256:afac4297e4e75f00b4043f9b3a989dc5924230d065996a233b9bce894c438cc2", size = 25830, upload-time = "2025-09-06T02:45:22.211Z" },
 ]
 
 [[package]]

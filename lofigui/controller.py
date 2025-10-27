@@ -59,7 +59,7 @@ class Controller:
         self.poll_count = 0
         self._action_running = False
 
-    def start_action(self, refresh_time: Optional[int] = None):
+    def start_action(self, refresh_time: Optional[int] = None) -> None:
         """
         Start an action and enable polling/auto-refresh.
 
@@ -71,7 +71,7 @@ class Controller:
         if refresh_time is not None:
             self.refresh_time = refresh_time
 
-    def end_action(self):
+    def end_action(self) -> None:
         """Stop the action and disable polling/auto-refresh."""
         self._action_running = False
         self.poll = False
@@ -166,6 +166,4 @@ class Controller:
 
         self.start_action()
 
-        return (
-            f'<head><meta http-equiv="Refresh" content="0; URL={redirect_url}"/></head>'
-        )
+        return f'<head><meta http-equiv="Refresh" content="0; URL={redirect_url}"/></head>'

@@ -5,10 +5,17 @@ Provides a simple favicon that can be served with your application
 
 import os
 from pathlib import Path
+from typing import Any, Union
 
 # Base64 encoded favicon.ico (16x16 pixels, simple "L" logo)
 # This is a minimal ICO file that works in all browsers
-FAVICON_ICO_BASE64 = "AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAMnPcAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEQEQEQEQEREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREf////8P////D////w////8P////D////w////8P////D////w////8AAAAA=="
+FAVICON_ICO_BASE64 = (
+    "AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAA"
+    + "AAAAAAAAAAAAAMnPcAP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    + "QEQEQEQEQERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERE"
+    + "REf////8P////D////w////8P////D////w////8P////D////w////8AAAAA=="
+)
 
 # Path to SVG favicon
 STATIC_DIR = Path(__file__).parent / "static"
@@ -63,7 +70,7 @@ def get_favicon_html_tag() -> str:
 
 
 # For FastAPI/Starlette integration
-def get_favicon_response():
+def get_favicon_response() -> Any:
     """
     Get a Response object for serving the favicon
     Works with FastAPI, Starlette, etc.
@@ -82,7 +89,7 @@ def get_favicon_response():
     except ImportError:
         # Fallback for plain Python
         class SimpleResponse:
-            def __init__(self, content, media_type):
+            def __init__(self, content: bytes, media_type: str) -> None:
                 self.content = content
                 self.media_type = media_type
 
@@ -101,7 +108,7 @@ def save_favicon_ico(path: str) -> None:
     print(f"Favicon saved to: {favicon_path}")
 
 
-def add_favicon_route(app):
+def add_favicon_route(app: Any) -> None:
     """
     Add the default favicon route to a FastAPI app
 
@@ -116,7 +123,7 @@ def add_favicon_route(app):
     """
 
     @app.get("/favicon.ico")
-    async def favicon():
+    async def favicon() -> Any:
         """Serve the lofigui favicon"""
         return get_favicon_response()
 
