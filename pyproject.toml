@@ -1,6 +1,6 @@
 [project]
 name = "lofigui"
-version = "0.8.0"
+version = "0.9.0"
 description = "Lofi GUI tooling"
 authors = [
     {name = "Humphrey Drummond", email = "hum3@drummond.info"}
@@ -21,6 +21,7 @@ dev = [
     "pytest-asyncio>=0.21.0",
     "mypy>=1.4.0",
     "flake8>=6.0.0",
+    "types-Markdown>=3.4.0",
 ]
 examples = [
     "fastapi>=0.96.0",
@@ -58,7 +59,7 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -72,4 +73,4 @@ strict_equality = true
 
 [tool.black]
 line-length = 100
-target-version = ['py38']
+target-version = ['py39']

@@ -22,6 +22,9 @@ func model(ctrl *lofigui.Controller) {
 }
 
 func main() {
+	// Create an App which provides safe controller management
+	app := lofigui.NewApp()
+
 	// Create controller with custom template directory and settings
 	// The template directory can be anywhere, not just the default location
 	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
@@ -33,14 +36,19 @@ func main() {
 		log.Fatalf("Failed to create controller: %v", err)
 	}
 
+	// Set the controller in the app
+	// App provides safe controller replacement - if we later replace the controller,
+	// it will ensure any running action is stopped first
+	app.SetController(ctrl)
+
 	// Root endpoint - starts the action
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ctrl.HandleRoot(w, r, model, true)
+		app.HandleRoot(w, r, model, true)
 	})
 
 	// Display endpoint - shows progress
 	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
-		ctrl.HandleDisplay(w, r, nil)
+		app.HandleDisplay(w, r)
 	})
 
 	// Favicon endpoint

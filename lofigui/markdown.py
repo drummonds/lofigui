@@ -58,7 +58,7 @@ def html(msg: str = "", ctx: Optional[PrintContext] = None) -> None:
 
 def table(
     table: Sequence[Sequence[Any]],
-    header: List[str] = None,
+    header: Optional[List[str]] = None,
     ctx: Optional[PrintContext] = None,
     escape: bool = True,
 ) -> None:

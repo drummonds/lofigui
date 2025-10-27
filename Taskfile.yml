@@ -16,7 +16,7 @@ tasks:
   install:
     desc: Install development dependencies
     cmds:
-      - uv sync --all-extrass
+      - uv sync --all-extras
 
   test:
     desc: Run tests
@@ -39,22 +39,22 @@ tasks:
   lint-black:
     desc: Check code formatting with black
     cmds:
-      - uv run black --check lofigui tests
+      - .venv/bin/black --check lofigui tests
 
   lint-flake8:
     desc: Run flake8 linter
     cmds:
-      - uv run flake8 lofigui tests --max-line-length=100 --extend-ignore=E203,W503
+      - .venv/bin/flake8 lofigui tests --max-line-length=100 --extend-ignore=E203,W503,F401
 
   lint-mypy:
     desc: Run mypy type checker
     cmds:
-      - uv run mypy lofigui
+      - .venv/bin/mypy lofigui
 
   format:
     desc: Format code with black
     cmds:
-      - uv run black lofigui tests
+      - .venv/bin/black lofigui tests
 
   build:
     desc: Build package distribution

@@ -55,6 +55,7 @@ class TestAppControllerProperty:
 
         class MinimalController:
             """Controller without is_action_running or end_action methods."""
+
             pass
 
         app = App()
@@ -136,3 +137,21 @@ class TestAppControllerProperty:
         # Setting to None should stop action
         app.controller = None
         assert controller.is_action_running() is False
+
+    def test_controller_setter_is_idempotent(self):
+        """Test that setting the same controller again doesn't stop the action (idempotent)."""
+        app = App()
+        controller = Controller()
+
+        # Set controller
+        app.controller = controller
+        assert app.controller is controller
+
+        # Start an action
+        controller.start_action()
+        assert controller.is_action_running() is True
+
+        # Set the same controller again - should NOT stop action (idempotent)
+        app.controller = controller
+        assert controller.is_action_running() is True  # Action should still be running
+        assert app.controller is controller
