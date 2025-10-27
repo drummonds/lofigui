@@ -104,12 +104,14 @@ class Controller:
         d["results"] = buffer()
 
         if self.poll:
-            d["poll_count"] = self.poll_count
+            d["polling"] = "Running"
             self.poll_count += 1
             d["refresh"] = f'<meta http-equiv="Refresh" content="{self.refresh_time}">'
         else:
+            d["polling"] = "Stopped"
             self.poll_count = 0
             d["refresh"] = ""
+        d["poll_count"] = self.poll_count
 
         return d
 
