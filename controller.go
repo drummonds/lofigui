@@ -32,6 +32,8 @@ import (
 type Controller struct {
 	template      *pongo2.Template
 	actionRunning bool
+	polling       bool
+	PollCount     int
 	refreshTime   int    // seconds between refresh
 	displayURL    string // URL to redirect to for display
 	context       *Context
@@ -121,11 +123,14 @@ func NewControllerFromDir(templateDir, templateName string, refreshTime int) (*C
 // StartAction starts an action and enables auto-refresh polling.
 func (ctrl *Controller) StartAction() {
 	ctrl.actionRunning = true
+	ctrl.polling = true
+	ctrl.PollCount = 0
 }
 
 // EndAction stops the action and disables auto-refresh.
 func (ctrl *Controller) EndAction() {
 	ctrl.actionRunning = false
+	ctrl.polling = false
 }
 
 // IsActionRunning returns whether an action is currently running.
@@ -153,6 +158,8 @@ func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
 	}
 
 	if ctrl.IsActionRunning() {
+		ctx["polling"] = "Running"
+		ctrl.PollCount += 1
 		ctx["refresh"] = fmt.Sprintf(
 			`<meta http-equiv="Refresh" content="%d; URL=%s"/>`,
 			ctrl.refreshTime,
@@ -160,7 +167,10 @@ func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
 		)
 	} else {
 		ctx["refresh"] = ""
+		ctrl.PollCount = 0
+		ctx["polling"] = "Stopped"
 	}
+	ctx["poll_count"] = ctrl.PollCount
 
 	return ctx
 }

@@ -81,7 +81,7 @@ tasks:
   # Go example tasks
   tidy:
     desc: Run go tidy and update for all
-    deps: [t_main,t_01,t_02,t_03]
+    deps: [t_main,t_01,t_02,t_03,t_04]
 
   t_main:
     desc: Run go tidy and update main
@@ -106,6 +106,13 @@ tasks:
   t_03:
     desc: Run go tidy an update
     dir: examples/03_hello_world_wasm/go
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
+  t_04:
+    desc: Run go tidy an update
+    dir: examples/04_tinygo_wasm/go
     cmds:
       - go mod tidy
       - go get -u ./...
@@ -140,6 +147,24 @@ tasks:
   build-go-wasm:
     desc: Build Go WASM binary only (no serve)
     dir: examples/03_hello_world_wasm/go
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+
+  go-example-04:
+    desc: Build and serve TinyGo WASM example
+    aliases: [go04, tinygo-wasm]
+    dir: examples/04_tinygo_wasm/go
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+      - echo ""
+      - echo "Build complete! Starting server..."
+      - cd .. && "{{.PYTHON}} serve.py"
+
+  build-tinygo-wasm:
+    desc: Build TinyGo WASM binary only (no serve)
+    dir: examples/04_tinygo_wasm/go
     cmds:
       - chmod +x build.sh
       - ./build.sh
