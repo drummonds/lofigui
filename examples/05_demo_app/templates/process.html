@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Run Process - Lofigui Demo App</title>
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">Run Process</h1>
+<h2 class="subtitle">Execute long-running tasks with live updates</h2>
+
+<div class="content">
+    <p>This page demonstrates lofigui's controller pattern for managing long-running processes with automatic page refresh.</p>
+
+    <div class="notification is-warning is-light">
+        <p class="has-text-weight-bold"><span class="icon"><i class="fas fa-exclamation-triangle"></i></span> How it works</p>
+        <p>When you start a process:</p>
+        <ol>
+            <li>The controller tracks the process state</li>
+            <li>The page automatically refreshes to show progress</li>
+            <li>The status panel updates in real-time</li>
+            <li>You can cancel the process at any time</li>
+        </ol>
+    </div>
+
+    <h3 class="title is-4 mt-5">Available Actions</h3>
+
+    <div class="box">
+        <form method="post" action="/start_demo_process">
+            <div class="field">
+                <label class="label">Demo Process</label>
+                <div class="control">
+                    <p class="help">Simulates a long-running process with progress updates</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Duration (seconds)</label>
+                <div class="control">
+                    <input class="input" type="number" name="duration" value="10" min="1" max="60">
+                </div>
+                <p class="help">How long the process should run (1-60 seconds)</p>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control">
+                    <button type="submit" class="button is-primary is-medium">
+                        <span class="icon"><i class="fas fa-play"></i></span>
+                        <span>Start Process</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <h3 class="title is-4 mt-5">Process Output</h3>
+
+    <div class="box">
+        {{process_output | safe}}
+    </div>
+
+    <div class="notification is-info is-light mt-5">
+        <p class="has-text-weight-bold"><span class="icon"><i class="fas fa-code"></i></span> Implementation Example</p>
+        <pre><code>from lofigui import Controller
+import time
+
+# Create controller
+controller = Controller(template_path="templates/process.html")
+app.controller = controller
+
+# Start process
+controller.start_action(refresh_time=2)  # Refresh every 2 seconds
+
+# Simulate work
+for i in range(10):
+    lf.print(f"Processing step {i+1}/10...")
+    time.sleep(1)
+
+# End process
+controller.end_action()</code></pre>
+    </div>
+</div>
+{% endblock %}

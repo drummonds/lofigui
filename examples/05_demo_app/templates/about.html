@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>About - Lofigui Demo App</title>
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">About Lofigui</h1>
+<h2 class="subtitle">A lightweight framework for simple web GUIs</h2>
+
+<div class="content">
+    <p><strong>Lofigui</strong> is a Python/Go framework designed to make it easy to create simple web interfaces with minimal boilerplate.</p>
+
+    <h3 class="title is-4 mt-5">Key Features</h3>
+
+    <div class="box">
+        <div class="content">
+            <ul>
+                <li><strong>Template Inheritance</strong> - Build consistent UIs with Jinja2 templates</li>
+                <li><strong>Controller Pattern</strong> - Manage long-running processes with automatic refresh</li>
+                <li><strong>Multi-language</strong> - Available in both Python and Go</li>
+                <li><strong>WASM Support</strong> - Run Go code in the browser via WebAssembly</li>
+                <li><strong>Lightweight</strong> - Minimal dependencies, fast startup</li>
+                <li><strong>FastAPI Integration</strong> - Works seamlessly with FastAPI</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 class="title is-4 mt-5">Use Cases</h3>
+
+    <div class="columns">
+        <div class="column">
+            <div class="box has-background-info-light">
+                <h4 class="title is-5">Internal Tools</h4>
+                <p>Build quick admin interfaces and dashboards for internal use</p>
+            </div>
+        </div>
+        <div class="column">
+            <div class="box has-background-success-light">
+                <h4 class="title is-5">Data Processing</h4>
+                <p>Monitor long-running data processing tasks with live updates</p>
+            </div>
+        </div>
+        <div class="column">
+            <div class="box has-background-warning-light">
+                <h4 class="title is-5">Demos & Prototypes</h4>
+                <p>Quickly prototype web interfaces for proof-of-concepts</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="title is-4 mt-5">Technology Stack</h3>
+
+    <div class="content">
+        <table class="table is-striped is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Technology</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Backend</strong></td>
+                    <td>Python 3.9+ / Go 1.21+</td>
+                    <td>Application logic</td>
+                </tr>
+                <tr>
+                    <td><strong>Web Framework</strong></td>
+                    <td>FastAPI</td>
+                    <td>HTTP routing and requests</td>
+                </tr>
+                <tr>
+                    <td><strong>Templates</strong></td>
+                    <td>Jinja2</td>
+                    <td>HTML template rendering</td>
+                </tr>
+                <tr>
+                    <td><strong>CSS Framework</strong></td>
+                    <td>Bulma</td>
+                    <td>Responsive UI styling</td>
+                </tr>
+                <tr>
+                    <td><strong>Icons</strong></td>
+                    <td>Font Awesome</td>
+                    <td>UI icons</td>
+                </tr>
+                <tr>
+                    <td><strong>WASM</strong></td>
+                    <td>Go/TinyGo</td>
+                    <td>Browser-side execution</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="title is-4 mt-5">Links</h3>
+
+    <div class="buttons">
+        <a href="https://github.com/drummonds/lofigui" class="button is-dark" target="_blank">
+            <span class="icon"><i class="fab fa-github"></i></span>
+            <span>GitHub Repository</span>
+        </a>
+        <a href="https://github.com/drummonds/lofigui/blob/main/README.md" class="button is-info" target="_blank">
+            <span class="icon"><i class="fas fa-book"></i></span>
+            <span>Documentation</span>
+        </a>
+    </div>
+
+    <div class="notification is-primary is-light mt-5">
+        <p class="has-text-weight-bold">This Demo Application</p>
+        <p>This demo showcases template inheritance, the controller pattern, and various lofigui features. Check the source code in <code>examples/05_demo_app/</code> to see how it's built.</p>
+    </div>
+</div>
+{% endblock %}

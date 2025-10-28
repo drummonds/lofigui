@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Charts - Lofigui Demo App</title>
+{% endblock %}
+
+{% block extra_css %}
+.chart-placeholder {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 2rem;
+    border-radius: 8px;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 3rem;
+    font-weight: bold;
+}
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">Charts & Visualizations</h1>
+<h2 class="subtitle">Visual data representation</h2>
+
+<div class="content">
+    <p>This page demonstrates how lofigui can display charts and visualizations using HTML and markdown output.</p>
+
+    <h3 class="title is-4 mt-4">Key Metrics</h3>
+
+    <div class="columns">
+        <div class="column">
+            <div class="metric-card">
+                <div class="metric-value">143</div>
+                <div>Total Users</div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="metric-value">89%</div>
+                <div>Success Rate</div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="metric-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="metric-value">1.2k</div>
+                <div>Requests/Day</div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="title is-4 mt-5">Chart Placeholder</h3>
+
+    <div class="chart-placeholder">
+        <span class="icon is-large"><i class="fas fa-chart-line fa-3x"></i></span>
+        <h4 class="title is-3 has-text-white mt-3">Interactive Chart Area</h4>
+        <p>Integrate with Chart.js, Plotly, or other charting libraries</p>
+    </div>
+
+    {{chart_content | safe}}
+
+    <div class="notification is-info is-light mt-5">
+        <p class="has-text-weight-bold"><span class="icon"><i class="fas fa-lightbulb"></i></span> Integration Tips</p>
+        <p>You can easily integrate popular charting libraries:</p>
+        <ul>
+            <li><strong>Chart.js</strong> - Simple, flexible JavaScript charts</li>
+            <li><strong>Plotly</strong> - Interactive, scientific visualizations</li>
+            <li><strong>D3.js</strong> - Custom, data-driven graphics</li>
+            <li><strong>ApexCharts</strong> - Modern, responsive charts</li>
+        </ul>
+        <p>Use lofigui's <code>html()</code> function to inject chart HTML and JavaScript.</p>
+    </div>
+</div>
+{% endblock %}

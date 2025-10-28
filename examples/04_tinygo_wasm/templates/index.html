@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lofigui TinyGo WASM Example - Hello World</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .hero {
+            margin-bottom: 2rem;
+        }
+        #output {
+            min-height: 200px;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        .buttons {
+            margin: 1rem 0;
+        }
+        #status {
+            margin-bottom: 1rem;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 1rem 0;
+        }
+        .size-comparison {
+            background: linear-gradient(90deg, #48c774 0%, #48c774 10%, #ffdd57 10%, #ffdd57 20%, #f14668 20%, #f14668 100%);
+            height: 30px;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <section class="hero is-success">
+        <div class="hero-body">
+            <p class="title">
+                Lofigui TinyGo WASM Example
+            </p>
+            <p class="subtitle">
+                Ultra-lightweight Go WASM - Only ~100KB!
+            </p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="content">
+            <h2>Interactive Demo</h2>
+            <p>This page demonstrates running TinyGo code compiled to WebAssembly in your browser.
+            TinyGo produces incredibly small WASM binaries - <strong>20x smaller than standard Go!</strong></p>
+
+            <div id="status" class="notification is-success">
+                <p id="status-text">Loading TinyGo WASM module...</p>
+            </div>
+
+            <div class="buttons">
+                <button id="runBasic" class="button is-success" disabled>
+                    <span>Run Basic Example</span>
+                </button>
+                <button id="runAdvanced" class="button is-info" disabled>
+                    <span>Run Advanced Example</span>
+                </button>
+                <button id="reload" class="button is-warning">
+                    <span>Reload Page</span>
+                </button>
+            </div>
+
+            <div class="box">
+                <h3>Output</h3>
+                <div id="output">
+                    <div class="loading">
+                        <progress class="progress is-success" max="100">Loading TinyGo WASM...</progress>
+                        <p>Loading WebAssembly module (typically instant)...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h3>Size Comparison</h3>
+                <div class="size-comparison" title="TinyGo (green) vs Go (yellow) vs Pyodide (red)"></div>
+                <p class="has-text-centered" style="margin-top: 0.5rem;">
+                    <span class="tag is-success">TinyGo: ~100KB (10%)</span>
+                    <span class="tag is-warning">Go: ~2MB (20%)</span>
+                    <span class="tag is-danger">Pyodide: ~10MB (100%)</span>
+                </p>
+
+                <h3>How It Works</h3>
+                <ol>
+                    <li><strong>Compile with TinyGo</strong>: Go code is compiled using <code>tinygo build -target wasm</code></li>
+                    <li><strong>Tiny WASM Binary</strong>: The browser loads only ~100KB of WASM</li>
+                    <li><strong>Instant Execution</strong>: JavaScript calls Go functions via <code>js.Global()</code></li>
+                    <li><strong>Results Display</strong>: Go returns HTML strings rendered in the page</li>
+                </ol>
+
+                <h3>Why TinyGo?</h3>
+                <ul>
+                    <li><strong>Ultra-compact</strong>: ~100KB vs ~2MB (standard Go) vs ~10MB (Pyodide)</li>
+                    <li><strong>Instant startup</strong>: Near-zero loading time</li>
+                    <li><strong>Native performance</strong>: Compiled code runs at near-native speed</li>
+                    <li><strong>Mobile-friendly</strong>: Perfect for low-bandwidth scenarios</li>
+                    <li><strong>GitHub Pages ready</strong>: Deploy static files anywhere</li>
+                </ul>
+
+                <h3>Perfect For</h3>
+                <ul>
+                    <li>Lightweight web applications</li>
+                    <li>Interactive documentation</li>
+                    <li>Fast-loading demos and prototypes</li>
+                    <li>Mobile-first experiences</li>
+                    <li>Edge computing scenarios</li>
+                </ul>
+
+                <h3>Limitations</h3>
+                <ul>
+                    <li>Not all Go stdlib packages are supported</li>
+                    <li>Some reflection features limited</li>
+                    <li>Smaller ecosystem than standard Go</li>
+                    <li>No goroutine scheduler (single-threaded)</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h3>TinyGo Source Code</h3>
+                <p>The TinyGo code running in your browser:</p>
+                <div class="code-block" id="go-source">Loading...</div>
+            </div>
+
+            <div class="box has-background-info-light">
+                <h3>Installation</h3>
+                <p><strong>macOS:</strong></p>
+                <pre>brew install tinygo</pre>
+
+                <p><strong>Linux:</strong></p>
+                <pre>wget https://github.com/tinygo-org/tinygo/releases/download/v0.30.0/tinygo_0.30.0_amd64.deb
+sudo dpkg -i tinygo_0.30.0_amd64.deb</pre>
+
+                <p><strong>Or use Docker:</strong></p>
+                <pre>docker run --rm -v $(pwd):/src tinygo/tinygo:latest tinygo build -o main.wasm -target wasm /src/main.go</pre>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Lofigui TinyGo WASM Example</strong> - Compiled with TinyGo for ultra-small size
+            </p>
+        </div>
+    </footer>
+
+    <!-- Load the WASM exec helper -->
+    <script src="wasm_exec.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
