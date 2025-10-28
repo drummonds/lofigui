@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" class="has-navbar-fixed-top">
+  <head>
+    {% block title %}
+    <title>Demo App</title>
+    {% endblock %} {{refresh | safe}}
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css"
+    />
+    <link
+      href="https://unpkg.com/eva-icons@1.1.3/style/eva-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav
+      class="navbar is-fixed-top"
+      role="navigation"
+      aria-label="main navigation"
+    >
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="/">
+            <img
+              src="/favicon.ico"
+              alt="Atom account view"
+              width="32"
+              height="32"
+            />
+          </a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">Source</a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" href="/select_1"> Select action 1</a>
+              <hr class="navbar-divider" />
+	      <a class="navbar-item" href="/select_2"> Select action 2 
+              </a>
+            </div>
+          </div>
+          <div class="navbar-item" title="Press to Cancel">
+            <form action="/stop" method="post">
+              <button id="cancel" class="button {{cancel_class}}">
+                Cancel
+              </button>
+            </form>
+          </div>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link"> More </a>
+              <a class="navbar-item" href="/about"> About </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    {% block content %}
+      <div class="columns">
+        <div class="column is-8">
+          <article class="tile is-child box">
+            {% block mainpanel %}
+            <div id="content">Main content</div>
+            {% endblock %}
+          </article>
+        </div>
+        <div class="column is-4">
+          <article class="tile is-child box">
+          {% block statuspanel %}
+            <p class="title">Info</p>
+            <div class="content">
+              <p>App</p>
+              <p>Status: {{status}}.</p>
+              <p>Progress: {{progress}}.</p>
+              <p>Polling: {{polling}}.</p>
+              <p>
+                This allows you to read in model data and then visualise the account
+                data in a browser.
+              </p>
+              {{options | safe}}
+            </div>
+          {% endblock %}
+          </article>
+        </div>
+      </div>
+    {% endblock %}
+  </body>
+</html>
