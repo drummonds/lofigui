@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>View Results - Lofigui Demo App</title>
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">View Results</h1>
+<h2 class="subtitle">Display process results and output</h2>
+
+<div class="content">
+    <p>This page shows the results from completed processes.</p>
+
+    <div class="box">
+        {{results_content | safe}}
+    </div>
+
+    <div class="buttons mt-5">
+        <a href="/process" class="button is-primary">
+            <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <span>Back to Process</span>
+        </a>
+        <a href="/" class="button is-light">
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span>Home</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

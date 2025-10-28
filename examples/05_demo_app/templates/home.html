@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Home - Lofigui Demo App</title>
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">Welcome to Lofigui Demo</h1>
+<h2 class="subtitle">A comprehensive demonstration of Lofigui features</h2>
+
+<div class="content">
+    <p>This demo application showcases the key features of <strong>Lofigui</strong>, a lightweight Python/Go framework for building simple web GUIs with template inheritance and reactive updates.</p>
+
+    <div class="notification is-info is-light">
+        <p class="has-text-weight-bold">What is Lofigui?</p>
+        <p>Lofigui provides a simple way to create web interfaces with:</p>
+        <ul>
+            <li>Template inheritance using Jinja2</li>
+            <li>Automatic page refresh during long-running processes</li>
+            <li>Controller pattern for managing application state</li>
+            <li>Support for Python and Go backends</li>
+            <li>WASM support for running in the browser</li>
+        </ul>
+    </div>
+
+    <h3 class="title is-4 mt-5">Features Demonstrated</h3>
+
+    <div class="columns is-multiline">
+        <div class="column is-6">
+            <div class="box">
+                <h4 class="title is-5">
+                    <span class="icon has-text-info"><i class="fas fa-columns"></i></span>
+                    Template Inheritance
+                </h4>
+                <p>All pages extend a common <code>base.html</code> template, demonstrating Jinja2 template inheritance with custom blocks.</p>
+            </div>
+        </div>
+
+        <div class="column is-6">
+            <div class="box">
+                <h4 class="title is-5">
+                    <span class="icon has-text-success"><i class="fas fa-table"></i></span>
+                    Data Tables
+                </h4>
+                <p>Display tabular data with automatic formatting using lofigui's table helpers.</p>
+            </div>
+        </div>
+
+        <div class="column is-6">
+            <div class="box">
+                <h4 class="title is-5">
+                    <span class="icon has-text-warning"><i class="fas fa-chart-bar"></i></span>
+                    Charts & Visualizations
+                </h4>
+                <p>Render charts and visualizations using markdown and HTML output.</p>
+            </div>
+        </div>
+
+        <div class="column is-6">
+            <div class="box">
+                <h4 class="title is-5">
+                    <span class="icon has-text-danger"><i class="fas fa-sync"></i></span>
+                    Process Management
+                </h4>
+                <p>Run long-running processes with automatic page refresh and status updates.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="title is-4 mt-5">Quick Start</h3>
+
+    <div class="content">
+        <ol>
+            <li>Navigate through the menu to explore different features</li>
+            <li>Visit <strong>Data Tables</strong> to see formatted data display</li>
+            <li>Check out <strong>Charts</strong> for visualization examples</li>
+            <li>Try <strong>Run Process</strong> to see the controller pattern in action</li>
+        </ol>
+    </div>
+
+    <div class="buttons">
+        <a href="/data" class="button is-primary">
+            <span class="icon"><i class="fas fa-table"></i></span>
+            <span>View Data Tables</span>
+        </a>
+        <a href="/charts" class="button is-link">
+            <span class="icon"><i class="fas fa-chart-bar"></i></span>
+            <span>View Charts</span>
+        </a>
+        <a href="/process" class="button is-success">
+            <span class="icon"><i class="fas fa-play"></i></span>
+            <span>Run Process</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
