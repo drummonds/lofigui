@@ -1,6 +1,7 @@
 package lofigui
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -30,22 +31,31 @@ import (
 //	}
 //	app.SetController(ctrl)
 type App struct {
-	controller *Controller
-	Version    string // Version/name of the application
-	mu         sync.RWMutex
+	controller    *Controller
+	Version       string // Version/name of the application
+	actionRunning bool   // Whether an action is currently running (singleton active model)
+	polling       bool   // Whether auto-refresh polling is enabled
+	PollCount     int    // Number of polling cycles
+	refreshTime   int    // Seconds between refresh when polling
+	displayURL    string // URL to redirect to for display
+	mu            sync.RWMutex
 }
 
 // NewApp creates a new App with no controller.
 func NewApp() *App {
 	return &App{
-		Version: "Lofigui",
+		Version:     "Lofigui",
+		refreshTime: 1,
+		displayURL:  "/display",
 	}
 }
 
 // NewAppWithController creates a new App with the given controller.
 func NewAppWithController(ctrl *Controller) *App {
 	app := &App{
-		Version: "Lofigui",
+		Version:     "Lofigui",
+		refreshTime: 1,
+		displayURL:  "/display",
 	}
 	app.SetController(ctrl)
 	return app
@@ -93,9 +103,9 @@ func (app *App) SetController(ctrl *Controller) {
 				_ = recover()
 			}()
 
-			// Try to stop running action
-			if app.controller.IsActionRunning() {
-				app.controller.EndAction()
+			// Try to stop running action (app-level state)
+			if app.IsActionRunning() {
+				app.EndAction()
 			}
 		}()
 	}
@@ -104,45 +114,69 @@ func (app *App) SetController(ctrl *Controller) {
 	app.controller = ctrl
 }
 
-// StartAction starts an action on the current controller.
-// Does nothing if no controller is set.
+// StartAction starts an action and enables auto-refresh polling.
+// This implements the singleton active model concept - only one action
+// can be running at a time across the entire app.
 func (app *App) StartAction() {
-	app.mu.RLock()
-	defer app.mu.RUnlock()
+	app.mu.Lock()
+	defer app.mu.Unlock()
 
-	if app.controller != nil {
-		app.controller.StartAction()
-	}
+	app.actionRunning = true
+	app.polling = true
+	app.PollCount = 0
 }
 
-// EndAction stops the action on the current controller.
-// Does nothing if no controller is set.
+// EndAction stops the action and disables auto-refresh polling.
 func (app *App) EndAction() {
-	app.mu.RLock()
-	defer app.mu.RUnlock()
+	app.mu.Lock()
+	defer app.mu.Unlock()
 
-	if app.controller != nil {
-		app.controller.EndAction()
-	}
+	app.actionRunning = false
+	app.polling = false
 }
 
 // IsActionRunning returns whether an action is currently running.
-// Returns false if no controller is set.
+// This checks the app-level state (singleton active model).
 func (app *App) IsActionRunning() bool {
 	app.mu.RLock()
 	defer app.mu.RUnlock()
 
-	if app.controller != nil {
-		return app.controller.IsActionRunning()
-	}
-	return false
+	return app.actionRunning
 }
 
-// HandleRoot is a helper that delegates to the controller's HandleRoot.
-// Panics if no controller is set.
-func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*Controller), resetBuffer bool) {
+// SetRefreshTime sets the refresh time in seconds for auto-refresh polling.
+func (app *App) SetRefreshTime(seconds int) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+
+	app.refreshTime = seconds
+}
+
+// SetDisplayURL sets the URL to redirect to for displaying results.
+func (app *App) SetDisplayURL(url string) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+
+	app.displayURL = url
+}
+
+// HandleRoot is a helper for the root endpoint that starts an action.
+//
+// This function:
+//  1. Resets the buffer (if resetBuffer is true)
+//  2. Starts the action (app-level state)
+//  3. Launches the model function in a goroutine
+//  4. Returns HTML that redirects to the display page
+//
+// Example:
+//
+//	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+//	    app.HandleRoot(w, r, model, true)
+//	})
+func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*App), resetBuffer bool) {
 	app.mu.RLock()
 	ctrl := app.controller
+	displayURL := app.displayURL
 	app.mu.RUnlock()
 
 	if ctrl == nil {
@@ -150,7 +184,15 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 		return
 	}
 
-	ctrl.HandleRoot(w, r, modelFunc, resetBuffer)
+	if resetBuffer {
+		ctrl.context.Reset()
+	}
+
+	app.StartAction()
+	go modelFunc(app)
+
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL)
 }
 
 // HandleDisplay is a helper that delegates to the controller's HandleDisplay.
@@ -183,8 +225,8 @@ func (app *App) ControllerName() string {
 // StateDict generates a template context dictionary with app and controller state merged.
 //
 // This method provides centralized state management by combining:
-//   - App-level state (version, controller name)
-//   - Controller-level state (buffer, polling status, poll count)
+//   - App-level state (version, controller name, polling status)
+//   - Controller-level state (buffer content)
 //   - Extra context passed by the caller
 //
 // Returns a pongo2.Context containing:
@@ -192,8 +234,8 @@ func (app *App) ControllerName() string {
 //   - version: Application version string
 //   - controller_name: Name of the active controller
 //   - results: Buffer content from Print/Markdown calls
-//   - polling: "Running" or "Stopped"
-//   - poll_count: Number of refresh cycles
+//   - polling: "Running" or "Stopped" (app-level singleton state)
+//   - poll_count: Number of refresh cycles (app-level)
 //   - refresh: Meta tag for auto-refresh (if action is running)
 //   - Any additional keys from extraContext
 //
@@ -205,28 +247,40 @@ func (app *App) ControllerName() string {
 //	    // Use data for template rendering
 //	}
 func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.Context {
-	app.mu.RLock()
+	app.mu.Lock()
 	ctrl := app.controller
-	app.mu.RUnlock()
 
-	// Start with base app context
+	// Get buffer content from controller
+	var buffer string
+	if ctrl != nil {
+		buffer = ctrl.context.Buffer()
+	}
+
+	// Build context with app-level state (singleton active model)
 	ctx := pongo2.Context{
 		"request":         r,
 		"version":         app.Version,
 		"controller_name": app.ControllerName(),
+		"results":         buffer,
 	}
 
-	// Merge controller state if controller exists
-	if ctrl != nil {
-		ctrlState := ctrl.StateDict(r)
-		ctx.Update(ctrlState)
+	// Add polling state from app (singleton active model concept)
+	if app.polling {
+		ctx["polling"] = "Running"
+		app.PollCount++
+		ctx["refresh"] = fmt.Sprintf(
+			`<meta http-equiv="Refresh" content="%d; URL=%s"/>`,
+			app.refreshTime,
+			app.displayURL,
+		)
 	} else {
-		// Provide defaults if no controller
-		ctx["results"] = ""
-		ctx["polling"] = "Stopped"
-		ctx["poll_count"] = 0
 		ctx["refresh"] = ""
+		app.PollCount = 0
+		ctx["polling"] = "Stopped"
 	}
+	ctx["poll_count"] = app.PollCount
+
+	app.mu.Unlock()
 
 	// Merge extra context last so it can override anything
 	if extraContext != nil {
