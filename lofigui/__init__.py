@@ -10,4 +10,4 @@ from .favicon import (
     get_favicon_response,
     save_favicon_ico,
 )
-from .app import create_app
+from .app import create_app, App
