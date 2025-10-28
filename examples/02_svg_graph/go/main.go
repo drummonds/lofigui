@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"github.com/drummonds/lofigui"
-	"github.com/flosch/pongo2/v6"
 	"github.com/wcharczuk/go-chart/v2"
 )
 
 // Model function - contains business logic with chart rendering
 // This is a static/synchronous example - generates immediately without polling
-func model(ctrl *lofigui.Controller) {
+// The model receives the App, which manages the singleton active model state
+func model(app *lofigui.App) {
 	lofigui.Print("Hello to SVG graphs in Go!")
 
 	lofigui.Markdown("## Fibonacci Bar Chart")
@@ -45,8 +45,8 @@ func model(ctrl *lofigui.Controller) {
 	lofigui.Printf("Sum: %d", sum(fibonacci))
 	lofigui.Printf("Average: %.2f", average(fibonacci))
 
-	// End action immediately since this is synchronous
-	ctrl.EndAction()
+	// End action immediately since this is synchronous (app-level state)
+	app.EndAction()
 }
 
 // renderChartToSVG renders a chart to SVG string
@@ -95,8 +95,6 @@ func main() {
 	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 		Name:         "SVG Graph Controller",    // Name displayed in app
 		TemplatePath: "../templates/hello.html", // Shared template
-		RefreshTime:  1,                         // Not used for static content
-		DisplayURL:   "/display",                // Where to show results
 	})
 	if err != nil {
 		log.Fatalf("Failed to create controller: %v", err)
@@ -108,31 +106,12 @@ func main() {
 	// Root endpoint - generates the graph immediately
 	// This is a static/synchronous example - no polling needed
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Reset buffer
-		lofigui.Reset()
-
-		// Start action
-		ctrl.StartAction()
-
-		// Run model synchronously (generates immediately)
-		model(ctrl)
-
-		// Redirect to display
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`<head><meta http-equiv="Refresh" content="0; URL=/display"/></head>`))
+		app.HandleRoot(w, r, model, true)
 	})
 
 	// Display endpoint - shows the generated graph
 	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
-		// Use app's StateDict for centralized state management
-		data := app.StateDict(r, pongo2.Context{
-			"title": "SVG Graph Demo",
-		})
-
-		// Render using controller's template
-		if err := ctrl.GetTemplate().ExecuteWriter(data, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		app.HandleDisplay(w, r)
 	})
 
 	// Favicon endpoint
