@@ -28,8 +28,10 @@ import (
 //	    TemplatePath:  "../templates/hello.html",
 //	    RefreshTime:   2,
 //	    DisplayURL:    "/display",
+//	    Name:          "My Custom Controller",
 //	})
 type Controller struct {
+	Name          string // Name of the controller
 	template      *pongo2.Template
 	actionRunning bool
 	polling       bool
@@ -41,6 +43,10 @@ type Controller struct {
 
 // ControllerConfig holds configuration for creating a Controller.
 type ControllerConfig struct {
+	// Name is the display name for the controller.
+	// Default: "Lofigui Controller"
+	Name string
+
 	// TemplatePath is the path to the template file (required).
 	// Can be absolute or relative. Examples:
 	//   - "../templates/hello.html"
@@ -86,6 +92,9 @@ func NewController(config ControllerConfig) (*Controller, error) {
 	}
 
 	// Set defaults
+	if config.Name == "" {
+		config.Name = "Lofigui Controller"
+	}
 	if config.RefreshTime <= 0 {
 		config.RefreshTime = 1
 	}
@@ -97,6 +106,7 @@ func NewController(config ControllerConfig) (*Controller, error) {
 	}
 
 	return &Controller{
+		Name:          config.Name,
 		template:      tmpl,
 		actionRunning: false,
 		refreshTime:   config.RefreshTime,

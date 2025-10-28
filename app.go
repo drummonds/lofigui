@@ -3,9 +3,17 @@ package lofigui
 import (
 	"net/http"
 	"sync"
+
+	"github.com/flosch/pongo2/v6"
 )
 
 // App provides a wrapper around a Controller with safe controller replacement.
+//
+// The app manages:
+//   - Action state (running/stopped)
+//   - Auto-refresh polling during actions
+//   - Version information
+//   - Controller lifecycle and composition
 //
 // When replacing a controller, App ensures that any running action is safely
 // stopped before the new controller is set. This prevents dangling goroutines
@@ -23,17 +31,22 @@ import (
 //	app.SetController(ctrl)
 type App struct {
 	controller *Controller
+	Version    string // Version/name of the application
 	mu         sync.RWMutex
 }
 
 // NewApp creates a new App with no controller.
 func NewApp() *App {
-	return &App{}
+	return &App{
+		Version: "Lofigui",
+	}
 }
 
 // NewAppWithController creates a new App with the given controller.
 func NewAppWithController(ctrl *Controller) *App {
-	app := &App{}
+	app := &App{
+		Version: "Lofigui",
+	}
 	app.SetController(ctrl)
 	return app
 }
@@ -153,4 +166,72 @@ func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctrl.HandleDisplay(w, r, nil)
+}
+
+// ControllerName returns the name of the current controller.
+// Returns "Lofigui no controller" if no controller is set.
+func (app *App) ControllerName() string {
+	app.mu.RLock()
+	defer app.mu.RUnlock()
+
+	if app.controller != nil {
+		return app.controller.Name
+	}
+	return "Lofigui no controller"
+}
+
+// StateDict generates a template context dictionary with app and controller state merged.
+//
+// This method provides centralized state management by combining:
+//   - App-level state (version, controller name)
+//   - Controller-level state (buffer, polling status, poll count)
+//   - Extra context passed by the caller
+//
+// Returns a pongo2.Context containing:
+//   - request: The HTTP request object
+//   - version: Application version string
+//   - controller_name: Name of the active controller
+//   - results: Buffer content from Print/Markdown calls
+//   - polling: "Running" or "Stopped"
+//   - poll_count: Number of refresh cycles
+//   - refresh: Meta tag for auto-refresh (if action is running)
+//   - Any additional keys from extraContext
+//
+// Example:
+//
+//	func (app *App) HandleCustomDisplay(w http.ResponseWriter, r *http.Request) {
+//	    extra := pongo2.Context{"title": "My Page"}
+//	    data := app.StateDict(r, extra)
+//	    // Use data for template rendering
+//	}
+func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.Context {
+	app.mu.RLock()
+	ctrl := app.controller
+	app.mu.RUnlock()
+
+	// Start with base app context
+	ctx := pongo2.Context{
+		"request":         r,
+		"version":         app.Version,
+		"controller_name": app.ControllerName(),
+	}
+
+	// Merge controller state if controller exists
+	if ctrl != nil {
+		ctrlState := ctrl.StateDict(r)
+		ctx.Update(ctrlState)
+	} else {
+		// Provide defaults if no controller
+		ctx["results"] = ""
+		ctx["polling"] = "Stopped"
+		ctx["poll_count"] = 0
+		ctx["refresh"] = ""
+	}
+
+	// Merge extra context last so it can override anything
+	if extraContext != nil {
+		ctx.Update(extraContext)
+	}
+
+	return ctx
 }

@@ -1,16 +1,17 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/drummonds/lofigui"
+	"github.com/flosch/pongo2/v6"
 	"github.com/wcharczuk/go-chart/v2"
 )
 
 // Model function - contains business logic with chart rendering
-func model() {
+// This is a static/synchronous example - generates immediately without polling
+func model(ctrl *lofigui.Controller) {
 	lofigui.Print("Hello to SVG graphs in Go!")
 
 	lofigui.Markdown("## Fibonacci Bar Chart")
@@ -43,6 +44,9 @@ func model() {
 	lofigui.Markdown("## Analysis")
 	lofigui.Printf("Sum: %d", sum(fibonacci))
 	lofigui.Printf("Average: %.2f", average(fibonacci))
+
+	// End action immediately since this is synchronous
+	ctrl.EndAction()
 }
 
 // renderChartToSVG renders a chart to SVG string
@@ -80,41 +84,58 @@ func average(values []float64) float64 {
 	return sum(values) / float64(len(values))
 }
 
-// Controller manages state and routing
-type Controller struct {
-	templates *template.Template
-}
-
-func NewController() *Controller {
-	tmpl := template.Must(template.ParseFiles("../templates/hello.html"))
-	return &Controller{
-		templates: tmpl,
-	}
-}
-
-func (ctrl *Controller) handleRoot(w http.ResponseWriter, r *http.Request) {
-	// Reset buffer and run model
-	lofigui.Reset()
-	model()
-
-	// Prepare template data
-	data := struct {
-		Results string
-	}{
-		Results: lofigui.Buffer(),
-	}
-
-	// Render template
-	if err := ctrl.templates.ExecuteTemplate(w, "hello.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func main() {
-	ctrl := NewController()
+	// Create an App which provides safe controller management
+	// The App uses composition to integrate the controller
+	app := lofigui.NewApp()
+	app.Version = "SVG Graph Demo v1.0"
 
-	http.HandleFunc("/", ctrl.handleRoot)
+	// Create controller using lofigui.Controller with composition pattern
+	// This demonstrates how model-specific controllers are integrated via composition
+	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
+		Name:         "SVG Graph Controller",    // Name displayed in app
+		TemplatePath: "../templates/hello.html", // Shared template
+		RefreshTime:  1,                         // Not used for static content
+		DisplayURL:   "/display",                // Where to show results
+	})
+	if err != nil {
+		log.Fatalf("Failed to create controller: %v", err)
+	}
+
+	// Set the controller in the app (composition pattern)
+	app.SetController(ctrl)
+
+	// Root endpoint - generates the graph immediately
+	// This is a static/synchronous example - no polling needed
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Reset buffer
+		lofigui.Reset()
+
+		// Start action
+		ctrl.StartAction()
+
+		// Run model synchronously (generates immediately)
+		model(ctrl)
+
+		// Redirect to display
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<head><meta http-equiv="Refresh" content="0; URL=/display"/></head>`))
+	})
+
+	// Display endpoint - shows the generated graph
+	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
+		// Use app's StateDict for centralized state management
+		data := app.StateDict(r, pongo2.Context{
+			"title": "SVG Graph Demo",
+		})
+
+		// Render using controller's template
+		if err := ctrl.GetTemplate().ExecuteWriter(data, w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	// Favicon endpoint
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 
 	addr := ":1340"
