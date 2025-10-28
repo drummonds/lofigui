@@ -38,17 +38,15 @@ class TestAppControllerProperty:
         app.controller = controller1
 
         # Start an action
-        controller1.start_action()
-        assert controller1.is_action_running() is True
+        app.start_action()
+        assert app.is_action_running() is True
 
         # Replace with new controller - should stop old action
         controller2 = Controller()
         app.controller = controller2
 
-        # Old controller should have action stopped
-        assert controller1.is_action_running() is False
-        # New controller should not have action running
-        assert controller2.is_action_running() is False
+        # Controller change should have stopped action
+        assert app.is_action_running() is False
 
     def test_controller_replacement_handles_missing_methods(self):
         """Test that controller replacement handles controllers without proper methods."""
@@ -100,23 +98,6 @@ class TestAppControllerProperty:
 
         assert app.controller is controller
 
-    def test_multiple_controller_replacements(self):
-        """Test multiple controller replacements work correctly."""
-        app = App()
-
-        controllers = [Controller() for _ in range(5)]
-
-        for i, controller in enumerate(controllers):
-            controller.start_action()
-            app.controller = controller
-
-            # Only the current controller should be set
-            assert app.controller is controller
-
-            # Previous controllers should have stopped actions
-            for j in range(i):
-                assert controllers[j].is_action_running() is False
-
     def test_controller_none_to_controller(self):
         """Test setting controller when initially None."""
         app = App()  # No controller
@@ -131,12 +112,12 @@ class TestAppControllerProperty:
         controller = Controller()
         app = App(controller=controller)
 
-        controller.start_action()
-        assert controller.is_action_running() is True
+        app.start_action()
+        assert app.is_action_running() is True
 
         # Setting to None should stop action
         app.controller = None
-        assert controller.is_action_running() is False
+        assert app.is_action_running() is False
 
     def test_controller_setter_is_idempotent(self):
         """Test that setting the same controller again doesn't stop the action (idempotent)."""
@@ -148,10 +129,10 @@ class TestAppControllerProperty:
         assert app.controller is controller
 
         # Start an action
-        controller.start_action()
-        assert controller.is_action_running() is True
+        app.start_action()
+        assert app.is_action_running() is True
 
         # Set the same controller again - should NOT stop action (idempotent)
         app.controller = controller
-        assert controller.is_action_running() is True  # Action should still be running
+        assert app.is_action_running() is True  # Action should still be running
         assert app.controller is controller

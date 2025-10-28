@@ -18,11 +18,7 @@ import uvicorn
 
 # Create controller with custom template directory
 # The template directory can be anywhere, not just the default "templates"
-controller = lg.Controller(
-    template_dir="../templates",  # Custom location
-    template_name="hello.html",  # Template to use
-    refresh_time=1,  # Refresh every 1 second while action runs
-)
+controller = lg.Controller()
 
 # Use create_app which automatically includes favicon route
 # Pass the same template_dir to create_app for consistency
@@ -62,4 +58,4 @@ async def display(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("hello:app", host="127.0.0.1", port=1340, reload=True)
+    uvicorn.run("hello:app", host="127.0.0.1", port=1342, reload=True)

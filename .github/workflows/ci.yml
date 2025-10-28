@@ -7,12 +7,12 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
+  test-python:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
     - uses: actions/checkout@v3
@@ -22,17 +22,21 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.x
+
     - name: Install uv
       uses: astral-sh/setup-uv@v4
       with:
         enable-cache: true
 
     - name: Install dependencies
-      run: uv sync --all-extras
+      run: task install
 
     - name: Run tests
-      run: |
-        uv run pytest --cov=lofigui --cov-report=xml --cov-report=term-missing
+      run: task test-coverage
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
@@ -52,22 +56,40 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.x
+
     - name: Install uv
       uses: astral-sh/setup-uv@v4
       with:
         enable-cache: true
 
     - name: Install dependencies
-      run: uv sync --all-extras
+      run: task install
 
-    - name: Run Black
-      run: uv run black --check lofigui tests
+    - name: Run linters
+      run: task lint
 
-    - name: Run Flake8
-      run: uv run flake8 lofigui tests --max-line-length=100 --extend-ignore=E203,W503
+  test-go:
+    runs-on: ubuntu-latest
 
-    - name: Run mypy
-      run: uv run mypy lofigui
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.x
+
+    - name: Run Go tests
+      run: go test -v ./...
 
   security:
     runs-on: ubuntu-latest
@@ -93,7 +115,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test-python, test-go, lint]
 
     steps:
     - uses: actions/checkout@v3
@@ -103,13 +125,18 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.x
+
     - name: Install uv
       uses: astral-sh/setup-uv@v4
       with:
         enable-cache: true
 
     - name: Build package
-      run: uv build
+      run: task build
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3

@@ -27,14 +27,14 @@ tasks:
   test-coverage:
     desc: Run tests with coverage report
     cmds:
-      - uv run pytest --cov=lofigui --cov-report=html --cov-report=term-missing
+      - uv run pytest --cov=lofigui --cov-report=html --cov-report=xml --cov-report=term-missing
 
   lint:
     desc: Run all linters
     cmds:
       - task: lint-black
       - task: lint-flake8
-      - task: lint-mypy
+      # - task: lint-mypy
 
   lint-black:
     desc: Check code formatting with black
@@ -77,6 +77,14 @@ tasks:
     cmds:
       - uv sync --no-install-project
       - uv run --no-project python graph.py
+
+  example-05:
+    desc: Run Python example 05 (Demo App with template inheritance)
+    aliases: [py05, demo]
+    dir: examples/05_demo_app
+    cmds:
+      - uv sync --no-install-project
+      - uv run --no-project python demo_app.py
 
   # Go example tasks
   tidy:

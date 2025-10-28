@@ -1,86 +1,161 @@
 <!DOCTYPE html>
 <html lang="en" class="has-navbar-fixed-top">
-  <head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block title %}
-    <title>Demo App</title>
-    {% endblock %} {{refresh | safe}}
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css"
-    />
-    <link
-      href="https://unpkg.com/eva-icons@1.1.3/style/eva-icons.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <nav
-      class="navbar is-fixed-top"
-      role="navigation"
-      aria-label="main navigation"
-    >
-      <div id="navbarBasicExample" class="navbar-menu">
-        <div class="navbar-start">
-          <a class="navbar-item" href="/">
-            <img
-              src="/favicon.ico"
-              alt="Atom account view"
-              width="32"
-              height="32"
-            />
-          </a>
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">Source</a>
-            <div class="navbar-dropdown">
-              <a class="navbar-item" href="/select_1"> Select action 1</a>
-              <hr class="navbar-divider" />
-	      <a class="navbar-item" href="/select_2"> Select action 2 
-              </a>
-            </div>
-          </div>
-          <div class="navbar-item" title="Press to Cancel">
-            <form action="/stop" method="post">
-              <button id="cancel" class="button {{cancel_class}}">
-                Cancel
-              </button>
-            </form>
-          </div>
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link"> More </a>
-              <a class="navbar-item" href="/about"> About </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-    {% block content %}
-      <div class="columns">
-        <div class="column is-8">
-          <article class="tile is-child box">
-            {% block mainpanel %}
-            <div id="content">Main content</div>
-            {% endblock %}
-          </article>
-        </div>
-        <div class="column is-4">
-          <article class="tile is-child box">
-          {% block statuspanel %}
-            <p class="title">Info</p>
-            <div class="content">
-              <p>App</p>
-              <p>Status: {{status}}.</p>
-              <p>Progress: {{progress}}.</p>
-              <p>Polling: {{polling}}.</p>
-              <p>
-                This allows you to read in model data and then visualise the account
-                data in a browser.
-              </p>
-              {{options | safe}}
-            </div>
-          {% endblock %}
-          </article>
-        </div>
-      </div>
+    <title>Lofigui Demo App</title>
     {% endblock %}
-  </body>
+    {{refresh | safe}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+            padding-top: 3.25rem;
+        }
+        .footer {
+            margin-top: auto;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="/">
+                    <img src="/favicon.ico" alt="Lofigui" width="32" height="32"/>
+                    <span class="ml-2 has-text-weight-bold">Lofigui Demo</span>
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbarMenu" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="/">
+                        <span class="icon"><i class="fas fa-home"></i></span>
+                        <span>Home</span>
+                    </a>
+                    <a class="navbar-item" href="/data">
+                        <span class="icon"><i class="fas fa-table"></i></span>
+                        <span>Data Tables</span>
+                    </a>
+                    <a class="navbar-item" href="/charts">
+                        <span class="icon"><i class="fas fa-chart-bar"></i></span>
+                        <span>Charts</span>
+                    </a>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">
+                            <span class="icon"><i class="fas fa-cog"></i></span>
+                            <span>Actions</span>
+                        </a>
+                        <div class="navbar-dropdown">
+                            <a class="navbar-item" href="/process">
+                                <span class="icon"><i class="fas fa-play"></i></span>
+                                <span>Run Process</span>
+                            </a>
+                            <hr class="navbar-divider"/>
+                            <a class="navbar-item" href="/display">
+                                <span class="icon"><i class="fas fa-eye"></i></span>
+                                <span>View Results</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <form action="/stop" method="post" style="display:inline;">
+                            <button class="button is-warning {{cancel_class}}" title="Cancel running process">
+                                <span class="icon"><i class="fas fa-stop"></i></span>
+                                <span>Cancel</span>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">More</a>
+                        <div class="navbar-dropdown is-right">
+                            <a class="navbar-item" href="/about">
+                                <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                <span>About</span>
+                            </a>
+                            <a class="navbar-item" href="https://github.com/drummonds/lofigui" target="_blank">
+                                <span class="icon"><i class="fab fa-github"></i></span>
+                                <span>GitHub</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            {% block content %}
+            <div class="columns">
+                <div class="column is-8">
+                    <div class="box">
+                        {% block mainpanel %}
+                        <div id="content">Main content</div>
+                        {% endblock %}
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <div class="box">
+                        {% block statuspanel %}
+                        <p class="title is-5">Status</p>
+                        <div class="content">
+                            <p><strong>Status:</strong> {{status | default('Ready')}}</p>
+                            <p><strong>Progress:</strong> {{progress | default('0%')}}</p>
+                            <p><strong>Polling:</strong> {{polling | default('Stopped')}}</p>
+                            {{options | safe}}
+                        </div>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Lofigui Demo Application</strong> - Demonstrating template inheritance and features.
+            </p>
+            <p>Built with <a href="https://github.com/drummonds/lofigui">Lofigui</a>, FastAPI, and Bulma.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar burger toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            $navbarBurgers.forEach(el => {
+                el.addEventListener('click', () => {
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
+                    el.classList.toggle('is-active');
+                    $target.classList.toggle('is-active');
+                });
+            });
+        });
+        {% block extra_js %}{% endblock %}
+    </script>
+</body>
 </html>

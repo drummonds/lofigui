@@ -2,7 +2,11 @@
 
 **Lofi GUI** - A minimalist library for creating really simple web-based GUIs for CLI tools and small projects. Available in both **Python** and **Go**, it provides a print-like interface for building lightweight web UIs with minimal complexity.
 
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+The aplication is where you have a single real object (eg machine or long running)
+processing which then have a number of pages around it to show various aspects
+of it.
+
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/dl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -40,12 +44,10 @@ Your project is essentially a web site.  To make design simple you completely re
 Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.
 
 ### model view controller architecture
-All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver.  The view is the html templating and the browser.
+All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver. The controller is split between the app (single instance) and a model specific controller. The view is the html templating and the browser.
 
 ### Buffer
 In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
-
-### Forms
 lofigui relies on hyperlinks to perform updates.  Forms are useful for nice buttons but in general to get the right level of interactivity (click on somthing and it changes) you don't want to have forms.  HTMLx would play nicely here if you were intersted in improving interactivity and spending a bit more time on the UI.
 
 ## Installation
@@ -258,7 +260,8 @@ See the `examples/` directory for complete working examples:
 
 - **01_hello_world**: Minimal FastAPI application (server-side)
 - **02_svg_graph**: Chart rendering with Pygal (server-side)
-- **03_hello_world_wasm**: Python as WebAssembly in browser (no server needed!)
+- **03_hello_world_wasm**: Go as WebAssembly in browser (no server needed!) no Python wasm as much bigger.
+- **04_hello_world_wasm**: Using tinygo for much smaller footprint
 
 ### Running Server-Side Examples (01 & 02)
 

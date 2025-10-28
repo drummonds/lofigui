@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+##  [0.12.0] - 2025-10-28
+
+- Refactoring to make app a more centralised and opinionated controller with just 
+model specific info in the controller.
+
+##  [0.11.0] - 2025-10-27
+
+- Using taskfile in CI to use same commands
+
+##  [0.10.0] - 2025-10-27
+
+- Adding tinygo example
+- Adding polling state
+
 ##  [0.9.0] - 2025-10-27
 
 - Make changes to controller idempotent for both go and python
