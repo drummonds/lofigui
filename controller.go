@@ -8,13 +8,15 @@ import (
 	"github.com/flosch/pongo2/v6"
 )
 
-// Controller manages application state and routing for lofigui apps.
+// Controller manages template rendering and buffer content for lofigui apps.
 //
-// The Controller provides extensible logic for:
-//   - Managing action state (running/stopped)
-//   - Auto-refresh polling during actions
+// The Controller provides:
 //   - Template rendering with state
+//   - Access to the output buffer
 //   - Customizable template directories and paths
+//
+// NOTE: Action state management (polling, refresh) is now handled at the App level
+// to implement the singleton active model concept. Use App methods for action control.
 //
 // Example usage:
 //
@@ -25,36 +27,27 @@ import (
 //
 //	// With custom settings
 //	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
-//	    TemplatePath:  "../templates/hello.html",
-//	    RefreshTime:   2,
-//	    DisplayURL:    "/display",
+//	    TemplatePath: "../templates/hello.html",
+//	    Name:         "My Custom Controller",
 //	})
 type Controller struct {
-	template      *pongo2.Template
-	actionRunning bool
-	polling       bool
-	PollCount     int
-	refreshTime   int    // seconds between refresh
-	displayURL    string // URL to redirect to for display
-	context       *Context
+	Name     string // Name of the controller
+	template *pongo2.Template
+	context  *Context
 }
 
 // ControllerConfig holds configuration for creating a Controller.
 type ControllerConfig struct {
+	// Name is the display name for the controller.
+	// Default: "Lofigui Controller"
+	Name string
+
 	// TemplatePath is the path to the template file (required).
 	// Can be absolute or relative. Examples:
 	//   - "../templates/hello.html"
 	//   - "/opt/myapp/templates/custom.html"
 	//   - "templates/page.html"
 	TemplatePath string
-
-	// RefreshTime is the number of seconds between auto-refresh when action is running.
-	// Default: 1 second
-	RefreshTime int
-
-	// DisplayURL is the URL to redirect to after starting an action.
-	// Default: "/display"
-	DisplayURL string
 
 	// Context is an optional custom Context for buffer management.
 	// If nil, uses the default global context.
@@ -86,22 +79,17 @@ func NewController(config ControllerConfig) (*Controller, error) {
 	}
 
 	// Set defaults
-	if config.RefreshTime <= 0 {
-		config.RefreshTime = 1
-	}
-	if config.DisplayURL == "" {
-		config.DisplayURL = "/display"
+	if config.Name == "" {
+		config.Name = "Lofigui Controller"
 	}
 	if config.Context == nil {
 		config.Context = defaultContext
 	}
 
 	return &Controller{
-		template:      tmpl,
-		actionRunning: false,
-		refreshTime:   config.RefreshTime,
-		displayURL:    config.DisplayURL,
-		context:       config.Context,
+		Name:     config.Name,
+		template: tmpl,
+		context:  config.Context,
 	}, nil
 }
 
@@ -111,44 +99,27 @@ func NewController(config ControllerConfig) (*Controller, error) {
 //
 // Example:
 //
-//	ctrl, err := lofigui.NewControllerFromDir("../templates", "hello.html", 1)
-func NewControllerFromDir(templateDir, templateName string, refreshTime int) (*Controller, error) {
+//	ctrl, err := lofigui.NewControllerFromDir("../templates", "hello.html")
+func NewControllerFromDir(templateDir, templateName string) (*Controller, error) {
 	templatePath := filepath.Join(templateDir, templateName)
 	return NewController(ControllerConfig{
 		TemplatePath: templatePath,
-		RefreshTime:  refreshTime,
 	})
 }
 
-// StartAction starts an action and enables auto-refresh polling.
-func (ctrl *Controller) StartAction() {
-	ctrl.actionRunning = true
-	ctrl.polling = true
-	ctrl.PollCount = 0
-}
+// NOTE: Action state management (StartAction, EndAction, IsActionRunning)
+// has been moved to the App level to implement the singleton active model concept.
+// Use app.StartAction(), app.EndAction(), and app.IsActionRunning() instead.
 
-// EndAction stops the action and disables auto-refresh.
-func (ctrl *Controller) EndAction() {
-	ctrl.actionRunning = false
-	ctrl.polling = false
-}
-
-// IsActionRunning returns whether an action is currently running.
-func (ctrl *Controller) IsActionRunning() bool {
-	return ctrl.actionRunning
-}
-
-// SetRefreshTime updates the refresh time (in seconds) for auto-refresh.
-func (ctrl *Controller) SetRefreshTime(seconds int) {
-	ctrl.refreshTime = seconds
-}
-
-// StateDict generates a template context dictionary with current state.
+// StateDict generates a template context dictionary with controller state.
+//
+// NOTE: This method now only provides basic controller state (request, buffer).
+// Polling state and action management are now handled at the App level.
+// Use app.StateDict() for complete state including polling status.
 //
 // Returns a pongo2.Context containing:
 //   - request: The HTTP request object
 //   - results: Buffer content from Print/Markdown calls
-//   - refresh: Meta tag for auto-refresh (if action is running)
 //
 // You can merge additional context by using pongo2.Context.Update().
 func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
@@ -157,56 +128,21 @@ func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
 		"results": ctrl.context.Buffer(),
 	}
 
-	if ctrl.IsActionRunning() {
-		ctx["polling"] = "Running"
-		ctrl.PollCount += 1
-		ctx["refresh"] = fmt.Sprintf(
-			`<meta http-equiv="Refresh" content="%d; URL=%s"/>`,
-			ctrl.refreshTime,
-			ctrl.displayURL,
-		)
-	} else {
-		ctx["refresh"] = ""
-		ctrl.PollCount = 0
-		ctx["polling"] = "Stopped"
-	}
-	ctx["poll_count"] = ctrl.PollCount
-
 	return ctx
 }
 
-// HandleRoot is a helper for the root endpoint that starts an action.
+// NOTE: HandleRoot has been moved to the App level to implement the singleton
+// active model concept. Use app.HandleRoot() instead.
+
+// HandleDisplay renders the template with the provided context.
+//
+// NOTE: This method now only handles template rendering. For complete state
+// management including polling status, use app.HandleDisplay() or app.StateDict().
 //
 // This function:
-//  1. Resets the buffer (if resetBuffer is true)
-//  2. Starts the action
-//  3. Launches the model function in a goroutine
-//  4. Returns HTML that redirects to the display page
-//
-// Example:
-//
-//	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-//	    ctrl.HandleRoot(w, r, model, true)
-//	})
-func (ctrl *Controller) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*Controller), resetBuffer bool) {
-	if resetBuffer {
-		ctrl.context.Reset()
-	}
-
-	ctrl.StartAction()
-	go modelFunc(ctrl)
-
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, ctrl.displayURL)
-}
-
-// HandleDisplay is a helper for the display endpoint that shows action progress.
-//
-// This function:
-//  1. Generates state dict with current buffer and refresh status
-//  2. Renders the template with the state
-//
-// You can pass additional context via extraContext which will be merged into the state.
+//  1. Generates basic state dict with buffer content
+//  2. Merges extra context if provided
+//  3. Renders the template
 //
 // Example:
 //

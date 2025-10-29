@@ -1,11 +1,20 @@
 package lofigui
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/flosch/pongo2/v6"
 )
 
 // App provides a wrapper around a Controller with safe controller replacement.
+//
+// The app manages:
+//   - Action state (running/stopped)
+//   - Auto-refresh polling during actions
+//   - Version information
+//   - Controller lifecycle and composition
 //
 // When replacing a controller, App ensures that any running action is safely
 // stopped before the new controller is set. This prevents dangling goroutines
@@ -22,18 +31,32 @@ import (
 //	}
 //	app.SetController(ctrl)
 type App struct {
-	controller *Controller
-	mu         sync.RWMutex
+	controller    *Controller
+	Version       string // Version/name of the application
+	actionRunning bool   // Whether an action is currently running (singleton active model)
+	polling       bool   // Whether auto-refresh polling is enabled
+	PollCount     int    // Number of polling cycles
+	refreshTime   int    // Seconds between refresh when polling
+	displayURL    string // URL to redirect to for display
+	mu            sync.RWMutex
 }
 
 // NewApp creates a new App with no controller.
 func NewApp() *App {
-	return &App{}
+	return &App{
+		Version:     "Lofigui",
+		refreshTime: 1,
+		displayURL:  "/display",
+	}
 }
 
 // NewAppWithController creates a new App with the given controller.
 func NewAppWithController(ctrl *Controller) *App {
-	app := &App{}
+	app := &App{
+		Version:     "Lofigui",
+		refreshTime: 1,
+		displayURL:  "/display",
+	}
 	app.SetController(ctrl)
 	return app
 }
@@ -69,67 +92,81 @@ func (app *App) SetController(ctrl *Controller) {
 		return
 	}
 
-	// If there's an existing controller, try to clean it up
-	if app.controller != nil {
-		// Safely check if action is running and try to end it
-		// We wrap this in a defer/recover to handle any panics during cleanup
-		func() {
-			defer func() {
-				// Silently ignore any panics during cleanup
-				// We're replacing the controller anyway
-				_ = recover()
-			}()
-
-			// Try to stop running action
-			if app.controller.IsActionRunning() {
-				app.controller.EndAction()
-			}
-		}()
+	// If there's an existing controller and action is running, stop it
+	// We already have the lock, so directly access and modify the state
+	// (no need to call methods that would try to acquire locks)
+	if app.controller != nil && app.actionRunning {
+		app.actionRunning = false
+		app.polling = false
 	}
 
 	// Set the new controller
 	app.controller = ctrl
 }
 
-// StartAction starts an action on the current controller.
-// Does nothing if no controller is set.
+// StartAction starts an action and enables auto-refresh polling.
+// This implements the singleton active model concept - only one action
+// can be running at a time across the entire app.
 func (app *App) StartAction() {
-	app.mu.RLock()
-	defer app.mu.RUnlock()
+	app.mu.Lock()
+	defer app.mu.Unlock()
 
-	if app.controller != nil {
-		app.controller.StartAction()
-	}
+	app.actionRunning = true
+	app.polling = true
+	app.PollCount = 0
 }
 
-// EndAction stops the action on the current controller.
-// Does nothing if no controller is set.
+// EndAction stops the action and disables auto-refresh polling.
 func (app *App) EndAction() {
-	app.mu.RLock()
-	defer app.mu.RUnlock()
+	app.mu.Lock()
+	defer app.mu.Unlock()
 
-	if app.controller != nil {
-		app.controller.EndAction()
-	}
+	app.actionRunning = false
+	app.polling = false
 }
 
 // IsActionRunning returns whether an action is currently running.
-// Returns false if no controller is set.
+// This checks the app-level state (singleton active model).
 func (app *App) IsActionRunning() bool {
 	app.mu.RLock()
 	defer app.mu.RUnlock()
 
-	if app.controller != nil {
-		return app.controller.IsActionRunning()
-	}
-	return false
+	return app.actionRunning
 }
 
-// HandleRoot is a helper that delegates to the controller's HandleRoot.
-// Panics if no controller is set.
-func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*Controller), resetBuffer bool) {
+// SetRefreshTime sets the refresh time in seconds for auto-refresh polling.
+func (app *App) SetRefreshTime(seconds int) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+
+	app.refreshTime = seconds
+}
+
+// SetDisplayURL sets the URL to redirect to for displaying results.
+func (app *App) SetDisplayURL(url string) {
+	app.mu.Lock()
+	defer app.mu.Unlock()
+
+	app.displayURL = url
+}
+
+// HandleRoot is a helper for the root endpoint that starts an action.
+//
+// This function:
+//  1. Resets the buffer (if resetBuffer is true)
+//  2. Starts the action (app-level state)
+//  3. Launches the model function in a goroutine
+//  4. Returns HTML that redirects to the display page
+//
+// Example:
+//
+//	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+//	    app.HandleRoot(w, r, model, true)
+//	})
+func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*App), resetBuffer bool) {
 	app.mu.RLock()
 	ctrl := app.controller
+	displayURL := app.displayURL
 	app.mu.RUnlock()
 
 	if ctrl == nil {
@@ -137,7 +174,17 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 		return
 	}
 
-	ctrl.HandleRoot(w, r, modelFunc, resetBuffer)
+	if resetBuffer {
+		ctrl.context.Reset()
+	}
+
+	app.StartAction()
+	go modelFunc(app)
+
+	w.Header().Set("Content-Type", "text/html")
+	if _, err := fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+	}
 }
 
 // HandleDisplay is a helper that delegates to the controller's HandleDisplay.
@@ -153,4 +200,84 @@ func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctrl.HandleDisplay(w, r, nil)
+}
+
+// ControllerName returns the name of the current controller.
+// Returns "Lofigui no controller" if no controller is set.
+func (app *App) ControllerName() string {
+	app.mu.RLock()
+	defer app.mu.RUnlock()
+
+	if app.controller != nil {
+		return app.controller.Name
+	}
+	return "Lofigui no controller"
+}
+
+// StateDict generates a template context dictionary with app and controller state merged.
+//
+// This method provides centralized state management by combining:
+//   - App-level state (version, controller name, polling status)
+//   - Controller-level state (buffer content)
+//   - Extra context passed by the caller
+//
+// Returns a pongo2.Context containing:
+//   - request: The HTTP request object
+//   - version: Application version string
+//   - controller_name: Name of the active controller
+//   - results: Buffer content from Print/Markdown calls
+//   - polling: "Running" or "Stopped" (app-level singleton state)
+//   - poll_count: Number of refresh cycles (app-level)
+//   - refresh: Meta tag for auto-refresh (if action is running)
+//   - Any additional keys from extraContext
+//
+// Example:
+//
+//	func (app *App) HandleCustomDisplay(w http.ResponseWriter, r *http.Request) {
+//	    extra := pongo2.Context{"title": "My Page"}
+//	    data := app.StateDict(r, extra)
+//	    // Use data for template rendering
+//	}
+func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.Context {
+	app.mu.Lock()
+	ctrl := app.controller
+
+	// Get buffer content from controller
+	var buffer string
+	if ctrl != nil {
+		buffer = ctrl.context.Buffer()
+	}
+
+	// Build context with app-level state (singleton active model)
+	ctx := pongo2.Context{
+		"request":         r,
+		"version":         app.Version,
+		"controller_name": app.ControllerName(),
+		"results":         buffer,
+	}
+
+	// Add polling state from app (singleton active model concept)
+	if app.polling {
+		ctx["polling"] = "Running"
+		app.PollCount++
+		ctx["refresh"] = fmt.Sprintf(
+			`<meta http-equiv="Refresh" content="%d; URL=%s"/>`,
+			app.refreshTime,
+			app.displayURL,
+		)
+	} else {
+		ctx["refresh"] = ""
+		app.PollCount = 0
+		ctx["polling"] = "Stopped"
+	}
+	ctx["poll_count"] = app.PollCount
+
+	app.mu.Unlock()
+
+	// Merge extra context last so it can override anything
+	if extraContext != nil {
+		ctx.Update(extraContext)
+	}
+
+	return ctx
 }
