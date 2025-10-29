@@ -1,0 +1,118 @@
+direction: right
+
+title: {
+  label: "Lofigui Controller State Machine"
+  near: top-center
+  shape: text
+  style.font-size: 20
+  style.bold: true
+}
+
+# Define states
+no_controller: {
+  label: "No Controller"
+  shape: circle
+  style.fill: "#e0e0e0"
+  style.stroke: "#666"
+
+  description: {
+    label: "• App has no controller set\n• App.controller = nil\n• Returns default state"
+    near: bottom-center
+    shape: text
+    style.font-size: 12
+  }
+}
+
+stopped: {
+  label: "Stopped"
+  shape: rectangle
+  style.fill: "#ffeb3b"
+  style.stroke: "#f57f17"
+  style.stroke-width: 2
+
+  description: {
+    label: "• Controller exists\n• actionRunning = false\n• polling = false\n• poll_count = 0\n• No auto-refresh"
+    near: bottom-center
+    shape: text
+    style.font-size: 12
+  }
+}
+
+polling: {
+  label: "Polling (Running)"
+  shape: rectangle
+  style.fill: "#4caf50"
+  style.stroke: "#1b5e20"
+  style.stroke-width: 2
+
+  description: {
+    label: "• Controller exists\n• actionRunning = true\n• polling = true\n• poll_count increments\n• Auto-refresh enabled"
+    near: bottom-center
+    shape: text
+    style.font-size: 12
+  }
+}
+
+# State transitions
+no_controller -> stopped: "app.SetController(ctrl)" {
+  style.stroke: "#2196f3"
+  style.stroke-width: 2
+}
+
+stopped -> polling: "ctrl.StartAction() / app.StartAction()" {
+  style.stroke: "#4caf50"
+  style.stroke-width: 2
+}
+
+polling -> stopped: "ctrl.EndAction() / app.EndAction()" {
+  style.stroke: "#f44336"
+  style.stroke-width: 2
+}
+
+stopped -> no_controller: "app.SetController(nil)" {
+  style.stroke: "#9e9e9e"
+  style.stroke-width: 1
+  style.stroke-dash: 3
+}
+
+polling -> no_controller: "app.SetController(nil)\n(auto stops action)" {
+  style.stroke: "#ff5722"
+  style.stroke-width: 2
+  style.stroke-dash: 3
+}
+
+polling -> polling: "Auto-refresh cycle\n(poll_count++)" {
+  style.stroke: "#8bc34a"
+  style.stroke-width: 1
+  style.stroke-dash: 2
+}
+
+# Legend
+legend: {
+  label: "Legend"
+  shape: rectangle
+  style.fill: "#f5f5f5"
+  style.stroke: "#bdbdbd"
+  near: bottom-right
+
+  text: {
+    label: "• Solid arrows: Normal transitions\n• Dashed arrows: Cleanup transitions\n• Green: Active/running states\n• Yellow: Idle states\n• Gray: No controller state"
+    shape: text
+    style.font-size: 11
+  }
+}
+
+# Notes
+notes: {
+  label: "Implementation Notes"
+  shape: rectangle
+  style.fill: "#e3f2fd"
+  style.stroke: "#1976d2"
+  near: bottom-left
+
+  text: {
+    label: "Python: Uses app.poll flag and app._action_running\nGo: Uses ctrl.polling and ctrl.actionRunning\nBoth: Safe cleanup when replacing controllers"
+    shape: text
+    style.font-size: 11
+  }
+}
