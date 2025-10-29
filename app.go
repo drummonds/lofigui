@@ -92,22 +92,12 @@ func (app *App) SetController(ctrl *Controller) {
 		return
 	}
 
-	// If there's an existing controller, try to clean it up
-	if app.controller != nil {
-		// Safely check if action is running and try to end it
-		// We wrap this in a defer/recover to handle any panics during cleanup
-		func() {
-			defer func() {
-				// Silently ignore any panics during cleanup
-				// We're replacing the controller anyway
-				_ = recover()
-			}()
-
-			// Try to stop running action (app-level state)
-			if app.IsActionRunning() {
-				app.EndAction()
-			}
-		}()
+	// If there's an existing controller and action is running, stop it
+	// We already have the lock, so directly access and modify the state
+	// (no need to call methods that would try to acquire locks)
+	if app.controller != nil && app.actionRunning {
+		app.actionRunning = false
+		app.polling = false
 	}
 
 	// Set the new controller
@@ -192,7 +182,9 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 	go modelFunc(app)
 
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL)
+	if _, err := fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+	}
 }
 
 // HandleDisplay is a helper that delegates to the controller's HandleDisplay.
