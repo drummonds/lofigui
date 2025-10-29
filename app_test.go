@@ -64,7 +64,7 @@ func TestAppControllerReplacementStopsRunningAction(t *testing.T) {
 	app.SetController(ctrl1)
 	app.StartAction()
 
-	if !ctrl1.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to be running")
 	}
 
@@ -78,8 +78,8 @@ func TestAppControllerReplacementStopsRunningAction(t *testing.T) {
 
 	app.SetController(ctrl2)
 
-	// First controller should have action stopped
-	if ctrl1.IsActionRunning() {
+	// Action should be stopped (app-level state)
+	if app.IsActionRunning() {
 		t.Error("Expected action to be stopped after controller replacement")
 	}
 
@@ -167,15 +167,15 @@ func TestAppControllerToNoneStopsAction(t *testing.T) {
 	app.SetController(ctrl)
 	app.StartAction()
 
-	if !ctrl.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to be running")
 	}
 
 	// Clear controller
 	app.SetController(nil)
 
-	// Action should be stopped
-	if ctrl.IsActionRunning() {
+	// Action should be stopped (app-level state)
+	if app.IsActionRunning() {
 		t.Error("Expected action to be stopped after clearing controller")
 	}
 }
@@ -219,17 +219,23 @@ func TestAppThreadSafety(t *testing.T) {
 func TestAppMethodsWithNoController(t *testing.T) {
 	app := NewApp()
 
-	// These should not panic
+	// These should not panic even with no controller
 	app.StartAction()
+
+	// Action state is managed at app level, so it should work without controller
+	if !app.IsActionRunning() {
+		t.Error("Expected IsActionRunning to return true after StartAction")
+	}
+
 	app.EndAction()
 
 	if app.IsActionRunning() {
-		t.Error("Expected IsActionRunning to return false when no controller")
+		t.Error("Expected IsActionRunning to return false after EndAction")
 	}
 }
 
-// TestAppStartActionDelegates tests that StartAction delegates to controller
-func TestAppStartActionDelegates(t *testing.T) {
+// TestAppStartActionManagesState tests that StartAction manages app-level state
+func TestAppStartActionManagesState(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
@@ -241,19 +247,19 @@ func TestAppStartActionDelegates(t *testing.T) {
 
 	app.SetController(ctrl)
 
-	if ctrl.IsActionRunning() {
+	if app.IsActionRunning() {
 		t.Error("Expected action not to be running initially")
 	}
 
 	app.StartAction()
 
-	if !ctrl.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to be running after StartAction")
 	}
 }
 
-// TestAppEndActionDelegates tests that EndAction delegates to controller
-func TestAppEndActionDelegates(t *testing.T) {
+// TestAppEndActionManagesState tests that EndAction manages app-level state
+func TestAppEndActionManagesState(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
@@ -264,15 +270,15 @@ func TestAppEndActionDelegates(t *testing.T) {
 	}
 
 	app.SetController(ctrl)
-	ctrl.StartAction()
+	app.StartAction()
 
-	if !ctrl.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to be running")
 	}
 
 	app.EndAction()
 
-	if ctrl.IsActionRunning() {
+	if app.IsActionRunning() {
 		t.Error("Expected action to be stopped after EndAction")
 	}
 }
@@ -295,10 +301,10 @@ func TestAppSetControllerIsIdempotent(t *testing.T) {
 		t.Error("Expected controller to be set")
 	}
 
-	// Start an action
-	ctrl.StartAction()
+	// Start an action (app-level)
+	app.StartAction()
 
-	if !ctrl.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to be running")
 	}
 
@@ -306,7 +312,7 @@ func TestAppSetControllerIsIdempotent(t *testing.T) {
 	app.SetController(ctrl)
 
 	// Action should still be running
-	if !ctrl.IsActionRunning() {
+	if !app.IsActionRunning() {
 		t.Error("Expected action to still be running after setting same controller (idempotent)")
 	}
 
