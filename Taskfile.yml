@@ -56,6 +56,12 @@ tasks:
     cmds:
       - .venv/bin/black lofigui tests
 
+  check-licenses:
+    desc: Check Go dependencies for license compliance
+    cmds:
+      - go install github.com/google/go-licenses@latest
+      - go-licenses check ./... --allowed_licenses MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0
+
   build:
     desc: Build package distribution
     cmds:
