@@ -109,6 +109,57 @@ class TestPythonExamples:
             if "graph" in sys.modules:
                 del sys.modules["graph"]
 
+    def test_example_06_notes_imports(self):
+        """Test that example 06 (notes CRUD) can be imported."""
+        example_path = Path(__file__).parent.parent / "examples" / "06_notes_crud" / "python"
+        sys.path.insert(0, str(example_path))
+
+        try:
+            import notes
+
+            # Verify the app exists
+            assert hasattr(notes, "app")
+            assert notes.app is not None
+
+            # Verify controller exists
+            assert hasattr(notes, "controller")
+            assert notes.controller is not None
+
+            # Verify notes database exists
+            assert hasattr(notes, "notes_db")
+            assert isinstance(notes.notes_db, dict)
+
+        finally:
+            sys.path.remove(str(example_path))
+            if "notes" in sys.modules:
+                del sys.modules["notes"]
+
+    def test_example_06_crud_operations(self):
+        """Test that example 06 CRUD operations work correctly."""
+        example_path = Path(__file__).parent.parent / "examples" / "06_notes_crud" / "python"
+        sys.path.insert(0, str(example_path))
+
+        try:
+            import notes
+            import lofigui
+
+            # Test Create
+            lofigui.reset()
+            initial_count = len(notes.notes_db)
+            notes.create_note("Test note")
+            assert len(notes.notes_db) == initial_count + 1
+
+            # Test list_notes function runs
+            lofigui.reset()
+            notes.list_notes()
+            output = lofigui.buffer()
+            assert "Notes Database" in output
+
+        finally:
+            sys.path.remove(str(example_path))
+            if "notes" in sys.modules:
+                del sys.modules["notes"]
+
 
 class TestPythonExamplesWithFastAPI:
     """Test Python examples with FastAPI test client."""
@@ -191,3 +242,42 @@ class TestPythonExamplesWithFastAPI:
             sys.path.remove(str(example_path))
             if "graph" in sys.modules:
                 del sys.modules["graph"]
+
+    @pytest.mark.asyncio
+    async def test_example_06_fastapi_endpoint(self):
+        """Test example 06 FastAPI endpoints return valid responses."""
+        pytest.importorskip("fastapi")
+
+        example_path = Path(__file__).parent.parent / "examples" / "06_notes_crud" / "python"
+        original_dir = os.getcwd()
+        sys.path.insert(0, str(example_path))
+
+        try:
+            # Change to example directory so template paths work
+            os.chdir(example_path)
+
+            from fastapi.testclient import TestClient
+            import notes
+
+            client = TestClient(notes.app)
+
+            # Test root endpoint
+            response = client.get("/")
+            assert response.status_code == 200
+            assert "text/html" in response.headers["content-type"]
+            assert "Notes CRUD Example" in response.text
+
+            # Test create endpoint
+            response = client.post("/create", data={"note_text": "Test note from API"})
+            assert response.status_code in [200, 303]  # Redirect
+
+            # Test favicon endpoint
+            response = client.get("/favicon.ico")
+            assert response.status_code == 200
+            assert response.headers["content-type"] == "image/x-icon"
+
+        finally:
+            os.chdir(original_dir)
+            sys.path.remove(str(example_path))
+            if "notes" in sys.modules:
+                del sys.modules["notes"]

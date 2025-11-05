@@ -146,7 +146,7 @@ class App(FastAPI):
         return "Lofigui no controller"
 
 
-def create_app(template_dir: str = "templates", **fastapi_kwargs: Any) -> App:
+def create_app(template_dir: str = "templates", add_favicon=True, **fastapi_kwargs: Any) -> App:
     """
         Create a lofigui application with defaults.  This is a wrapper for FastAPI.
     **kwar
@@ -157,10 +157,11 @@ def create_app(template_dir: str = "templates", **fastapi_kwargs: Any) -> App:
     """
     app = App(template_dir, **fastapi_kwargs)
 
-    # Add favicon route automatically
-    @app.get("/favicon.ico")
-    async def favicon() -> Any:
-        """Serve the lofigui favicon"""
-        return get_favicon_response()
+    if add_favicon:
+        # Add favicon route automatically
+        @app.get("/favicon.ico")
+        async def favicon() -> Any:
+            """Serve the lofigui favicon"""
+            return get_favicon_response()
 
     return app
