@@ -31,6 +31,11 @@ func TestGoExampleBuilds(t *testing.T) {
 			path: "examples/03_hello_world_wasm/go",
 			env:  []string{"GOOS=js", "GOARCH=wasm"},
 		},
+		{
+			name: "06_notes_crud",
+			path: "examples/06_notes_crud/go",
+			env:  nil,
+		},
 	}
 
 	for _, ex := range examples {
@@ -146,6 +151,11 @@ func TestGoExampleModules(t *testing.T) {
 			name:       "03_hello_world_wasm",
 			path:       "examples/03_hello_world_wasm/go",
 			moduleName: "github.com/drummonds/lofigui/examples/03_hello_world_wasm",
+		},
+		{
+			name:       "06_notes_crud",
+			path:       "examples/06_notes_crud/go",
+			moduleName: "github.com/drummonds/lofigui/examples/06_notes_crud",
 		},
 	}
 
@@ -321,6 +331,18 @@ func TestGoExampleStructure(t *testing.T) {
 				"go/build.sh",
 				"templates/index.html",
 				"templates/app.js",
+				"README.md",
+			},
+		},
+		{
+			name: "06_notes_crud",
+			path: "examples/06_notes_crud",
+			requiredFiles: []string{
+				"go/main.go",
+				"go/go.mod",
+				"templates/notes.html",
+				"python/notes.py",
+				"python/pyproject.toml",
 				"README.md",
 			},
 		},

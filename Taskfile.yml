@@ -86,10 +86,18 @@ tasks:
       - uv sync --no-install-project
       - uv run --no-project python demo_app.py
 
+  example-06:
+    desc: Run Python example 06 (Notes CRUD)
+    aliases: [py06]
+    dir: examples/06_notes_crud/python
+    cmds:
+      - uv sync --no-install-project
+      - uv run --no-project python notes.py
+
   # Go example tasks
   tidy:
     desc: Run go tidy and update for all
-    deps: [t_main,t_01,t_02,t_03,t_04]
+    deps: [t_main,t_01,t_02,t_03,t_04,t_06]
 
   t_main:
     desc: Run go tidy and update main
@@ -121,6 +129,13 @@ tasks:
   t_04:
     desc: Run go tidy an update
     dir: examples/04_tinygo_wasm/go
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+
+  t_06:
+    desc: Run go tidy an update
+    dir: examples/06_notes_crud/go
     cmds:
       - go mod tidy
       - go get -u ./...
@@ -176,3 +191,11 @@ tasks:
     cmds:
       - chmod +x build.sh
       - ./build.sh
+
+  go-example-06:
+    desc: Run Go example 06 (Notes CRUD)
+    aliases: [go06]
+    dir: examples/06_notes_crud/go
+    cmds:
+      - go mod tidy
+      - go run main.go
