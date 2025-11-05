@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes CRUD - Lofigui Example</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            padding: 2rem;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .box {
+            margin-bottom: 1rem;
+        }
+        table {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Notes CRUD Example</h1>
+        <p class="subtitle">Simple database operations with lofigui</p>
+
+        <hr>
+
+        <!-- Content from lofigui buffer -->
+        <div class="content">
+            {{ content|safe }}
+        </div>
+
+        <hr>
+
+        <footer class="content has-text-centered">
+            <p>
+                <small>
+                    Example demonstrating CRUD operations with lofigui.
+                    <a href="/">Refresh</a>
+                </small>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
