@@ -1,0 +1,15 @@
+[project]
+name = "notes-crud-example"
+version = "0.1.0"
+description = "CRUD operations example for lofigui"
+requires-python = ">=3.9"
+dependencies = [
+    "lofigui",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
