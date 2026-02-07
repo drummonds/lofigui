@@ -30,6 +30,7 @@ class Controller:
             refresh_time: Seconds between auto-refresh when action is running (default: 1)
         """
         self.name = "Demo Controller"
+        self.model = None  # Placeholder for link to model
 
     # actions will be called by app and are to do any specific commands
 

@@ -67,6 +67,68 @@ func TestNewController(t *testing.T) {
 			t.Fatal("Expected error for empty TemplatePath")
 		}
 	})
+
+	t.Run("TemplateString", func(t *testing.T) {
+		ctrl, err := NewController(ControllerConfig{
+			TemplateString: `<html><body>{{results|safe}}</body></html>`,
+		})
+		if err != nil {
+			t.Fatalf("NewController with TemplateString failed: %v", err)
+		}
+		if ctrl == nil {
+			t.Fatal("Expected non-nil controller")
+		}
+		if ctrl.Name != "Lofigui Controller" {
+			t.Errorf("Expected default name, got %s", ctrl.Name)
+		}
+	})
+
+	t.Run("TemplateStringWithName", func(t *testing.T) {
+		ctrl, err := NewController(ControllerConfig{
+			TemplateString: `<html><body>{{results|safe}}</body></html>`,
+			Name:           "Embedded Controller",
+		})
+		if err != nil {
+			t.Fatalf("NewController with TemplateString failed: %v", err)
+		}
+		if ctrl.Name != "Embedded Controller" {
+			t.Errorf("Expected Name='Embedded Controller', got %s", ctrl.Name)
+		}
+	})
+
+	t.Run("TemplateStringPrecedence", func(t *testing.T) {
+		// TemplateString should take precedence over TemplatePath
+		ctrl, err := NewController(ControllerConfig{
+			TemplateString: `<html><body>from string</body></html>`,
+			TemplatePath:   "/nonexistent/template.html",
+		})
+		if err != nil {
+			t.Fatalf("Expected TemplateString to take precedence: %v", err)
+		}
+		if ctrl == nil {
+			t.Fatal("Expected non-nil controller")
+		}
+	})
+
+	t.Run("InvalidTemplateString", func(t *testing.T) {
+		_, err := NewController(ControllerConfig{
+			TemplateString: `{% invalid tag %}`,
+		})
+		if err == nil {
+			t.Fatal("Expected error for invalid template string")
+		}
+	})
+}
+
+// TestNewControllerFromString tests the string convenience constructor
+func TestNewControllerFromString(t *testing.T) {
+	ctrl, err := NewControllerFromString(`<html><body>{{results|safe}}</body></html>`)
+	if err != nil {
+		t.Fatalf("NewControllerFromString failed: %v", err)
+	}
+	if ctrl == nil {
+		t.Fatal("Expected non-nil controller")
+	}
 }
 
 // TestNewControllerFromDir tests the convenience constructor
@@ -130,6 +192,31 @@ func TestStateDict(t *testing.T) {
 // NOTE: TestHandleRoot has been removed.
 // HandleRoot has moved to the App level.
 // See app_test.go or examples for tests of app.HandleRoot().
+
+// TestHandleDisplayFromString tests display rendering with a string-based template
+func TestHandleDisplayFromString(t *testing.T) {
+	ctrl, err := NewControllerFromString(`<html><body>{{results|safe}}</body></html>`)
+	if err != nil {
+		t.Fatalf("NewControllerFromString failed: %v", err)
+	}
+
+	Reset()
+	Print("Embedded template output")
+
+	req := httptest.NewRequest("GET", "/display", nil)
+	w := httptest.NewRecorder()
+
+	ctrl.HandleDisplay(w, req, nil)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	body := w.Body.String()
+	if !strings.Contains(body, "Embedded template output") {
+		t.Error("Expected body to contain test output from string template")
+	}
+}
 
 // TestHandleDisplay tests the display handler helper
 func TestHandleDisplay(t *testing.T) {

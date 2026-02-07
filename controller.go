@@ -42,12 +42,18 @@ type ControllerConfig struct {
 	// Default: "Lofigui Controller"
 	Name string
 
-	// TemplatePath is the path to the template file (required).
+	// TemplatePath is the path to the template file.
 	// Can be absolute or relative. Examples:
 	//   - "../templates/hello.html"
 	//   - "/opt/myapp/templates/custom.html"
 	//   - "templates/page.html"
+	// Either TemplatePath or TemplateString must be provided.
 	TemplatePath string
+
+	// TemplateString is the template content as a string.
+	// Use this for embedded templates (e.g. via Go's embed package).
+	// Either TemplatePath or TemplateString must be provided.
+	TemplateString string
 
 	// Context is an optional custom Context for buffer management.
 	// If nil, uses the default global context.
@@ -56,26 +62,41 @@ type ControllerConfig struct {
 
 // NewController creates a new Controller with the given configuration.
 //
-// Returns an error if the template file cannot be loaded.
+// Either TemplatePath or TemplateString must be provided. If both are set,
+// TemplateString takes precedence.
+//
+// Returns an error if the template cannot be loaded or parsed.
 //
 // Example:
 //
+//	// From file:
 //	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 //	    TemplatePath: "../templates/hello.html",
-//	    RefreshTime:  1,
 //	})
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
+//
+//	// From embedded string:
+//	//go:embed templates/hello.html
+//	var helloTemplate string
+//	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
+//	    TemplateString: helloTemplate,
+//	})
 func NewController(config ControllerConfig) (*Controller, error) {
-	if config.TemplatePath == "" {
-		return nil, fmt.Errorf("TemplatePath is required")
-	}
+	var tmpl *pongo2.Template
+	var err error
 
-	// Load template
-	tmpl, err := pongo2.FromFile(config.TemplatePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load template from %s: %w", config.TemplatePath, err)
+	switch {
+	case config.TemplateString != "":
+		tmpl, err = pongo2.FromString(config.TemplateString)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse template string: %w", err)
+		}
+	case config.TemplatePath != "":
+		tmpl, err = pongo2.FromFile(config.TemplatePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load template from %s: %w", config.TemplatePath, err)
+		}
+	default:
+		return nil, fmt.Errorf("either TemplatePath or TemplateString is required")
 	}
 
 	// Set defaults
@@ -104,6 +125,21 @@ func NewControllerFromDir(templateDir, templateName string) (*Controller, error)
 	templatePath := filepath.Join(templateDir, templateName)
 	return NewController(ControllerConfig{
 		TemplatePath: templatePath,
+	})
+}
+
+// NewControllerFromString creates a new Controller from a template string.
+//
+// This is a convenience function for embedded templates.
+//
+// Example:
+//
+//	//go:embed templates/hello.html
+//	var helloTemplate string
+//	ctrl, err := lofigui.NewControllerFromString(helloTemplate)
+func NewControllerFromString(templateString string) (*Controller, error) {
+	return NewController(ControllerConfig{
+		TemplateString: templateString,
 	})
 }
 
