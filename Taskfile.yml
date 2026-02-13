@@ -100,108 +100,95 @@ tasks:
       - uv sync --no-install-project
       - uv run --no-project python notes.py
 
-  # Go example tasks
+  # Go example tasks (wildcard)
+  go-example:*:
+    desc: 'Run Go example (use go-wasm:NN for WASM examples)'
+    vars:
+      NUM: '{{index .MATCH 0}}'
+      EXAMPLE_DIR:
+        sh: ls -d examples/{{index .MATCH 0}}_*/go 2>/dev/null || echo ""
+    preconditions:
+      - sh: '[ -n "{{.EXAMPLE_DIR}}" ]'
+        msg: 'No Go example found for number {{.NUM}}'
+      - sh: '[ ! -f "build.sh" ]'
+        msg: 'Example {{.NUM}} is a WASM example — use task go-wasm:{{.NUM}} instead'
+    dir: '{{.EXAMPLE_DIR}}'
+    cmds:
+      - go mod tidy
+      - go run main.go
+
+  go-wasm:*:
+    desc: 'Build and serve Go WASM example'
+    vars:
+      NUM: '{{index .MATCH 0}}'
+      EXAMPLE_DIR:
+        sh: ls -d examples/{{index .MATCH 0}}_*/go 2>/dev/null || echo ""
+    preconditions:
+      - sh: '[ -n "{{.EXAMPLE_DIR}}" ]'
+        msg: 'No Go example found for number {{.NUM}}'
+      - sh: '[ -f "build.sh" ]'
+        msg: 'Example {{.NUM}} is not a WASM example — use task go-example:{{.NUM}} instead'
+    dir: '{{.EXAMPLE_DIR}}'
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+      - echo ""
+      - echo "Build complete! Starting server..."
+      - cd .. && {{.PYTHON}} serve.py
+
+  build-wasm:*:
+    desc: 'Build WASM binary only (no serve)'
+    vars:
+      NUM: '{{index .MATCH 0}}'
+      EXAMPLE_DIR:
+        sh: ls -d examples/{{index .MATCH 0}}_*/go 2>/dev/null || echo ""
+    preconditions:
+      - sh: '[ -n "{{.EXAMPLE_DIR}}" ]'
+        msg: 'No Go example found for number {{.NUM}}'
+      - sh: '[ -f "build.sh" ]'
+        msg: 'Example {{.NUM}} is not a WASM example'
+    dir: '{{.EXAMPLE_DIR}}'
+    cmds:
+      - chmod +x build.sh
+      - ./build.sh
+
+  # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [t_main,t_01,t_02,t_03,t_04,t_06]
+    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06]
 
-  t_main:
+  tidy:main:
     desc: Run go tidy and update main
     cmds:
       - go mod tidy
       - go get -u ./...
 
-  t_01:
-    desc: Run go tidy an update
-    dir: examples/01_hello_world/go
+  tidy:*:
+    desc: 'Run go tidy and update for example'
+    vars:
+      NUM: '{{index .MATCH 0}}'
+      EXAMPLE_DIR:
+        sh: ls -d examples/{{index .MATCH 0}}_*/go 2>/dev/null || echo ""
+    preconditions:
+      - sh: '[ -n "{{.EXAMPLE_DIR}}" ]'
+        msg: 'No Go example found for number {{.NUM}}'
+    dir: '{{.EXAMPLE_DIR}}'
     cmds:
       - go mod tidy
       - go get -u ./...
 
-  t_02:
-    desc: Run go tidy an update
-    dir: examples/02_svg_graph/go
+  # Release task (pattern from github.com/drummonds/godocs)
+  release:*:*:
+    desc: 'Release process eg task release:v0.14.0:"new feature"'
+    vars:
+      TAG: '{{index .MATCH 0}}'
+      BUILD: '{{index .MATCH 1}}'
     cmds:
-      - go mod tidy
-      - go get -u ./...
-
-  t_03:
-    desc: Run go tidy an update
-    dir: examples/03_hello_world_wasm/go
-    cmds:
-      - go mod tidy
-      - go get -u ./...
-
-  t_04:
-    desc: Run go tidy an update
-    dir: examples/04_tinygo_wasm/go
-    cmds:
-      - go mod tidy
-      - go get -u ./...
-
-  t_06:
-    desc: Run go tidy an update
-    dir: examples/06_notes_crud/go
-    cmds:
-      - go mod tidy
-      - go get -u ./...
-
-  go-example-01:
-    desc: Run Go example 01 (Hello World with net/http)
-    aliases: [go01]
-    dir: examples/01_hello_world/go
-    cmds:
-      - go mod tidy
-      - go run main.go
-
-  go-example-02:
-    desc: Run Go example 02 (SVG Graph)
-    aliases: [go02]
-    dir: examples/02_svg_graph/go
-    cmds:
-      - go mod download
-      - go run main.go
-
-  go-example-03:
-    desc: Build and serve Go WASM example
-    aliases: [go03, go-wasm]
-    dir: examples/03_hello_world_wasm/go
-    cmds:
-      - chmod +x build.sh
-      - ./build.sh
-      - echo ""
-      - echo "Build complete! Starting server..."
-      - cd .. && "{{.PYTHON}} serve.py"
-
-  build-go-wasm:
-    desc: Build Go WASM binary only (no serve)
-    dir: examples/03_hello_world_wasm/go
-    cmds:
-      - chmod +x build.sh
-      - ./build.sh
-
-  go-example-04:
-    desc: Build and serve TinyGo WASM example
-    aliases: [go04, tinygo-wasm]
-    dir: examples/04_tinygo_wasm/go
-    cmds:
-      - chmod +x build.sh
-      - ./build.sh
-      - echo ""
-      - echo "Build complete! Starting server..."
-      - cd .. && "{{.PYTHON}} serve.py"
-
-  build-tinygo-wasm:
-    desc: Build TinyGo WASM binary only (no serve)
-    dir: examples/04_tinygo_wasm/go
-    cmds:
-      - chmod +x build.sh
-      - ./build.sh
-
-  go-example-06:
-    desc: Run Go example 06 (Notes CRUD)
-    aliases: [go06]
-    dir: examples/06_notes_crud/go
-    cmds:
-      - go mod tidy
-      - go run main.go
+      - task: test
+      - task: lint
+      - task: build
+      - git add .
+      - git commit -am "{{.BUILD}}"
+      - git tag "{{.TAG}}"
+      - git push origin "{{.TAG}}"
+      - git push

@@ -9,8 +9,22 @@ import (
 	"time"
 )
 
-// TestGoExampleBuilds tests that all Go examples can be built
-func TestGoExampleBuilds(t *testing.T) {
+// TestGoExamples is the single entry point for all Go example tests.
+// Run with: go test -run TestGoExamples -v
+func TestGoExamples(t *testing.T) {
+	t.Run("Builds", testGoExampleBuilds)
+	t.Run("Example01Templates", testGoExample01Templates)
+	t.Run("Example02Templates", testGoExample02Templates)
+	t.Run("Modules", testGoExampleModules)
+	t.Run("HTTPHandlers", testGoExampleHTTPHandlers)
+	t.Run("WASMBuild", testGoExampleWASMBuild)
+	t.Run("CompilationTime", testGoExampleCompilationTime)
+	t.Run("Structure", testGoExampleStructure)
+	t.Run("TaskCommands", testTaskCommands)
+	t.Run("PythonTaskCommands", testPythonTaskCommands)
+}
+
+func testGoExampleBuilds(t *testing.T) {
 	examples := []struct {
 		name string
 		path string
@@ -40,16 +54,13 @@ func TestGoExampleBuilds(t *testing.T) {
 
 	for _, ex := range examples {
 		t.Run(ex.name, func(t *testing.T) {
-			// Change to example directory
 			examplePath := filepath.Join(".", ex.path)
 
-			// Check if directory exists
 			if _, err := os.Stat(examplePath); os.IsNotExist(err) {
 				t.Skipf("Example directory does not exist: %s", examplePath)
 				return
 			}
 
-			// Build the example
 			cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), ex.name), ".")
 			cmd.Dir = examplePath
 			cmd.Env = append(os.Environ(), ex.env...)
@@ -64,17 +75,14 @@ func TestGoExampleBuilds(t *testing.T) {
 	}
 }
 
-// TestGoExample01Templates tests that example 01 can find its templates
-func TestGoExample01Templates(t *testing.T) {
+func testGoExample01Templates(t *testing.T) {
 	examplePath := "examples/01_hello_world/go"
 	templatePath := filepath.Join(examplePath, "../templates/hello.html")
 
-	// Check if template file exists
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
 		t.Fatalf("Template file does not exist: %s", templatePath)
 	}
 
-	// Change to example directory and verify we can parse the template
 	originalDir, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -86,11 +94,9 @@ func TestGoExample01Templates(t *testing.T) {
 		return
 	}
 
-	// Try to parse the template using the path in the code with a 5 second timeout
 	cmd := exec.Command("go", "run", ".", "--help")
 	cmd.Env = append(os.Environ(), "TEST_MODE=1")
 
-	// Create a channel to signal completion
 	done := make(chan error, 1)
 	var output []byte
 
@@ -100,18 +106,13 @@ func TestGoExample01Templates(t *testing.T) {
 		done <- err
 	}()
 
-	// Wait for command to complete or timeout after 5 seconds
 	select {
 	case <-done:
-		// Command completed, check output
 		outputStr := string(output)
-
-		// Should not have template-related errors
 		if strings.Contains(outputStr, "no such file") && strings.Contains(outputStr, "template") {
 			t.Errorf("Template path issue detected: %s", outputStr)
 		}
 	case <-time.After(5 * time.Second):
-		// Timeout - kill the process and skip the test
 		if cmd.Process != nil {
 			cmd.Process.Kill()
 		}
@@ -119,19 +120,16 @@ func TestGoExample01Templates(t *testing.T) {
 	}
 }
 
-// TestGoExample02Templates tests that example 02 can find its templates
-func TestGoExample02Templates(t *testing.T) {
+func testGoExample02Templates(t *testing.T) {
 	examplePath := "examples/02_svg_graph/go"
 	templatePath := filepath.Join(examplePath, "../templates/hello.html")
 
-	// Check if template file exists
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
 		t.Fatalf("Template file does not exist: %s", templatePath)
 	}
 }
 
-// TestGoExampleModules tests that all Go example modules are correctly configured
-func TestGoExampleModules(t *testing.T) {
+func testGoExampleModules(t *testing.T) {
 	examples := []struct {
 		name       string
 		path       string
@@ -163,13 +161,11 @@ func TestGoExampleModules(t *testing.T) {
 		t.Run(ex.name, func(t *testing.T) {
 			modPath := filepath.Join(ex.path, "go.mod")
 
-			// Check if go.mod exists
 			if _, err := os.Stat(modPath); os.IsNotExist(err) {
 				t.Skipf("go.mod does not exist: %s", modPath)
 				return
 			}
 
-			// Read go.mod
 			content, err := os.ReadFile(modPath)
 			if err != nil {
 				t.Fatalf("Failed to read go.mod: %v", err)
@@ -177,17 +173,14 @@ func TestGoExampleModules(t *testing.T) {
 
 			modContent := string(content)
 
-			// Check module name
 			if !strings.Contains(modContent, ex.moduleName) {
 				t.Errorf("go.mod does not contain expected module name %s", ex.moduleName)
 			}
 
-			// Check that it requires lofigui
 			if !strings.Contains(modContent, "github.com/drummonds/lofigui") {
 				t.Errorf("go.mod does not require lofigui package")
 			}
 
-			// Check for replace directive pointing to root
 			if !strings.Contains(modContent, "replace github.com/drummonds/lofigui => ../../..") {
 				t.Errorf("go.mod does not have correct replace directive")
 			}
@@ -195,13 +188,7 @@ func TestGoExampleModules(t *testing.T) {
 	}
 }
 
-// TestGoExampleHTTPEndpoints tests HTTP endpoints if examples are running
-// This is a more integration-style test
-func TestGoExampleHTTPHandlers(t *testing.T) {
-	// We can't easily test the full examples without running them,
-	// but we can verify they use the lofigui package correctly
-	// by checking the imports compile
-
+func testGoExampleHTTPHandlers(t *testing.T) {
 	examples := []string{
 		"examples/01_hello_world/go",
 		"examples/02_svg_graph/go",
@@ -214,7 +201,6 @@ func TestGoExampleHTTPHandlers(t *testing.T) {
 				return
 			}
 
-			// Verify go.mod dependencies are satisfied
 			cmd := exec.Command("go", "list", "-m", "all")
 			cmd.Dir = exPath
 			output, err := cmd.CombinedOutput()
@@ -222,7 +208,6 @@ func TestGoExampleHTTPHandlers(t *testing.T) {
 				t.Fatalf("Failed to list modules: %v\nOutput: %s", err, output)
 			}
 
-			// Should include lofigui
 			if !strings.Contains(string(output), "github.com/drummonds/lofigui") {
 				t.Error("Example does not properly import lofigui")
 			}
@@ -230,8 +215,7 @@ func TestGoExampleHTTPHandlers(t *testing.T) {
 	}
 }
 
-// TestGoExampleWASMBuild specifically tests WASM example build
-func TestGoExampleWASMBuild(t *testing.T) {
+func testGoExampleWASMBuild(t *testing.T) {
 	examplePath := "examples/03_hello_world_wasm/go"
 
 	if _, err := os.Stat(examplePath); os.IsNotExist(err) {
@@ -239,7 +223,6 @@ func TestGoExampleWASMBuild(t *testing.T) {
 		return
 	}
 
-	// Test building for WASM
 	cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), "test.wasm"), ".")
 	cmd.Dir = examplePath
 	cmd.Env = append(os.Environ(), "GOOS=js", "GOARCH=wasm")
@@ -249,18 +232,15 @@ func TestGoExampleWASMBuild(t *testing.T) {
 		t.Fatalf("Failed to build WASM example: %v\nOutput: %s", err, output)
 	}
 
-	// Verify the wasm file was created
 	wasmPath := filepath.Join(os.TempDir(), "test.wasm")
 	if _, err := os.Stat(wasmPath); os.IsNotExist(err) {
 		t.Error("WASM file was not created")
 	} else {
-		// Clean up
 		os.Remove(wasmPath)
 	}
 }
 
-// TestGoExampleCompilationTime tests that examples compile in reasonable time
-func TestGoExampleCompilationTime(t *testing.T) {
+func testGoExampleCompilationTime(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping compilation time test in short mode")
 	}
@@ -283,7 +263,6 @@ func TestGoExampleCompilationTime(t *testing.T) {
 
 	duration := time.Since(start)
 
-	// Should compile in under 10 seconds on most systems
 	if duration > 10*time.Second {
 		t.Logf("Warning: Compilation took %v (longer than expected)", duration)
 	}
@@ -291,8 +270,7 @@ func TestGoExampleCompilationTime(t *testing.T) {
 	t.Logf("Example compiled in %v", duration)
 }
 
-// Mock test to verify example structure
-func TestGoExampleStructure(t *testing.T) {
+func testGoExampleStructure(t *testing.T) {
 	examples := []struct {
 		name          string
 		path          string
@@ -360,87 +338,58 @@ func TestGoExampleStructure(t *testing.T) {
 	}
 }
 
-// TestTaskCommands tests that task commands work correctly
-func TestTaskCommands(t *testing.T) {
-	// Check if task is available
+func testTaskCommands(t *testing.T) {
 	if _, err := exec.LookPath("task"); err != nil {
 		t.Skip("task command not available")
 		return
 	}
 
 	tests := []struct {
-		name        string
-		taskName    string
-		expectStart bool // Whether we expect the server to start
+		name     string
+		taskName string
 	}{
 		{
-			name:        "go01",
-			taskName:    "go01",
-			expectStart: true,
+			name:     "go-example:01",
+			taskName: "go-example:01",
 		},
 		{
-			name:        "go02",
-			taskName:    "go02",
-			expectStart: true,
-		},
-		{
-			name:        "go-example-01",
-			taskName:    "go-example-01",
-			expectStart: true,
-		},
-		{
-			name:        "go-example-02",
-			taskName:    "go-example-02",
-			expectStart: true,
+			name:     "go-example:02",
+			taskName: "go-example:02",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Run task with timeout
 			cmd := exec.Command("task", tt.taskName)
 
-			// Start the command
 			if err := cmd.Start(); err != nil {
 				t.Fatalf("Failed to start task %s: %v", tt.taskName, err)
 			}
 
-			// Give it time to start and potentially fail
 			time.Sleep(2 * time.Second)
 
-			// Kill the process
 			if err := cmd.Process.Kill(); err != nil {
 				t.Logf("Failed to kill process: %v", err)
 			}
 
-			// Wait for it to exit
 			err := cmd.Wait()
 
-			if tt.expectStart {
-				// We expect it to have been killed (exit code 143, 201, or signal killed)
-				// Exit code 201 is from task when the subprocess is killed
-				// Exit code 143 is from SIGTERM
-				// If it exited with error before we killed it, that's a problem
-				if err != nil && !strings.Contains(err.Error(), "signal: killed") &&
-					!strings.Contains(err.Error(), "exit status 143") &&
-					!strings.Contains(err.Error(), "exit status 201") {
-					// Check if it's a different error
-					if exitErr, ok := err.(*exec.ExitError); ok {
-						if exitErr.ExitCode() != 143 && exitErr.ExitCode() != 201 && exitErr.ExitCode() != -1 {
-							t.Errorf("Task %s exited with unexpected error: %v (exit code: %d)",
-								tt.taskName, err, exitErr.ExitCode())
-						}
+			if err != nil && !strings.Contains(err.Error(), "signal: killed") &&
+				!strings.Contains(err.Error(), "exit status 143") &&
+				!strings.Contains(err.Error(), "exit status 201") {
+				if exitErr, ok := err.(*exec.ExitError); ok {
+					if exitErr.ExitCode() != 143 && exitErr.ExitCode() != 201 && exitErr.ExitCode() != -1 {
+						t.Errorf("Task %s exited with unexpected error: %v (exit code: %d)",
+							tt.taskName, err, exitErr.ExitCode())
 					}
 				}
-				t.Logf("Task %s started successfully and was killed", tt.taskName)
 			}
+			t.Logf("Task %s started successfully and was killed", tt.taskName)
 		})
 	}
 }
 
-// TestPythonTaskCommands tests Python task commands
-func TestPythonTaskCommands(t *testing.T) {
-	// Check if task and uv are available
+func testPythonTaskCommands(t *testing.T) {
 	if _, err := exec.LookPath("task"); err != nil {
 		t.Skip("task command not available")
 		return
@@ -466,23 +415,18 @@ func TestPythonTaskCommands(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Run task with timeout
 			cmd := exec.Command("task", tt.taskName)
 
-			// Start the command
 			if err := cmd.Start(); err != nil {
 				t.Fatalf("Failed to start task %s: %v", tt.taskName, err)
 			}
 
-			// Give it time to start
 			time.Sleep(3 * time.Second)
 
-			// Kill the process
 			if err := cmd.Process.Kill(); err != nil {
 				t.Logf("Failed to kill process: %v", err)
 			}
 
-			// Wait for it to exit
 			cmd.Wait()
 
 			t.Logf("Task %s started successfully and was killed", tt.taskName)
