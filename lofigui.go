@@ -13,8 +13,8 @@ import (
 
 // Context manages the output buffer for HTML generation
 type Context struct {
-	buffer      strings.Builder
-	mu          sync.Mutex
+	buffer        strings.Builder
+	mu            sync.Mutex
 	maxBufferSize int
 }
 

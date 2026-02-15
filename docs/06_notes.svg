@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <clipPath id="clip2">
+      <rect x="64" y="153" width="881" height="2" />
+    </clipPath>
+    <clipPath id="clip3">
+      <rect x="64" y="439" width="881" height="365" />
+    </clipPath>
+    <clipPath id="clip4">
+      <rect x="64" y="818" width="881" height="1184" />
+    </clipPath>
+    <clipPath id="clip5">
+      <rect x="64" y="2026" width="881" height="2" />
+    </clipPath>
+    <filter id="shadow1" x="-0.6" y="-0.6" width="2.2" height="2.2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="rgb(0,0,0)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <rect x="0" y="0" width="1009" height="2140" fill="rgb(245,245,245)"/>
+  <rect x="32" y="32" width="945" height="2076" rx="8" fill="rgb(0,0,0)" filter="url(#shadow1)"/>
+  <rect x="32" y="32" width="945" height="2076" rx="8" fill="rgb(255,255,255)"/>
+  <text x="64" y="92.8" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="600">Notes CRUD Example</text>
+  <text x="64" y="123.4" fill="rgb(74,74,74)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">Simple database operations with lofigui</text>
+  <g clip-path="url(#clip2)">
+    <rect x="64" y="153" width="881" height="2" fill="rgb(245,245,245)"/>
+  </g>
+  <text x="64" y="196.4" fill="rgb(74,74,74)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">&lt;h2&gt;Notes Database&lt;/h2&gt;</text>
+  <rect x="64" y="219" width="881" height="164" fill="rgb(255,255,255)"/>
+  <rect x="64" y="219" width="85.2" height="41" fill="none"/>
+  <line x1="64" y1="260" x2="149.2" y2="260" stroke="rgb(219,219,219)" stroke-width="2"/>
+  <text x="76" y="244.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">ID</text>
+  <rect x="149.2" y="219" width="795.8" height="41" fill="none"/>
+  <line x1="149.2" y1="260" x2="945" y2="260" stroke="rgb(219,219,219)" stroke-width="2"/>
+  <text x="161.2" y="244.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Note</text>
+  <rect x="64" y="260" width="85.2" height="41.5" fill="none"/>
+  <line x1="64" y1="301.5" x2="149.2" y2="301.5" stroke="rgb(219,219,219)" stroke-width="1"/>
+  <text x="76" y="286.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">1</text>
+  <rect x="149.2" y="260" width="795.8" height="41.5" fill="none"/>
+  <line x1="149.2" y1="301.5" x2="945" y2="301.5" stroke="rgb(219,219,219)" stroke-width="1"/>
+  <text x="161.2" y="286.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">First note - Welcome to the notes CRUD example!</text>
+  <rect x="64" y="301.5" width="881" height="41" fill="rgb(250,250,250)"/>
+  <rect x="64" y="301.5" width="85.2" height="41" fill="none"/>
+  <line x1="64" y1="342.5" x2="149.2" y2="342.5" stroke="rgb(219,219,219)" stroke-width="1"/>
+  <text x="76" y="327.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">2</text>
+  <rect x="149.2" y="301.5" width="795.8" height="41" fill="none"/>
+  <line x1="149.2" y1="342.5" x2="945" y2="342.5" stroke="rgb(219,219,219)" stroke-width="1"/>
+  <text x="161.2" y="327.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Second note - Add, edit, and delete notes.</text>
+  <text x="76" y="368.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">3</text>
+  <text x="161.2" y="368.4" fill="rgb(54,54,54)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Third note - All data is stored in memory.</text>
+  <text x="64" y="416.4" fill="rgb(74,74,74)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">&lt;p&gt;Total notes: 3&lt;/p&gt;</text>
+  <g clip-path="url(#clip3)">
+    <rect x="64" y="439" width="881" height="365" fill="rgb(245,245,245)"/>
+    <text x="85" y="471.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;box&quot;&gt;</text>
+    <text x="85" y="492.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;h3 class=&quot;title is-4&quot;&gt;Create New Note&lt;/h3&gt;</text>
+    <text x="85" y="513.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;form action=&quot;/create&quot; method=&quot;post&quot;&gt;</text>
+    <text x="85" y="534.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field&quot;&gt;</text>
+    <text x="85" y="555.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="576.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;input class=&quot;input&quot; type=&quot;text&quot; name=&quot;note_text&quot; placeholder=&quot;Enter note text&quot; required&gt;</text>
+    <text x="85" y="597.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="618.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="639.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field&quot;&gt;</text>
+    <text x="85" y="660.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="681.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;button class=&quot;button is-primary&quot; type=&quot;submit&quot;&gt;Create Note&lt;/button&gt;</text>
+    <text x="85" y="702.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="723.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="744.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/form&gt;</text>
+    <text x="85" y="765.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+  </g>
+  <g clip-path="url(#clip4)">
+    <rect x="64" y="818" width="881" height="1184" fill="rgb(245,245,245)"/>
+    <text x="85" y="850.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;columns&quot;&gt;</text>
+    <text x="85" y="871.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;column&quot;&gt;</text>
+    <text x="85" y="892.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;box&quot;&gt;</text>
+    <text x="85" y="913.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;h3 class=&quot;title is-4&quot;&gt;Read Note&lt;/h3&gt;</text>
+    <text x="85" y="934.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;form action=&quot;/read&quot; method=&quot;post&quot;&gt;</text>
+    <text x="85" y="955.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field has-addons&quot;&gt;</text>
+    <text x="85" y="976.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control is-expanded&quot;&gt;</text>
+    <text x="85" y="997.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;input class=&quot;input&quot; type=&quot;number&quot; name=&quot;note_id&quot; placeholder=&quot;Note ID&quot; required&gt;</text>
+    <text x="85" y="1018.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1039.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="1060.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;button class=&quot;button is-info&quot; type=&quot;submit&quot;&gt;Read&lt;/button&gt;</text>
+    <text x="85" y="1081.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1102.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1123.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/form&gt;</text>
+    <text x="85" y="1144.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1165.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1207.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;column&quot;&gt;</text>
+    <text x="85" y="1228.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;box&quot;&gt;</text>
+    <text x="85" y="1249.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;h3 class=&quot;title is-4&quot;&gt;Update Note&lt;/h3&gt;</text>
+    <text x="85" y="1270.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;form action=&quot;/update&quot; method=&quot;post&quot;&gt;</text>
+    <text x="85" y="1291.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field&quot;&gt;</text>
+    <text x="85" y="1312.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="1333.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;input class=&quot;input&quot; type=&quot;number&quot; name=&quot;note_id&quot; placeholder=&quot;Note ID&quot; required&gt;</text>
+    <text x="85" y="1354.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1375.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1396.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field has-addons&quot;&gt;</text>
+    <text x="85" y="1417.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control is-expanded&quot;&gt;</text>
+    <text x="85" y="1438.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;input class=&quot;input&quot; type=&quot;text&quot; name=&quot;new_text&quot; placeholder=&quot;New text&quot; required&gt;</text>
+    <text x="85" y="1459.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1480.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="1501.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;button class=&quot;button is-warning&quot; type=&quot;submit&quot;&gt;Update&lt;/button&gt;</text>
+    <text x="85" y="1522.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1543.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1564.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/form&gt;</text>
+    <text x="85" y="1585.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1606.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1648.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;column&quot;&gt;</text>
+    <text x="85" y="1669.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;box&quot;&gt;</text>
+    <text x="85" y="1690.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;h3 class=&quot;title is-4&quot;&gt;Delete Note&lt;/h3&gt;</text>
+    <text x="85" y="1711.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;form action=&quot;/delete&quot; method=&quot;post&quot;&gt;</text>
+    <text x="85" y="1732.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;field has-addons&quot;&gt;</text>
+    <text x="85" y="1753.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control is-expanded&quot;&gt;</text>
+    <text x="85" y="1774.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;input class=&quot;input&quot; type=&quot;number&quot; name=&quot;note_id&quot; placeholder=&quot;Note ID&quot; required&gt;</text>
+    <text x="85" y="1795.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1816.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;div class=&quot;control&quot;&gt;</text>
+    <text x="85" y="1837.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;button class=&quot;button is-danger&quot; type=&quot;submit&quot;&gt;Delete&lt;/button&gt;</text>
+    <text x="85" y="1858.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1879.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1900.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/form&gt;</text>
+    <text x="85" y="1921.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1942.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+    <text x="85" y="1963.3" fill="rgb(74,74,74)" font-family="monospace" font-size="14">&lt;/div&gt;</text>
+  </g>
+  <g clip-path="url(#clip5)">
+    <rect x="64" y="2026" width="881" height="2" fill="rgb(245,245,245)"/>
+  </g>
+  <text x="309" y="2069.8" fill="rgb(74,74,74)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="14">Example demonstrating CRUD operations with lofigui.</text>
+  <a xlink:href="http://127.0.0.1:1346/">
+    <text x="651.1" y="2069.8" fill="rgb(72,95,199)" font-family="BlinkMacSystemFont, -apple-system, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="14">Refresh</text>
+  </a>
+</svg>

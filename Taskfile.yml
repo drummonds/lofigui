@@ -56,6 +56,32 @@ tasks:
     cmds:
       - .venv/bin/black lofigui tests
 
+  fmt:
+    desc: Format all code (Go + Python)
+    cmds:
+      - gofmt -w .
+      - task: format
+
+  vet:
+    desc: Run Go vet
+    cmds:
+      - go vet ./...
+
+  check:
+    desc: Run fmt, vet, and test
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: test
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf dist/ *.egg-info __pycache__ .pytest_cache .mypy_cache .coverage htmlcov
+      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+      - rm -f examples/03_hello_world_wasm/go/main.wasm 2>/dev/null || true
+      - rm -f examples/04_tinygo_wasm/go/main.wasm 2>/dev/null || true
+
   check-licenses:
     desc: Check Go dependencies for license compliance
     cmds:
