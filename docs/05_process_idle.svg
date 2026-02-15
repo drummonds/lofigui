@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <clipPath id="clip10">
+      <rect x="68.5" y="1146" width="544" height="407" />
+    </clipPath>
+    <filter id="shadow1" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow2" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow3" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow4" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow5" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow6" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"/>
+      <feOffset dx="0" dy="1.2" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow7" x="-0.6" y="-0.6" width="2.1" height="2.1">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5"/>
+      <feOffset dx="0" dy="2.5" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow8" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow9" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow11" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow12" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <rect x="0" y="0" width="1009" height="56" fill="rgb(0,209,178)"/>
+  <a xlink:href="http://127.0.0.1:8050/">
+    <image x="24.5" y="14" width="32" height="28" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAcCAYAAAAAwr0iAAABQUlEQVR4AeyTsUoDQRRFrxMlGowEZG1U7ATFQrGw1c7eOv/gB6T0C/ILdoLiJwiCtoLaWBkIpMgmJClCAoFkzrIpQordYjfTDOyBM7fIu3mzayRNXUIBO9/d4wuYcrGgJEobRoW1fK7J1K4PlET1PNBRpZhLA3N3tqskbo8rutzf1kmwlTmpXkL+ffUiUO3GbitjUhXY2VzX6V5JV4flzElVIJfLj3/UF/Ab8Btwv4H6R0tznn86avbHEThwjj/ZzHPmmvqnLRDz9B3qLxxF4MB5MJoIcDLAyQAnA5wMcDLAyQAnY/bCFTR6Yz1+tSNw4Pzw1hTgZICTAU4GOBngZICTAU7GZhcKhMOJ3v8HEThwfvntCnAywMkAJwOcDHAywMkAJ1sqQLBq2MCrHeoMCtzbAs6gQMMWcAYF7Hx3jy8wAwAA//+MNBV9AAAABklEQVQDAENXsEjK8sOSAAAAAElFTkSuQmCC"/>
+    <text x="76.5" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Lofigui Demo</text>
+  </a>
+  <a xlink:href="http://127.0.0.1:8050/">
+    <text x="237.3" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Home</text>
+  </a>
+  <a xlink:href="http://127.0.0.1:8050/data">
+    <text x="340.4" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Data Tables</text>
+  </a>
+  <a xlink:href="http://127.0.0.1:8050/charts">
+    <text x="483.9" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Charts</text>
+  </a>
+  <text x="590.4" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Actions</text>
+  <rect x="793.7" y="8" width="100.6" height="40" rx="6" fill="rgb(243,244,246)"/>
+  <text x="829.7" y="33.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Cancel</text>
+  <text x="918.3" y="33.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">More</text>
+  <rect x="26.5" y="106" width="628" height="1487" rx="12" fill="rgb(9,10,12)" filter="url(#shadow1)"/>
+  <rect x="23.5" y="103" width="634" height="1493" rx="12" fill="rgb(9,10,12)" filter="url(#shadow2)"/>
+  <rect x="24.5" y="104" width="632" height="1491" rx="12" fill="rgb(255,255,255)"/>
+  <text x="44.5" y="152.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Run Process</text>
+  <text x="44.5" y="179.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">Execute long-running tasks with live updates</text>
+  <text x="44.5" y="226.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">This page demonstrates lofigui's controller pattern for managing long-running</text>
+  <text x="44.5" y="250.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">processes with automatic page refresh.</text>
+  <rect x="44.5" y="273" width="592" height="232" rx="6" fill="rgb(255,240,204)"/>
+  <text x="92.5" y="312.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">How it works</text>
+  <text x="68.5" y="352.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">When you start a process:</text>
+  <text x="100.5" y="392.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">The controller tracks the process state</text>
+  <text x="100.5" y="420.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">The page automatically refreshes to show progress</text>
+  <text x="100.5" y="448.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">The status panel updates in real-time</text>
+  <text x="100.5" y="476.4" fill="rgb(66,46,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">You can cancel the process at any time</text>
+  <text x="44.5" y="550.6" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="24" font-weight="800">Available Actions</text>
+  <rect x="46.5" y="582" width="588" height="254" rx="12" fill="rgb(9,10,12)" filter="url(#shadow3)"/>
+  <rect x="43.5" y="579" width="594" height="260" rx="12" fill="rgb(9,10,12)" filter="url(#shadow4)"/>
+  <rect x="44.5" y="580" width="592" height="258" rx="12" fill="rgb(255,255,255)"/>
+  <text x="64.5" y="617.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Demo Process</text>
+  <text x="64.5" y="644.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Simulates a long-running process with progress updates</text>
+  <text x="64.5" y="679.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Duration (seconds)</text>
+  <rect x="64.5" y="694" width="552" height="40" rx="6" fill="rgb(255,255,255)" stroke="rgb(214,217,224)" stroke-width="1"/>
+  <text x="64.5" y="750.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">How long the process should run (1-60 seconds)</text>
+  <rect x="64.5" y="768" width="185.7" height="50" rx="10" fill="rgb(51,51,51)" filter="url(#shadow6)"/>
+  <rect x="64.5" y="768" width="185.7" height="50" rx="10" fill="rgb(51,51,51)" filter="url(#shadow7)"/>
+  <rect x="64.5" y="768" width="185.7" height="50" rx="10" fill="rgb(0,209,178)"/>
+  <text x="109.5" y="799.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="500">Start Process</text>
+  <text x="44.5" y="883.6" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="24" font-weight="800">Process Output</text>
+  <rect x="46.5" y="915" width="588" height="143" rx="12" fill="rgb(9,10,12)" filter="url(#shadow8)"/>
+  <rect x="43.5" y="912" width="594" height="149" rx="12" fill="rgb(9,10,12)" filter="url(#shadow9)"/>
+  <rect x="44.5" y="913" width="592" height="147" rx="12" fill="rgb(255,255,255)"/>
+  <text x="64.5" y="954.6" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="24" font-weight="800">Ready to Start</text>
+  <text x="64.5" y="993.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">No process is currently running.</text>
+  <text x="64.5" y="1033.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Fill in the form below and click 'Start Process' to begin.</text>
+  <rect x="44.5" y="1084" width="592" height="491" rx="6" fill="rgb(204,240,255)"/>
+  <text x="92.5" y="1123.4" fill="rgb(0,54,77)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Implementation Example</text>
+  <g clip-path="url(#clip10)">
+    <rect x="68.5" y="1146" width="544" height="407" fill="rgb(255,255,255)"/>
+    <text x="89.5" y="1178.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">from lofigui import Controller</text>
+    <text x="89.5" y="1199.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">import time</text>
+    <text x="89.5" y="1241.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14"># Create controller</text>
+    <text x="89.5" y="1262.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">controller = Controller(template_path=&quot;templates/process.html&quot;)</text>
+    <text x="89.5" y="1283.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">app.controller = controller</text>
+    <text x="89.5" y="1325.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14"># Start process</text>
+    <text x="89.5" y="1346.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">controller.start_action(refresh_time=2)  # Refresh every 2 seconds</text>
+    <text x="89.5" y="1388.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14"># Simulate work</text>
+    <text x="89.5" y="1409.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">for i in range(10):</text>
+    <text x="89.5" y="1430.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">lf.print(f&quot;Processing step {i+1}/10...&quot;)</text>
+    <text x="89.5" y="1451.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">time.sleep(1)</text>
+    <text x="89.5" y="1493.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14"># End process</text>
+    <text x="89.5" y="1514.3" fill="rgb(64,70,84)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">controller.end_action()</text>
+  </g>
+  <rect x="682.5" y="106" width="300" height="186.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow11)"/>
+  <rect x="679.5" y="103" width="306" height="192.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow12)"/>
+  <rect x="680.5" y="104" width="304" height="190.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="700.5" y="141.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Status</text>
+  <text x="752.7" y="187.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Idle</text>
+  <text x="700.5" y="187.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Status:</text>
+  <text x="770.9" y="227.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">0%</text>
+  <text x="700.5" y="227.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Progress:</text>
+  <text x="756.9" y="267.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Stopped</text>
+  <text x="700.5" y="267.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Polling:</text>
+  <rect x="0" y="1595" width="1009" height="208" fill="rgb(249,250,251)"/>
+  <text x="413.6" y="1660.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">- Demonstrating template inheritance and features.</text>
+  <text x="222.7" y="1660.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Lofigui Demo Application</text>
+  <text x="369.1" y="1700.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Built with</text>
+  <text x="491.5" y="1700.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">, FastAPI, and Bulma.</text>
+  <a xlink:href="https://github.com/drummonds/lofigui">
+    <text x="441.8" y="1700.4" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Lofigui</text>
+  </a>
+</svg>

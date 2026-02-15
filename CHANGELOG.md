@@ -5,34 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-##  [0.13.2] - 2026-02-13
+## [0.13.4] - 2026-02-15
+
+- Project conformance: added ROADMAP.md, standard tasks (fmt, vet, check, clean), fixed CHANGELOG formatting
+- Visual documentation: SVG captures of examples using url2svg, docs/UI_PATTERNS.md
+
+## [0.13.2] - 2026-02-13
 
 - Making more LLM compatible
  
-##  [0.13.0] - 2025-11-05
+## [0.13.0] - 2025-11-05
 
 - Making auto favicon configurable 
 
-##  [0.12.0] - 2025-10-28
+## [0.12.0] - 2025-10-28
 
 - Refactoring to make app a more centralised and opinionated controller with just 
 model specific info in the controller.
 
-##  [0.11.0] - 2025-10-27
+## [0.11.0] - 2025-10-27
 
 - Using taskfile in CI to use same commands
 
-##  [0.10.0] - 2025-10-27
+## [0.10.0] - 2025-10-27
 
 - Adding tinygo example
 - Adding polling state
 
-##  [0.9.0] - 2025-10-27
+## [0.9.0] - 2025-10-27
 
 - Make changes to controller idempotent for both go and python
 - adding tests and lint to precommit hook.
 
-##  [0.8.0] - 2025-10-27
+## [0.8.0] - 2025-10-27
 
 - When change python controller, make app shut down previous action safely.
 
@@ -43,7 +48,7 @@ model specific info in the controller.
  - restructuring to put core controller function into lofigui
  - refactored example 01 to show this currently python only
 
-## v0.4.0
+## [0.4.0]
 
 ### Added
 - Comprehensive test suite with pytest

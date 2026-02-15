@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <text x="8" y="50.2" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="32" font-weight="700">Test start</text>
+  <text x="8" y="93.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Hello world.</text>
+  <text x="8" y="127.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 0</text>
+  <text x="8" y="161.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 1</text>
+  <text x="8" y="195.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 2</text>
+  <text x="8" y="229.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 3</text>
+  <text x="8" y="263.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 4</text>
+  <a xlink:href="http://127.0.0.1:1340/">
+    <text x="8" y="297.5" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16" text-decoration="underline">Restart</text>
+  </a>
+  <text x="8" y="331.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Done.</text>
+</svg>

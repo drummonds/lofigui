@@ -32,7 +32,7 @@ func main() {
 	// The template directory can be anywhere, not just the default location
 	// The controller is integrated into the app via composition
 	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
-		Name:         "Hello World Controller", // Name displayed in app
+		Name:         "Hello World Controller",  // Name displayed in app
 		TemplatePath: "../templates/hello.html", // Custom location
 	})
 	if err != nil {
