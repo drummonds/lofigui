@@ -203,18 +203,17 @@ tasks:
       - go mod tidy
       - go get -u ./...
 
-  # Release task (pattern from github.com/drummonds/godocs)
-  release:*:*:
-    desc: 'Release process eg task release:v0.14.0:"new feature"'
-    vars:
-      TAG: '{{index .MATCH 0}}'
-      BUILD: '{{index .MATCH 1}}'
+  # Release task
+  release:
+    desc: 'Release process eg task release VERSION=v0.14.0 COMMENT="new feature"'
+    requires:
+      vars: [VERSION, COMMENT]
     cmds:
       - task: test
       - task: lint
       - task: build
       - git add .
-      - git commit -am "{{.BUILD}}"
-      - git tag "{{.TAG}}"
-      - git push origin "{{.TAG}}"
+      - git commit -am "{{.COMMENT}}"
+      - git tag "{{.VERSION}}"
+      - git push origin "{{.VERSION}}"
       - git push
