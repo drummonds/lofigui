@@ -34,7 +34,9 @@ LAYOUT_NAVBAR = """<!DOCTYPE html>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <span class="tag {% if polling == "Running" %}is-warning{% else %}is-success{% endif %}">{{ polling }}</span>
+        <span class="tag {% if polling == "Running" %}is-warning{% else %}is-success{% endif %}">
+        {{ polling }}
+        </span>
       </div>
     </div>
   </nav>
@@ -67,7 +69,9 @@ LAYOUT_THREE_PANEL = """<!DOCTYPE html>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <span class="tag {% if polling == "Running" %}is-warning{% else %}is-success{% endif %}">{{ polling }}</span>
+        <span class="tag {% if polling == "Running" %}is-warning{% else %}is-success{% endif %}">
+        {{ polling }}
+        </span>
       </div>
     </div>
   </nav>
