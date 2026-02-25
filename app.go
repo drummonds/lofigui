@@ -1,6 +1,7 @@
 package lofigui
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sync"
@@ -38,6 +39,7 @@ type App struct {
 	PollCount     int    // Number of polling cycles
 	refreshTime   int    // Seconds between refresh when polling
 	displayURL    string // URL to redirect to for display
+	cancelFunc    context.CancelFunc
 	mu            sync.RWMutex
 }
 
@@ -98,6 +100,10 @@ func (app *App) SetController(ctrl *Controller) {
 	if app.controller != nil && app.actionRunning {
 		app.actionRunning = false
 		app.polling = false
+		if app.cancelFunc != nil {
+			app.cancelFunc()
+			app.cancelFunc = nil
+		}
 	}
 
 	// Set the new controller
@@ -107,22 +113,40 @@ func (app *App) SetController(ctrl *Controller) {
 // StartAction starts an action and enables auto-refresh polling.
 // This implements the singleton active model concept - only one action
 // can be running at a time across the entire app.
-func (app *App) StartAction() {
+//
+// If a previous action is still running, its context is cancelled before
+// starting the new one. Returns a context that will be cancelled when
+// the action is stopped or replaced.
+func (app *App) StartAction() context.Context {
 	app.mu.Lock()
 	defer app.mu.Unlock()
+
+	// Cancel any previous action
+	if app.cancelFunc != nil {
+		app.cancelFunc()
+	}
 
 	app.actionRunning = true
 	app.polling = true
 	app.PollCount = 0
+
+	ctx, cancel := context.WithCancel(context.Background())
+	app.cancelFunc = cancel
+	return ctx
 }
 
 // EndAction stops the action and disables auto-refresh polling.
+// Also cancels the context returned by StartAction.
 func (app *App) EndAction() {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
 	app.actionRunning = false
 	app.polling = false
+	if app.cancelFunc != nil {
+		app.cancelFunc()
+		app.cancelFunc = nil
+	}
 }
 
 // IsActionRunning returns whether an action is currently running.
@@ -154,16 +178,19 @@ func (app *App) SetDisplayURL(url string) {
 //
 // This function:
 //  1. Resets the buffer (if resetBuffer is true)
-//  2. Starts the action (app-level state)
-//  3. Launches the model function in a goroutine
+//  2. Starts the action (app-level state) and gets a cancellable context
+//  3. Launches the model function in a goroutine with the context
 //  4. Returns HTML that redirects to the display page
+//
+// The model function receives a context.Context that is cancelled when the action
+// is stopped (EndAction) or replaced by a new action (another HandleRoot call).
 //
 // Example:
 //
 //	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 //	    app.HandleRoot(w, r, model, true)
 //	})
-func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*App), resetBuffer bool) {
+func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(context.Context, *App), resetBuffer bool) {
 	app.mu.RLock()
 	ctrl := app.controller
 	displayURL := app.displayURL
@@ -178,8 +205,8 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 		ctrl.context.Reset()
 	}
 
-	app.StartAction()
-	go modelFunc(app)
+	ctx := app.StartAction()
+	go modelFunc(ctx, app)
 
 	w.Header().Set("Content-Type", "text/html")
 	if _, err := fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL); err != nil {
@@ -187,7 +214,7 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 	}
 }
 
-// HandleDisplay is a helper that delegates to the controller's HandleDisplay.
+// HandleDisplay renders the template with full app state (including polling/refresh).
 // Returns an error if no controller is set.
 func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 	app.mu.RLock()
@@ -199,7 +226,10 @@ func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctrl.HandleDisplay(w, r, nil)
+	data := app.StateDict(r, nil)
+	if err := ctrl.RenderTemplate(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // ControllerName returns the name of the current controller.
@@ -240,6 +270,8 @@ func (app *App) ControllerName() string {
 //	}
 func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.Context {
 	app.mu.Lock()
+	defer app.mu.Unlock()
+
 	ctrl := app.controller
 
 	// Get buffer content from controller
@@ -248,11 +280,17 @@ func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.C
 		buffer = ctrl.context.Buffer()
 	}
 
+	// Inline controller name lookup to avoid nested lock
+	controllerName := "Lofigui no controller"
+	if ctrl != nil {
+		controllerName = ctrl.Name
+	}
+
 	// Build context with app-level state (singleton active model)
 	ctx := pongo2.Context{
 		"request":         r,
 		"version":         app.Version,
-		"controller_name": app.ControllerName(),
+		"controller_name": controllerName,
 		"results":         buffer,
 	}
 
@@ -271,8 +309,6 @@ func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.C
 		ctx["polling"] = "Stopped"
 	}
 	ctx["poll_count"] = app.PollCount
-
-	app.mu.Unlock()
 
 	// Merge extra context last so it can override anything
 	if extraContext != nil {

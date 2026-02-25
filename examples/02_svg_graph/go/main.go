@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -10,8 +11,7 @@ import (
 
 // Model function - contains business logic with chart rendering
 // This is a static/synchronous example - generates immediately without polling
-// The model receives the App, which manages the singleton active model state
-func model(app *lofigui.App) {
+func model(_ context.Context, app *lofigui.App) {
 	lofigui.Print("Hello to SVG graphs in Go!")
 
 	lofigui.Markdown("## Fibonacci Bar Chart")

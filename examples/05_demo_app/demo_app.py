@@ -9,8 +9,7 @@ This demo showcases the key features of lofigui including:
 - Process management with auto-refresh
 """
 
-import time
-from typing import Optional
+import asyncio
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 import uvicorn
@@ -18,12 +17,10 @@ import uvicorn
 import lofigui as lf
 from lofigui import App, Controller
 
-# Initialize app
+# Initialize app with controller
 app_instance = App(template_dir="templates")
+app_instance.controller = Controller()
 fastapi_app = FastAPI(title="Lofigui Demo")
-
-# Global controller for managing processes
-current_controller: Optional[Controller] = None
 
 
 @fastapi_app.get("/", response_class=HTMLResponse)
@@ -129,28 +126,24 @@ new Chart(ctx, {
 @fastapi_app.get("/process", response_class=HTMLResponse)
 async def process_page(request: Request):
     """Process management page."""
-    global current_controller
-
     lf.reset()
 
-    if current_controller and current_controller.is_action_running():
+    if app_instance.is_action_running():
         lf.markdown("### Process Running...")
         lf.print("A process is currently running. Check the status panel for progress.")
         lf.print("")
         lf.print("You can cancel the process using the Cancel button in the top navigation.")
-        refresh = current_controller.get_refresh()
         cancel_class = ""
     else:
         lf.markdown("### Ready to Start")
         lf.print("No process is currently running.")
         lf.print("Fill in the form below and click 'Start Process' to begin.")
-        refresh = ""
         cancel_class = "is-static"
 
     process_output = lf.buffer()
 
     # Get status info
-    if current_controller and current_controller.is_action_running():
+    if app_instance.is_action_running():
         status = "Running"
         polling = "Active (2s refresh)"
     else:
@@ -165,7 +158,6 @@ async def process_page(request: Request):
             "status": status,
             "progress": "0%",
             "polling": polling,
-            "refresh": refresh,
             "cancel_class": cancel_class,
         },
     )
@@ -174,16 +166,8 @@ async def process_page(request: Request):
 @fastapi_app.post("/start_demo_process")
 async def start_demo_process(duration: int = Form(10)):
     """Start a demo process with specified duration."""
-    global current_controller
-
-    # Create new controller if needed
-    if current_controller is None:
-        current_controller = Controller(template_path="templates/process.html")
-
-    app_instance.controller = current_controller
-
     # Start the action with 2-second refresh
-    current_controller.start_action(refresh_time=2)
+    app_instance.start_action(refresh_time=2)
 
     # Simulate a long-running process
     lf.reset()
@@ -197,14 +181,14 @@ async def start_demo_process(duration: int = Form(10)):
     for i in range(duration):
         progress = int((i + 1) / duration * 100)
         lf.print(f"Step {i + 1}/{duration} - Progress: {progress}%")
-        time.sleep(1)
+        await asyncio.sleep(1)
 
     lf.print("")
     lf.markdown("### Process Complete!")
     lf.print(f"Successfully completed {duration} steps.")
 
     # End the action
-    current_controller.end_action()
+    app_instance.end_action()
 
     return RedirectResponse(url="/display", status_code=303)
 
@@ -212,10 +196,8 @@ async def start_demo_process(duration: int = Form(10)):
 @fastapi_app.post("/stop")
 async def stop_process():
     """Stop the currently running process."""
-    global current_controller
-
-    if current_controller and current_controller.is_action_running():
-        current_controller.end_action()
+    if app_instance.is_action_running():
+        app_instance.end_action()
 
     return RedirectResponse(url="/", status_code=303)
 
