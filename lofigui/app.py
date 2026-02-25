@@ -82,8 +82,10 @@ class App(FastAPI):
         # Set the new controller
         self._controller = new_controller
 
-    def state_dict(self, request: Request, extra: dict = {}) -> dict:
+    def state_dict(self, request: Request, extra: Optional[dict] = None) -> dict:
         """Merge in local state and from controller so that they can be overidden"""
+        if extra is None:
+            extra = {}
         # Do the dict in this order so defaults can be overriden
         d: dict = {}
         d["request"] = request
@@ -108,7 +110,7 @@ class App(FastAPI):
         return d
 
     def template_response(
-        self, request: Request, templateName: str, extra: dict = {}
+        self, request: Request, templateName: str, extra: Optional[dict] = None
     ) -> HTMLResponse:
         if self.startup:  # To cover the first call being a refresh of an api endpoint
             self.startup = False

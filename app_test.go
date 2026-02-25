@@ -1,6 +1,9 @@
 package lofigui
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -319,5 +322,167 @@ func TestAppSetControllerIsIdempotent(t *testing.T) {
 	// Controller should still be set
 	if app.GetController() != ctrl {
 		t.Error("Expected same controller to still be set")
+	}
+}
+
+// TestAppStateDictDoesNotDeadlock verifies StateDict completes with a controller set (no nested lock)
+func TestAppStateDictDoesNotDeadlock(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `<html>{{ results | safe }}</html>`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatalf("Failed to create controller: %v", err)
+	}
+	app.SetController(ctrl)
+
+	done := make(chan struct{})
+	go func() {
+		_ = app.StateDict(nil, nil)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// success
+	case <-time.After(2 * time.Second):
+		t.Fatal("StateDict deadlocked")
+	}
+}
+
+// TestAppStateDictPollingState verifies refresh meta tag when action is running vs stopped
+func TestAppStateDictPollingState(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `ok`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+
+	// Stopped state
+	data := app.StateDict(nil, nil)
+	if data["polling"] != "Stopped" {
+		t.Errorf("Expected Stopped, got %v", data["polling"])
+	}
+	if data["refresh"] != "" {
+		t.Errorf("Expected empty refresh, got %v", data["refresh"])
+	}
+
+	// Running state
+	app.StartAction()
+	data = app.StateDict(nil, nil)
+	if data["polling"] != "Running" {
+		t.Errorf("Expected Running, got %v", data["polling"])
+	}
+	refresh, _ := data["refresh"].(string)
+	if !strings.Contains(refresh, "Refresh") {
+		t.Errorf("Expected meta refresh tag, got %q", refresh)
+	}
+}
+
+// TestAppStateDictExtraContext verifies extra context merges into state dict
+func TestAppStateDictExtraContext(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `ok`,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+
+	extra := map[string]interface{}{"title": "My Page"}
+	data := app.StateDict(nil, extra)
+	if data["title"] != "My Page" {
+		t.Errorf("Expected title=My Page, got %v", data["title"])
+	}
+}
+
+// TestAppHandleDisplayIncludesRefresh verifies HandleDisplay renders polling state
+func TestAppHandleDisplayIncludesRefresh(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `{{ refresh | safe }}|{{ polling }}`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+	app.StartAction()
+
+	req := httptest.NewRequest(http.MethodGet, "/display", nil)
+	w := httptest.NewRecorder()
+	app.HandleDisplay(w, req)
+
+	body := w.Body.String()
+	if !strings.Contains(body, "Refresh") {
+		t.Errorf("Expected meta refresh in body, got %q", body)
+	}
+	if !strings.Contains(body, "Running") {
+		t.Errorf("Expected Running in body, got %q", body)
+	}
+}
+
+// TestAppHandleDisplayStopped verifies HandleDisplay without action shows Stopped
+func TestAppHandleDisplayStopped(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `{{ refresh | safe }}|{{ polling }}`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+
+	req := httptest.NewRequest(http.MethodGet, "/display", nil)
+	w := httptest.NewRecorder()
+	app.HandleDisplay(w, req)
+
+	body := w.Body.String()
+	if strings.Contains(body, "Refresh") {
+		t.Errorf("Expected no meta refresh in body, got %q", body)
+	}
+	if !strings.Contains(body, "Stopped") {
+		t.Errorf("Expected Stopped in body, got %q", body)
+	}
+}
+
+// TestAppStartActionReturnsContext verifies StartAction returns a valid context
+func TestAppStartActionReturnsContext(t *testing.T) {
+	app := NewApp()
+	ctx := app.StartAction()
+	if ctx == nil {
+		t.Fatal("Expected non-nil context")
+	}
+	if ctx.Err() != nil {
+		t.Errorf("Expected context to not be cancelled, got %v", ctx.Err())
+	}
+}
+
+// TestAppStartActionCancelsPrevious verifies starting a new action cancels the previous context
+func TestAppStartActionCancelsPrevious(t *testing.T) {
+	app := NewApp()
+	ctx1 := app.StartAction()
+	_ = app.StartAction()
+
+	if ctx1.Err() == nil {
+		t.Error("Expected first context to be cancelled after second StartAction")
+	}
+}
+
+// TestAppEndActionCancelsContext verifies EndAction cancels the context
+func TestAppEndActionCancelsContext(t *testing.T) {
+	app := NewApp()
+	ctx := app.StartAction()
+	app.EndAction()
+
+	if ctx.Err() == nil {
+		t.Error("Expected context to be cancelled after EndAction")
 	}
 }

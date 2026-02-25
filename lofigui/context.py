@@ -68,7 +68,13 @@ class PrintContext:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit context manager and reset buffer."""
+        """Exit context manager, drain queue and reset buffer."""
+        try:
+            while not self.queue.empty():
+                self.queue.get_nowait()
+                self.queue.task_done()
+        except asyncio.QueueEmpty:
+            pass
         self.buffer = ""
 
 
@@ -101,9 +107,9 @@ def buffer(ctx: Optional[PrintContext] = None) -> str:
 
 
 def reset(ctx: Optional[PrintContext] = None) -> None:
-    """Clear the buffer.
+    """Clear the buffer and drain the queue.
 
-    Resets the buffer to an empty string. Does not clear the queue.
+    Resets the buffer to an empty string and discards any pending queue items.
 
     Args:
         ctx: Optional PrintContext to use. If None, uses the default global context.
@@ -117,4 +123,10 @@ def reset(ctx: Optional[PrintContext] = None) -> None:
     """
     if ctx is None:
         ctx = _ctx
+    try:
+        while not ctx.queue.empty():
+            ctx.queue.get_nowait()
+            ctx.queue.task_done()
+    except asyncio.QueueEmpty:
+        pass
     ctx.buffer = ""

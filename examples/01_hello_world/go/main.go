@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,11 +11,16 @@ import (
 )
 
 // Model function - contains business logic
-// The model receives the App, which manages the singleton active model state
-func model(app *lofigui.App) {
+// The model receives a context for cancellation and the App for state management
+func model(ctx context.Context, app *lofigui.App) {
 	lofigui.Print("Hello world.")
 	for i := 0; i < 5; i++ {
-		time.Sleep(1 * time.Second)
+		select {
+		case <-ctx.Done():
+			lofigui.Print("Cancelled.")
+			return
+		case <-time.After(1 * time.Second):
+		}
 		lofigui.Print(fmt.Sprintf("Count %d", i))
 	}
 	lofigui.Markdown("<a href='/'>Restart</a>")

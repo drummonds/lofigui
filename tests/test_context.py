@@ -120,13 +120,13 @@ class TestResetFunction:
         reset()
         assert _ctx.buffer == ""
 
-    def test_reset_preserves_queue(self):
-        """Test that reset only clears buffer, not queue."""
+    def test_reset_drains_queue(self):
+        """Test that reset clears buffer and drains the queue."""
         ctx = PrintContext()
         ctx.queue.put_nowait("item")
         reset(ctx)
         assert ctx.buffer == ""
-        assert not ctx.queue.empty()
+        assert ctx.queue.empty()
 
 
 class TestGlobalContext:

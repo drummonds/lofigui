@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-02-25
+
+### Added
+- Built-in Bulma 1.0.4 layout templates: LayoutSingle, LayoutNavbar, LayoutThreePanel (Go + Python)
+- `NewControllerWithLayout()` convenience constructor
+- Python `lofigui.LAYOUT_SINGLE`, `LAYOUT_NAVBAR`, `LAYOUT_THREE_PANEL` exports
+
+## [0.15.1] - 2026-02-25
+
+### Fixed
+- Python: `reset()` now drains the queue (BUG 4 — stale items persisted across resets)
+- Python: `PrintContext.__exit__` also drains queue on context manager exit
+- Python: Fixed mutable default arguments `extra: dict = {}` in `App.state_dict()` and `App.template_response()`
+- Python: Fixed example 05 to use `app_instance` API instead of removed `Controller` methods; replaced blocking `time.sleep` with `asyncio.sleep`
+
+## [0.15.0] - 2026-02-25
+
+### Changed
+- **Breaking**: Go model function signature changed from `func(*App)` to `func(context.Context, *App)`
+- `StartAction()` now returns a `context.Context` that is cancelled on `EndAction()` or when a new action starts
+- `HandleRoot()` passes cancellable context to model goroutines
+- Old goroutines are automatically cancelled when a new action starts (prevents stale goroutines)
+
+## [0.14.0] - 2026-02-25
+
+### Fixed
+- Go: `StateDict()` deadlock — replaced nested `ControllerName()` call with inline lookup, added `defer` for unlock
+- Go: `HandleDisplay()` now injects polling state (refresh meta tag, polling status) via `StateDict()` + `RenderTemplate()`
+- Go: Extra context merge moved inside lock scope for safety
+
 ## [0.13.4] - 2026-02-15
 
 - Project conformance: added ROADMAP.md, standard tasks (fmt, vet, check, clean), fixed CHANGELOG formatting
