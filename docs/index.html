@@ -3,23 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lofigui WASM Demos</title>
+  <title>Lofigui Examples</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">Lofigui WASM Demos</span>
+      <span class="navbar-item has-text-weight-bold">Lofigui Examples</span>
     </div>
   </nav>
   <section class="section">
     <div class="container">
-      <h1 class="title">WASM Examples</h1>
-      <div class="content">
-        <ul>
-          <li><a href="07_water_tank/">Water Tank SCADA Simulation</a></li>
-        </ul>
-      </div>
+      <h1 class="title">Examples</h1>
+      <p class="subtitle">Demos and examples for <a href="https://github.com/drummonds/lofigui">lofigui</a></p>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Example</th>
+            <th>WASM Demo</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01</td>
+            <td>Hello World</td>
+            <td><a href="01_hello_world/" class="button is-small is-link">Run</a></td>
+            <td>Async with polling — prints "Hello world", counts 0-4, "Done."</td>
+          </tr>
+          <tr>
+            <td>02</td>
+            <td>SVG Graph</td>
+            <td><span class="tag is-light">Server-only</span></td>
+            <td>go-chart dependency — requires server-side font rendering</td>
+          </tr>
+          <tr>
+            <td>03</td>
+            <td>Hello World WASM</td>
+            <td><a href="03_hello_world_wasm/" class="button is-small is-link">Run</a></td>
+            <td>Synchronous WASM — basic and advanced model demos</td>
+          </tr>
+          <tr>
+            <td>04</td>
+            <td>TinyGo WASM</td>
+            <td><span class="tag is-light">TinyGo required</span></td>
+            <td>Requires TinyGo toolchain for smaller binary</td>
+          </tr>
+          <tr>
+            <td>05</td>
+            <td>Demo App</td>
+            <td><span class="tag is-light">Python-only</span></td>
+            <td>Template inheritance with Jinja2</td>
+          </tr>
+          <tr>
+            <td>06</td>
+            <td>Notes CRUD</td>
+            <td><span class="tag is-light">Server-only</span></td>
+            <td>CRUD forms need HTTP POST</td>
+          </tr>
+          <tr>
+            <td>07</td>
+            <td>Water Tank</td>
+            <td><a href="07_water_tank/" class="button is-small is-link">Run</a></td>
+            <td>SCADA simulation — SVG schematic, pump/valve controls</td>
+          </tr>
+          <tr>
+            <td>08</td>
+            <td>Water Tank Multi-Page</td>
+            <td><a href="08_water_tank_multi/" class="button is-small is-link">Run</a></td>
+            <td>Multi-page pattern — schematic + diagnostics tabs</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="mt-4"><a href="multipage.html">Multi-page display documentation</a></p>
     </div>
   </section>
   <footer class="footer">

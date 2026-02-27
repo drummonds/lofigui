@@ -180,19 +180,47 @@ tasks:
 
   build-pages:
     desc: Build WASM examples for GitHub Pages docs/ folder
+    vars:
+      WASM_EXEC_JS:
+        sh: find $(go env GOROOT) -name wasm_exec.js -print -quit
     cmds:
+      # 01 Hello World
+      - mkdir -p docs/01_hello_world
+      - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/01_hello_world/
+      - cp examples/01_hello_world/go/main.wasm docs/01_hello_world/
+      - cp examples/01_hello_world/templates/index.html docs/01_hello_world/
+      - cp examples/01_hello_world/templates/app.js docs/01_hello_world/
+      - rm examples/01_hello_world/go/main.wasm
+      # 03 Hello World WASM
+      - mkdir -p docs/03_hello_world_wasm
+      - cd examples/03_hello_world_wasm/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/03_hello_world_wasm/
+      - cp examples/03_hello_world_wasm/go/main.wasm docs/03_hello_world_wasm/
+      - cp examples/03_hello_world_wasm/templates/index.html docs/03_hello_world_wasm/
+      - cp examples/03_hello_world_wasm/templates/app.js docs/03_hello_world_wasm/
+      - rm examples/03_hello_world_wasm/go/main.wasm
+      # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .
-      - cp "$(find $(go env GOROOT) -name wasm_exec.js -print -quit)" docs/07_water_tank/
+      - cp "{{.WASM_EXEC_JS}}" docs/07_water_tank/
       - cp examples/07_water_tank/go/main.wasm docs/07_water_tank/
       - cp examples/07_water_tank/templates/index.html docs/07_water_tank/
       - cp examples/07_water_tank/templates/app.js docs/07_water_tank/
       - rm examples/07_water_tank/go/main.wasm
+      # 08 Water Tank Multi-Page
+      - mkdir -p docs/08_water_tank_multi
+      - cd examples/08_water_tank_multi/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/go/main.wasm docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/templates/app.js docs/08_water_tank_multi/
+      - rm examples/08_water_tank_multi/go/main.wasm
 
   # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07]
+    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08]
 
   tidy:main:
     desc: Run go tidy and update main
