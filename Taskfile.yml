@@ -141,7 +141,7 @@ tasks:
     dir: '{{.EXAMPLE_DIR}}'
     cmds:
       - go mod tidy
-      - go run main.go
+      - go run .
 
   go-wasm:*:
     desc: 'Build and serve Go WASM example'
@@ -177,6 +177,17 @@ tasks:
     cmds:
       - chmod +x build.sh
       - ./build.sh
+
+  build-pages:
+    desc: Build WASM examples for GitHub Pages docs/ folder
+    cmds:
+      - mkdir -p docs/07_water_tank
+      - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "$(find $(go env GOROOT) -name wasm_exec.js -print -quit)" docs/07_water_tank/
+      - cp examples/07_water_tank/go/main.wasm docs/07_water_tank/
+      - cp examples/07_water_tank/templates/index.html docs/07_water_tank/
+      - cp examples/07_water_tank/templates/app.js docs/07_water_tank/
+      - rm examples/07_water_tank/go/main.wasm
 
   # Go module tidy tasks (wildcard)
   tidy:
