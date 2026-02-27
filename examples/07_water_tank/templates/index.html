@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water Tank</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">Water Tank</span>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span id="status-tag" class="tag is-success">Stopped</span>
+      </div>
+    </div>
+  </nav>
+  <section class="section">
+    <div class="container">
+      <div id="output">
+        <progress class="progress is-primary" max="100">Loading WASM...</progress>
+      </div>
+      <div class="buttons mt-4">
+        <button id="startStopBtn" class="button is-success" disabled>Start Simulation</button>
+        <button id="pumpBtn" class="button is-info" disabled>Toggle Pump</button>
+        <button id="valveBtn" class="button is-info" disabled>Toggle Valve</button>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>Water Tank SCADA v1.0</p>
+    </div>
+  </footer>
+  <script src="wasm_exec.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
