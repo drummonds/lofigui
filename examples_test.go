@@ -50,6 +50,11 @@ func testGoExampleBuilds(t *testing.T) {
 			path: "examples/06_notes_crud/go",
 			env:  nil,
 		},
+		{
+			name: "08_water_tank_multi",
+			path: "examples/08_water_tank_multi/go",
+			env:  nil,
+		},
 	}
 
 	for _, ex := range examples {
@@ -154,6 +159,11 @@ func testGoExampleModules(t *testing.T) {
 			name:       "06_notes_crud",
 			path:       "examples/06_notes_crud/go",
 			moduleName: "github.com/drummonds/lofigui/examples/06_notes_crud",
+		},
+		{
+			name:       "08_water_tank_multi",
+			path:       "examples/08_water_tank_multi/go",
+			moduleName: "github.com/drummonds/lofigui/examples/08_water_tank_multi",
 		},
 	}
 
@@ -321,6 +331,16 @@ func testGoExampleStructure(t *testing.T) {
 				"templates/notes.html",
 				"python/notes.py",
 				"python/pyproject.toml",
+				"README.md",
+			},
+		},
+		{
+			name: "08_water_tank_multi",
+			path: "examples/08_water_tank_multi",
+			requiredFiles: []string{
+				"go/main.go",
+				"go/go.mod",
+				"go/simulation.go",
 				"README.md",
 			},
 		},

@@ -208,14 +208,12 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 	ctx := app.StartAction()
 	go modelFunc(ctx, app)
 
-	w.Header().Set("Content-Type", "text/html")
-	if _, err := fmt.Fprintf(w, `<head><meta http-equiv="Refresh" content="0; URL=%s"/></head>`, displayURL); err != nil {
-		http.Error(w, "Failed to write response", http.StatusInternalServerError)
-	}
+	http.Redirect(w, r, displayURL, http.StatusSeeOther)
 }
 
 // HandleDisplay renders the template with full app state (including polling/refresh).
-// Returns an error if no controller is set.
+// Sets the HTTP Refresh header when polling is active, so the browser reloads
+// the current page (not a hardcoded URL). Returns an error if no controller is set.
 func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 	app.mu.RLock()
 	ctrl := app.controller
@@ -226,9 +224,23 @@ func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.WriteRefreshHeader(w)
 	data := app.StateDict(r, nil)
 	if err := ctrl.RenderTemplate(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// WriteRefreshHeader sets the HTTP Refresh header when polling is active.
+// This causes the browser to reload the current page after refreshTime seconds,
+// which works correctly for multi-page apps (unlike a meta refresh with a hardcoded URL).
+func (app *App) WriteRefreshHeader(w http.ResponseWriter) {
+	app.mu.RLock()
+	polling := app.polling
+	refreshTime := app.refreshTime
+	app.mu.RUnlock()
+	if polling {
+		w.Header().Set("Refresh", fmt.Sprintf("%d", refreshTime))
 	}
 }
 
@@ -258,7 +270,7 @@ func (app *App) ControllerName() string {
 //   - results: Buffer content from Print/Markdown calls
 //   - polling: "Running" or "Stopped" (app-level singleton state)
 //   - poll_count: Number of refresh cycles (app-level)
-//   - refresh: Meta tag for auto-refresh (if action is running)
+//   - refresh: Always empty string (refresh now uses HTTP header, kept for template compat)
 //   - Any additional keys from extraContext
 //
 // Example:
@@ -295,16 +307,13 @@ func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.C
 	}
 
 	// Add polling state from app (singleton active model concept)
+	// Refresh is now handled via HTTP Refresh header (see WriteRefreshHeader),
+	// so the template variable is always empty for backward compatibility.
+	ctx["refresh"] = ""
 	if app.polling {
 		ctx["polling"] = "Running"
 		app.PollCount++
-		ctx["refresh"] = fmt.Sprintf(
-			`<meta http-equiv="Refresh" content="%d; URL=%s"/>`,
-			app.refreshTime,
-			app.displayURL,
-		)
 	} else {
-		ctx["refresh"] = ""
 		app.PollCount = 0
 		ctx["polling"] = "Stopped"
 	}

@@ -1,6 +1,7 @@
 package lofigui
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -372,15 +373,14 @@ func TestAppStateDictPollingState(t *testing.T) {
 		t.Errorf("Expected empty refresh, got %v", data["refresh"])
 	}
 
-	// Running state
+	// Running state — refresh is now always empty (handled via HTTP header)
 	app.StartAction()
 	data = app.StateDict(nil, nil)
 	if data["polling"] != "Running" {
 		t.Errorf("Expected Running, got %v", data["polling"])
 	}
-	refresh, _ := data["refresh"].(string)
-	if !strings.Contains(refresh, "Refresh") {
-		t.Errorf("Expected meta refresh tag, got %q", refresh)
+	if data["refresh"] != "" {
+		t.Errorf("Expected empty refresh (now uses HTTP header), got %v", data["refresh"])
 	}
 }
 
@@ -402,11 +402,11 @@ func TestAppStateDictExtraContext(t *testing.T) {
 	}
 }
 
-// TestAppHandleDisplayIncludesRefresh verifies HandleDisplay renders polling state
+// TestAppHandleDisplayIncludesRefresh verifies HandleDisplay sets HTTP Refresh header when polling
 func TestAppHandleDisplayIncludesRefresh(t *testing.T) {
 	app := NewApp()
 	ctrl, err := NewController(ControllerConfig{
-		TemplateString: `{{ refresh | safe }}|{{ polling }}`,
+		TemplateString: `{{ polling }}`,
 		Name:           "Test",
 	})
 	if err != nil {
@@ -419,20 +419,22 @@ func TestAppHandleDisplayIncludesRefresh(t *testing.T) {
 	w := httptest.NewRecorder()
 	app.HandleDisplay(w, req)
 
-	body := w.Body.String()
-	if !strings.Contains(body, "Refresh") {
-		t.Errorf("Expected meta refresh in body, got %q", body)
+	// Check HTTP Refresh header
+	refreshHeader := w.Header().Get("Refresh")
+	if refreshHeader != "1" {
+		t.Errorf("Expected Refresh header '1', got %q", refreshHeader)
 	}
+	body := w.Body.String()
 	if !strings.Contains(body, "Running") {
 		t.Errorf("Expected Running in body, got %q", body)
 	}
 }
 
-// TestAppHandleDisplayStopped verifies HandleDisplay without action shows Stopped
+// TestAppHandleDisplayStopped verifies HandleDisplay without action shows Stopped and no Refresh header
 func TestAppHandleDisplayStopped(t *testing.T) {
 	app := NewApp()
 	ctrl, err := NewController(ControllerConfig{
-		TemplateString: `{{ refresh | safe }}|{{ polling }}`,
+		TemplateString: `{{ polling }}`,
 		Name:           "Test",
 	})
 	if err != nil {
@@ -444,10 +446,11 @@ func TestAppHandleDisplayStopped(t *testing.T) {
 	w := httptest.NewRecorder()
 	app.HandleDisplay(w, req)
 
-	body := w.Body.String()
-	if strings.Contains(body, "Refresh") {
-		t.Errorf("Expected no meta refresh in body, got %q", body)
+	// No Refresh header when not polling
+	if h := w.Header().Get("Refresh"); h != "" {
+		t.Errorf("Expected no Refresh header, got %q", h)
 	}
+	body := w.Body.String()
 	if !strings.Contains(body, "Stopped") {
 		t.Errorf("Expected Stopped in body, got %q", body)
 	}
@@ -484,5 +487,59 @@ func TestAppEndActionCancelsContext(t *testing.T) {
 
 	if ctx.Err() == nil {
 		t.Error("Expected context to be cancelled after EndAction")
+	}
+}
+
+// TestAppWriteRefreshHeader verifies the HTTP Refresh header is set/unset based on polling state
+func TestAppWriteRefreshHeader(t *testing.T) {
+	app := NewApp()
+	app.SetRefreshTime(2)
+
+	// Not polling — no header
+	w := httptest.NewRecorder()
+	app.WriteRefreshHeader(w)
+	if h := w.Header().Get("Refresh"); h != "" {
+		t.Errorf("Expected no Refresh header when not polling, got %q", h)
+	}
+
+	// Polling — header set
+	app.StartAction()
+	w = httptest.NewRecorder()
+	app.WriteRefreshHeader(w)
+	if h := w.Header().Get("Refresh"); h != "2" {
+		t.Errorf("Expected Refresh header '2', got %q", h)
+	}
+
+	// Stopped again — no header
+	app.EndAction()
+	w = httptest.NewRecorder()
+	app.WriteRefreshHeader(w)
+	if h := w.Header().Get("Refresh"); h != "" {
+		t.Errorf("Expected no Refresh header after EndAction, got %q", h)
+	}
+}
+
+// TestAppHandleRootRedirects verifies HandleRoot sends a 303 redirect
+func TestAppHandleRootRedirects(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `ok`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+	app.SetDisplayURL("/display")
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	app.HandleRoot(w, req, func(_ context.Context, _ *App) {}, true)
+
+	if w.Code != http.StatusSeeOther {
+		t.Errorf("Expected status 303, got %d", w.Code)
+	}
+	if loc := w.Header().Get("Location"); loc != "/display" {
+		t.Errorf("Expected Location '/display', got %q", loc)
 	}
 }

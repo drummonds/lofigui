@@ -20,12 +20,12 @@ A synchronous model generates a chart inline. `HTML()` embeds the raw SVG direct
 
 ## 2. Polling Pattern
 
-For long-running tasks, lofigui uses an auto-refresh `<meta>` tag. The cycle:
+For long-running tasks, lofigui uses an HTTP `Refresh` header. The cycle:
 
 1. `GET /` resets the buffer, starts the model in a goroutine, redirects to `/display`
-2. `/display` renders the template with a `{{ refresh | safe }}` meta tag that triggers periodic reload
+2. `/display` renders the template; `HandleDisplay` sets the `Refresh: N` header while polling is active
 3. Each reload shows the buffer's current state (partial output)
-4. When the model calls `EndAction()`, the refresh tag is omitted and polling stops
+4. When the model calls `EndAction()`, the Refresh header is omitted and polling stops
 
 **During polling (partial output):**
 
@@ -91,3 +91,4 @@ Key elements:
 | Async with polling | Yes | `results`, `refresh`, `polling` | 01, 05 |
 | CRUD forms | No | `results` (via `StateDict`) | 06 |
 | Navigation + templates | No | All + custom | 05 |
+| Multi-page | Optional | `results`, `refresh` | 07, 08 |
