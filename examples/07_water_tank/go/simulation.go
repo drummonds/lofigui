@@ -162,7 +162,10 @@ func (s *Simulation) buildSVG() string {
 
 	// --- Pipes (drawn first, behind tank) ---
 
-	// Inlet pipe: pump discharge to tank left wall (extends slightly under tank border)
+	// Supply pipe: left edge to pump inlet
+	fmt.Fprintf(&b, `<rect x="0" y="193" width="45" height="14" rx="1" fill="%s" stroke="#363636" stroke-width="1"/>`, pipeInColor)
+
+	// Discharge pipe: pump to tank left wall (extends slightly under tank border)
 	fmt.Fprintf(&b, `<rect x="120" y="193" width="155" height="14" rx="1" fill="%s" stroke="#363636" stroke-width="1"/>`, pipeInColor)
 	// Flow arrow on inlet pipe
 	if pump && running {
@@ -207,20 +210,23 @@ func (s *Simulation) buildSVG() string {
 	fmt.Fprintf(&b, `<text x="%.0f" y="220" text-anchor="middle" font-size="13" fill="#4a4a4a">TANK</text>`,
 		tankX+tankW/2)
 
-	// --- Pump: ISA centrifugal pump (circle + internal triangle) ---
+	// --- Pump: ISA centrifugal pump (circle + internal triangle), clickable ---
 
+	b.WriteString(`<a href="/pump" style="cursor:pointer">`)
 	fmt.Fprintf(&b, `<circle cx="80" cy="200" r="40" fill="%s" stroke="#363636" stroke-width="2.5"/>`, pumpFill)
 	// Triangle inside circle (discharge direction indicator, pointing right)
-	b.WriteString(`<polygon points="62,225 98,225 80,190" fill="none" stroke="#363636" stroke-width="2"/>`)
+	b.WriteString(`<polygon points="65,182 65,218 100,200" fill="none" stroke="#363636" stroke-width="2"/>`)
 	b.WriteString(`<text x="80" y="258" text-anchor="middle" font-size="13" font-weight="bold" fill="#363636">PUMP</text>`)
 	pumpLabel := "OFF"
 	if pump {
 		pumpLabel = "ON"
 	}
 	fmt.Fprintf(&b, `<text x="80" y="274" text-anchor="middle" font-size="11" fill="#4a4a4a">%s</text>`, pumpLabel)
+	b.WriteString(`</a>`)
 
-	// --- Valve: ISA gate valve (bowtie) ---
+	// --- Valve: ISA gate valve (bowtie), clickable ---
 
+	b.WriteString(`<a href="/valve" style="cursor:pointer">`)
 	fmt.Fprintf(&b, `<polygon points="570,175 610,200 570,225" fill="%s" stroke="#363636" stroke-width="2"/>`, valveFill)
 	fmt.Fprintf(&b, `<polygon points="650,175 610,200 650,225" fill="%s" stroke="#363636" stroke-width="2"/>`, valveFill)
 	b.WriteString(`<text x="610" y="248" text-anchor="middle" font-size="13" font-weight="bold" fill="#363636">VALVE</text>`)
@@ -229,6 +235,7 @@ func (s *Simulation) buildSVG() string {
 		valveLabel = "OPEN"
 	}
 	fmt.Fprintf(&b, `<text x="610" y="264" text-anchor="middle" font-size="11" fill="#4a4a4a">%s</text>`, valveLabel)
+	b.WriteString(`</a>`)
 
 	// Flow arrow on outlet pipe
 	if valve && level > 0 {

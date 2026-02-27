@@ -10,6 +10,13 @@ function render() {
     if (typeof goRender === 'function') {
         outputDiv.innerHTML = goRender();
         updateStatus();
+        // Intercept SVG link clicks so they toggle state instead of navigating
+        outputDiv.querySelectorAll('a[href="/pump"]').forEach(function(a) {
+            a.addEventListener('click', function(e) { e.preventDefault(); goTogglePump(); render(); });
+        });
+        outputDiv.querySelectorAll('a[href="/valve"]').forEach(function(a) {
+            a.addEventListener('click', function(e) { e.preventDefault(); goToggleValve(); render(); });
+        });
     }
 }
 
