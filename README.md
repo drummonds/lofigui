@@ -256,60 +256,39 @@ Use `escape=False` or `html()` only with trusted input.
 
 ## Examples
 
-See the `examples/` directory for complete working examples:
+Each example introduces new features progressively. Study them in order, or jump to the one closest to your use case.
 
-- **01_hello_world**: Minimal FastAPI application (server-side)
-- **02_svg_graph**: Chart rendering with Pygal (server-side)
-- **03_hello_world_wasm**: Go as WebAssembly in browser (no server needed!) no Python wasm as much bigger.
-- **04_hello_world_wasm**: Using tinygo for much smaller footprint
+| # | Name | Features introduced | Run command |
+|---|------|---------------------|-------------|
+| 01 | Hello World | `App`, background model, auto-refresh polling | `task go-example:01` |
+| 02 | SVG Graph | Synchronous render, SVG via `lofigui.HTML()` | `task go-example:02` |
+| 03 | WASM Hello World | Go compiled to WASM, browser-only, no server | `task go-wasm:03` |
+| 04 | TinyGo WASM | Smaller WASM binaries with TinyGo | `task go-wasm:04` |
+| 05 | Demo App | Python template inheritance (Jinja2) | `task example-05` |
+| 06 | Notes CRUD | Form POST, `Controller` directly (no App), redirect-after-POST | `task go-example:06` |
+| 07 | Water Tank | SVG schematic generation, simulation goroutine, clickable SVG links, WASM-compatible | `task go-example:07` |
+| 08 | Water Tank Multi | Multiple pages sharing one model, `LayoutNavbar`, HTTP Refresh polling | `task go-example:08` |
+| 09 | Water Tank HTMX | HTMX partial updates, fragment endpoints, no full-page reload | `task go-example:09` |
 
-### Running Server-Side Examples (01 & 02)
+**Starting points for new projects:**
+- **Status page / dashboard** — example 01 (polling) or 02 (sync)
+- **CRUD / forms app** — example 06
+- **Real-time dashboard** — example 08 (HTTP Refresh) or 09 (HTMX, smoother updates)
+- **Browser-only (no server)** — example 03 (WASM)
 
-```bash
-cd examples/01_hello_world
-uv sync
-uv run python hello.py
-```
-
-Or using Task:
-```bash
-task example-01  # or task example-02
-```
-
-Visit `http://127.0.0.1:1340`
-
-### Running WASM Example (03)
-
-```bash
-cd examples/03_hello_world_wasm
-python3 serve.py
-```
-
-Or using Task:
-```bash
-task example-03  # aliases: task wasm
-```
-
-Visit `http://localhost:8000`
-
-This example runs Python entirely in your browser using Pyodide and can be deployed to GitHub Pages for free!
+Python examples also available for 01, 02, 05, 06: `task example-01`, `task example-02`, etc.
 
 ### Using Taskfile
 
-The project includes a [Taskfile](Taskfile.yml) for common development tasks:
+The project uses [Task](https://taskfile.dev/) for all development commands:
 
 ```bash
 task --list              # Show all available tasks
-task install             # Install dependencies
-task test                # Run tests
-task test-coverage       # Run tests with coverage
-task lint                # Run all linters
-task format              # Format code with black
-task build               # Build package
-task example-01          # Run example 01
-task example-02          # Run example 02
-task wasm                # Run WASM example (alias for example-03)
-task test-wasm-python    # Test WASM Python code
+task test                # Run Python + Go tests
+task lint                # Run linters
+task go-example:09       # Run any Go example by number
+task example-01          # Run any Python example by number
+task tidy                # go mod tidy for all modules
 task clean               # Clean build artifacts
 ```
 
@@ -354,7 +333,7 @@ uv run black lofigui tests
 | Complexity | Very Low | Medium | Medium | Medium |
 | Use Case | Internal tools | Data apps | Web apps | Terminal UIs |
 | Learning Curve | Minimal | Moderate | Moderate | Moderate |
-| Partial Updates | No | Yes | Yes | Yes |
+| Partial Updates | Via HTMX | Yes | Yes | Yes |
 
 **Choose lofigui if:**
 - You want maximum simplicity

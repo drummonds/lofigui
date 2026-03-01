@@ -27,6 +27,9 @@ lofigui/
     04_tinygo_wasm/        # TinyGo WASM
     05_demo_app/           # Python template inheritance
     06_notes_crud/         # CRUD app (Python + Go)
+    07_water_tank/         # SVG schematic, simulation goroutine, WASM-compatible
+    08_water_tank_multi/   # Multi-page with HTTP Refresh polling
+    09_water_tank_htmx/    # HTMX partial updates (no full-page polling)
 ```
 
 ## Python API
@@ -195,6 +198,56 @@ POST /delete  -> delete record, redirect /
 
 Uses `ctrl.StateDict(r)` and `ctrl.RenderTemplate(w, context)` directly instead of `app.HandleRoot`.
 
+### 5. Real-time dashboard with SVG (example 07)
+
+Combines polling (pattern 1) with POST controls (pattern 4) and generated SVG:
+
+- Background goroutine ticks a simulation at 500ms
+- `buildSVG()` generates a P&ID schematic with clickable `<a href>` links
+- `App` + `LayoutNavbar` for auto-refresh while simulation runs
+- Also compiles to WASM with `main_wasm.go` build tag
+
+### 6. Multi-page with shared model (example 08)
+
+Multiple routes render different views of the same model. Each page auto-refreshes independently:
+
+```
+GET /             -> renderSchematic(), app.HandleDisplay()
+GET /diagnostics  -> renderDiagnostics(), app.HandleDisplay()
+POST /start       -> sim.Start(), app.StartAction(), redirect /
+POST /stop        -> sim.Stop(), app.EndAction(), redirect /
+```
+
+Key insight: HTTP `Refresh` header reloads the **current** page, so `/diagnostics` keeps refreshing itself.
+
+### 7. HTMX partial updates (example 09)
+
+Replaces HTTP Refresh polling with HTMX — only the results div is swapped, no full page reload:
+
+```
+GET /                    -> full page, <div hx-get="/fragment" hx-trigger="every 1s">
+GET /diagnostics         -> full page, <div hx-get="/fragment/diagnostics" hx-trigger="every 1s">
+GET /fragment            -> HTML fragment (schematic only)
+GET /fragment/diagnostics -> HTML fragment (diagnostics only)
+```
+
+Key differences from pattern 6:
+- No `App` needed — uses `Controller` directly with `ctrl.RenderTemplate(w, context)`
+- Embedded template string with `<script src="htmx.org">` (no templates/ directory)
+- Fragment endpoints return raw `lofigui.Buffer()` content
+- `sync.Mutex` around buffer operations for concurrent request safety:
+
+```go
+var renderMu sync.Mutex
+func renderAndCapture(fn func()) string {
+    renderMu.Lock()
+    defer renderMu.Unlock()
+    lofigui.Reset()
+    fn()
+    return lofigui.Buffer()
+}
+```
+
 ## Template requirements
 
 Templates receive these variables from `state_dict` / `StateDict`:
@@ -221,6 +274,29 @@ Minimal template:
 </html>
 ```
 
+## Examples guide
+
+Each example builds on previous ones. Study them in order to learn the framework progressively.
+
+| # | Name | Key features introduced | Base pattern |
+|---|------|------------------------|-------------|
+| 01 | Hello World | `App`, `HandleRoot`, `HandleDisplay`, background goroutine, auto-refresh polling | Async polling |
+| 02 | SVG Graph | Synchronous render (no polling), SVG output via `lofigui.HTML()` | Sync inline |
+| 03 | WASM Hello World | Go compiled to WASM, browser-side rendering, no server | WASM |
+| 04 | TinyGo WASM | TinyGo for smaller WASM binaries (~500KB vs ~2MB) | WASM |
+| 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
+| 06 | Notes CRUD | Form POST handlers, `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly (no App), redirect-after-POST | CRUD |
+| 07 | Water Tank | Generated SVG schematic (`buildSVG()`), simulation goroutine, clickable SVG `<a>` links, dual server/WASM build | Dashboard |
+| 08 | Water Tank Multi | Multiple routes sharing one model, `LayoutNavbar`, HTTP Refresh per-page, diagnostics view | Multi-page |
+| 09 | Water Tank HTMX | HTMX `hx-get`/`hx-trigger` for partial updates, fragment endpoints, `Controller` without `App`, `renderAndCapture` mutex, embedded template | HTMX |
+
+**Choosing a starting point for new projects:**
+
+- **Simple status page** — start from 01 (polling) or 02 (sync)
+- **CRUD / forms** — start from 06
+- **Real-time dashboard** — start from 08 (HTTP Refresh) or 09 (HTMX)
+- **Browser-only (no server)** — start from 03 (WASM)
+
 ## Running examples / Development commands
 
 Uses [Task](https://taskfile.dev/) runner:
@@ -243,6 +319,9 @@ task go-example:02       # SVG Graph
 task go-wasm:03          # WASM Hello World
 task go-wasm:04          # TinyGo WASM
 task go-example:06       # Notes CRUD
+task go-example:07       # Water Tank (SVG dashboard)
+task go-example:08       # Water Tank Multi-Page (HTTP Refresh)
+task go-example:09       # Water Tank HTMX (partial updates)
 task build-wasm:03       # Build WASM binary only (no serve)
 task build-wasm:04       # Build TinyGo WASM binary only
 
