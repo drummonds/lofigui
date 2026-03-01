@@ -220,7 +220,7 @@ tasks:
   # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08]
+    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08, tidy:09]
 
   tidy:main:
     desc: Run go tidy and update main
@@ -242,17 +242,17 @@ tasks:
       - go mod tidy
       - go get -u ./...
 
-  # Release task
-  release:
-    desc: 'Release process eg task release VERSION=v0.14.0 COMMENT="new feature"'
-    requires:
-      vars: [VERSION, COMMENT]
-    cmds:
-      - task: test
-      - task: lint
-      - task: build
-      - git add .
-      - git commit -am "{{.COMMENT}}"
-      - git tag "{{.VERSION}}"
-      - git push origin "{{.VERSION}}"
-      - git push
+  # # Release task
+  # release:
+  #   desc: 'Release process eg task release VERSION=v0.14.0 COMMENT="new feature"'
+  #   requires:
+  #     vars: [VERSION, COMMENT]
+  #   cmds:
+  #     - task: test
+  #     - task: lint
+  #     - task: build
+  #     - git add .
+  #     - git commit -am "{{.COMMENT}}"
+  #     - git tag "{{.VERSION}}"
+  #     - git push origin "{{.VERSION}}"
+  #     - git push
