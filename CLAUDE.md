@@ -162,6 +162,83 @@ http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 
 Model function signature: `func model(app *lofigui.App)`. Call `app.EndAction()` when done.
 
+### Controller with HTMX (no App — example 09)
+
+For HTMX-based apps, use `Controller` directly — no `App` or polling state needed. HTMX fetches fragment endpoints to update the page without full reloads.
+
+```go
+import (
+    "fmt"
+    "net/http"
+    "sync"
+    "github.com/drummonds/lofigui"
+    "github.com/flosch/pongo2/v6"
+)
+
+// Template with HTMX: results div polls a fragment endpoint every 1s
+const htmxLayout = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body>
+  <section class="section"><div class="container">
+    <div id="results" hx-get="{{ fragment_url }}" hx-trigger="every 1s" hx-swap="innerHTML">
+      {{ results | safe }}
+    </div>
+  </div></section>
+</body>
+</html>`
+
+// Mutex protects the global lofigui buffer from concurrent requests
+var renderMu sync.Mutex
+
+func renderAndCapture(fn func()) string {
+    renderMu.Lock()
+    defer renderMu.Unlock()
+    lofigui.Reset()
+    fn()
+    return lofigui.Buffer()
+}
+
+func main() {
+    ctrl, _ := lofigui.NewController(lofigui.ControllerConfig{
+        TemplateString: htmxLayout,
+        Name:           "My HTMX App",
+    })
+
+    // Full page — serves HTML with HTMX polling on #results div
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        content := renderAndCapture(func() {
+            lofigui.Print("Hello from HTMX!")
+        })
+        ctrl.RenderTemplate(w, pongo2.Context{
+            "results":      content,
+            "fragment_url": "/fragment",
+        })
+    })
+
+    // Fragment — returns only the inner HTML (no <html>/<body> wrapper)
+    http.HandleFunc("/fragment", func(w http.ResponseWriter, r *http.Request) {
+        content := renderAndCapture(func() {
+            lofigui.Print("Hello from HTMX!")
+        })
+        w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        fmt.Fprint(w, content)
+    })
+
+    http.ListenAndServe(":8080", nil)
+}
+```
+
+Key points:
+- `ctrl.RenderTemplate(w, pongo2.Context{...})` — render with custom context (no App state injection)
+- Fragment endpoints return raw HTML via `fmt.Fprint` — no template rendering
+- `renderAndCapture` mutex ensures concurrent HTMX requests don't interleave buffer writes
+- Multiple pages: each full page sets its own `fragment_url` to poll the right fragment
+
 ## Architecture patterns
 
 ### 1. Async with polling (example 01)
