@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Water Tank</title>
+  <title>Example 07 — Water Tank</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">Water Tank</span>
+      <span class="navbar-item has-text-weight-bold">07 — Water Tank</span>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
@@ -17,21 +17,31 @@
       </div>
     </div>
   </nav>
+
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Real-time SVG Dashboard</h1>
+        <h2 class="subtitle">A P&amp;ID schematic generated in Go, with clickable pump and valve controls</h2>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
       <div class="content mb-5">
-        <h2 class="title is-4">Real-time SVG Dashboard</h2>
-        <p>
-          Combines polling with POST controls and a generated SVG P&amp;ID schematic.
-          A background goroutine ticks the simulation at 500ms.
-        </p>
+        <h3 class="title is-5">What this demonstrates</h3>
         <ul>
-          <li><strong>buildSVG()</strong> &mdash; generates a P&amp;ID schematic with colour-coded pipes, tank level, and clickable pump/valve</li>
-          <li><strong>Clickable SVG links</strong> &mdash; <code>&lt;a href="/pump"&gt;</code> inside SVG toggles state</li>
-          <li><strong>Float switch</strong> &mdash; auto-off pump at 95%, auto-on at 5%</li>
-          <li><strong>Dual build</strong> &mdash; same simulation runs as server (<code>net/http</code>) or WASM</li>
+          <li><strong>buildSVG()</strong> — generates a full P&amp;ID schematic with colour-coded pipes, water level, and float switch marks</li>
+          <li><strong>Clickable SVG</strong> — <code>&lt;a href="/pump"&gt;</code> and <code>&lt;a href="/valve"&gt;</code> inside the SVG toggle state directly</li>
+          <li><strong>Simulation goroutine</strong> — background tick loop at 500ms updates tank level (+3% pump, -1% valve)</li>
+          <li><strong>Float switch</strong> — auto-off pump at 95%, auto-on at 5% with trip counting</li>
+          <li><strong>Dual build</strong> — same code runs as server (<code>net/http</code>) or WASM in the browser</li>
         </ul>
       </div>
+
+      <hr>
+      <h3 class="title is-5">Live Demo (WASM)</h3>
       <div id="output">
         <progress class="progress is-primary" max="100">Loading WASM...</progress>
       </div>
@@ -42,6 +52,7 @@
       </div>
     </div>
   </section>
+
   <footer class="footer">
     <div class="content has-text-centered">
       <p>

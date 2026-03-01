@@ -178,7 +178,7 @@ tasks:
       - chmod +x build.sh
       - ./build.sh
 
-  build-pages:
+  build:docs:
     desc: Build WASM examples for GitHub Pages docs/ folder
     vars:
       WASM_EXEC_JS:
@@ -259,17 +259,4 @@ tasks:
       - go mod tidy
       - go get -u ./...
 
-  # # Release task
-  # release:
-  #   desc: 'Release process eg task release VERSION=v0.14.0 COMMENT="new feature"'
-  #   requires:
-  #     vars: [VERSION, COMMENT]
-  #   cmds:
-  #     - task: test
-  #     - task: lint
-  #     - task: build
-  #     - git add .
-  #     - git commit -am "{{.COMMENT}}"
-  #     - git tag "{{.VERSION}}"
-  #     - git push origin "{{.VERSION}}"
-  #     - git push
+
