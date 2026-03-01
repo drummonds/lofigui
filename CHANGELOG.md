@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Updating documentation## [0.17.8] - 2026-03-01
 
  - Adding 04 and 09 and summary pages
+## [0.17.9] - 2026-03-01
+
+ - Adding better documentation
 
 ## [0.17.7] - 2026-03-01
 
