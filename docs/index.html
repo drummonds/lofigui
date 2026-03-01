@@ -11,77 +11,96 @@
     <div class="navbar-brand">
       <span class="navbar-item has-text-weight-bold">Lofigui Examples</span>
     </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <a href="https://github.com/drummonds/lofigui" class="has-text-white">
+          <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:text-bottom"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+      </div>
+    </div>
   </nav>
   <section class="section">
     <div class="container">
       <h1 class="title">Examples</h1>
-      <p class="subtitle">Demos and examples for <a href="https://github.com/drummonds/lofigui">lofigui</a></p>
+      <p class="subtitle">
+        Each example builds on previous ones. Study them in order or jump to the pattern closest to your use case.
+      </p>
       <table class="table is-bordered is-striped is-hoverable is-fullwidth">
         <thead>
           <tr>
             <th>#</th>
             <th>Example</th>
+            <th>Features Introduced</th>
             <th>WASM Demo</th>
-            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>01</td>
             <td>Hello World</td>
+            <td><code>App</code>, background goroutine, auto-refresh polling, <code>HandleRoot</code>/<code>HandleDisplay</code></td>
             <td><a href="01_hello_world/" class="button is-small is-link">Run</a></td>
-            <td>Async with polling — prints "Hello world", counts 0-4, "Done."</td>
           </tr>
           <tr>
             <td>02</td>
             <td>SVG Graph</td>
+            <td>Synchronous render (no polling), SVG output via <code>lofigui.HTML()</code></td>
             <td><span class="tag is-light">Server-only</span></td>
-            <td>go-chart dependency — requires server-side font rendering</td>
           </tr>
           <tr>
             <td>03</td>
             <td>Hello World WASM</td>
+            <td>Go compiled to WASM, browser-only rendering, no server needed</td>
             <td><a href="03_hello_world_wasm/" class="button is-small is-link">Run</a></td>
-            <td>Synchronous WASM — basic and advanced model demos</td>
           </tr>
           <tr>
             <td>04</td>
             <td>TinyGo WASM</td>
-            <td><span class="tag is-light">TinyGo required</span></td>
-            <td>Requires TinyGo toolchain for smaller binary</td>
+            <td>Smaller WASM binaries with TinyGo (~2.7MB vs ~8MB standard Go)</td>
+            <td><a href="04_tinygo_wasm/" class="button is-small is-link">Run</a></td>
           </tr>
           <tr>
             <td>05</td>
             <td>Demo App</td>
+            <td>Python template inheritance (Jinja2 extends/blocks)</td>
             <td><span class="tag is-light">Python-only</span></td>
-            <td>Template inheritance with Jinja2</td>
           </tr>
           <tr>
             <td>06</td>
             <td>Notes CRUD</td>
+            <td>Form POST, <code>Controller</code> directly (no App), redirect-after-POST</td>
             <td><span class="tag is-light">Server-only</span></td>
-            <td>CRUD forms need HTTP POST</td>
           </tr>
           <tr>
             <td>07</td>
             <td>Water Tank</td>
+            <td>SVG schematic generation (<code>buildSVG</code>), simulation goroutine, clickable SVG links, dual server/WASM</td>
             <td><a href="07_water_tank/" class="button is-small is-link">Run</a></td>
-            <td>SCADA simulation — SVG schematic, pump/valve controls</td>
           </tr>
           <tr>
             <td>08</td>
             <td>Water Tank Multi-Page</td>
+            <td>Multiple routes sharing one model, <code>LayoutNavbar</code>, per-page HTTP Refresh polling</td>
             <td><a href="08_water_tank_multi/" class="button is-small is-link">Run</a></td>
-            <td>Multi-page pattern — schematic + diagnostics tabs</td>
+          </tr>
+          <tr>
+            <td>09</td>
+            <td>Water Tank HTMX</td>
+            <td>HTMX partial updates, fragment endpoints, <code>Controller</code> without <code>App</code>, <code>renderAndCapture</code> mutex</td>
+            <td><a href="09_water_tank_htmx/" class="button is-small is-link">Run</a></td>
           </tr>
         </tbody>
       </table>
-      <p class="mt-4"><a href="multipage.html">Multi-page display documentation</a></p>
     </div>
   </section>
   <footer class="footer">
     <div class="content has-text-centered">
-      <p><a href="https://github.com/drummonds/lofigui">github.com/drummonds/lofigui</a></p>
+      <p>
+        <a href="https://github.com/drummonds/lofigui">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:text-bottom;margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          github.com/drummonds/lofigui
+        </a>
+      </p>
     </div>
   </footer>
 </body>

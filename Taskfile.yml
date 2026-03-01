@@ -200,6 +200,15 @@ tasks:
       - cp examples/03_hello_world_wasm/templates/index.html docs/03_hello_world_wasm/
       - cp examples/03_hello_world_wasm/templates/app.js docs/03_hello_world_wasm/
       - rm examples/03_hello_world_wasm/go/main.wasm
+      # 04 TinyGo WASM
+      - mkdir -p docs/04_tinygo_wasm
+      - cd examples/04_tinygo_wasm/go && tinygo build -o main.wasm -target wasm main.go
+      - cd examples/04_tinygo_wasm/go && cp "$(tinygo env TINYGOROOT)/targets/wasm_exec.js" .
+      - cp examples/04_tinygo_wasm/go/main.wasm docs/04_tinygo_wasm/
+      - cp examples/04_tinygo_wasm/go/wasm_exec.js docs/04_tinygo_wasm/
+      - cp examples/04_tinygo_wasm/templates/index.html docs/04_tinygo_wasm/
+      - cp examples/04_tinygo_wasm/templates/app.js docs/04_tinygo_wasm/
+      - rm examples/04_tinygo_wasm/go/main.wasm examples/04_tinygo_wasm/go/wasm_exec.js
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .
@@ -216,6 +225,14 @@ tasks:
       - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/
       - cp examples/08_water_tank_multi/templates/app.js docs/08_water_tank_multi/
       - rm examples/08_water_tank_multi/go/main.wasm
+      # 09 Water Tank HTMX
+      - mkdir -p docs/09_water_tank_htmx
+      - cd examples/09_water_tank_htmx/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/go/main.wasm docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/templates/index.html docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/templates/app.js docs/09_water_tank_htmx/
+      - rm examples/09_water_tank_htmx/go/main.wasm
 
   # Go module tidy tasks (wildcard)
   tidy:
