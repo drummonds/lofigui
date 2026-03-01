@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hello World</title>
+  <title>Example 01 — Hello World</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">Hello World</span>
+      <span class="navbar-item has-text-weight-bold">01 — Hello World</span>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
@@ -17,20 +17,48 @@
       </div>
     </div>
   </nav>
+
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Async with Polling</h1>
+        <h2 class="subtitle">A background model prints to a buffer while the page auto-refreshes until done</h2>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
       <div class="content mb-5">
-        <h2 class="title is-4">Async with Polling</h2>
-        <p>
-          The simplest lofigui pattern: a background model prints to a buffer while the page
-          auto-refreshes until the model calls <code>EndAction()</code>.
-        </p>
-        <ul>
-          <li><strong>App + HandleRoot</strong> &mdash; starts model in a goroutine and redirects to display</li>
-          <li><strong>Auto-refresh</strong> &mdash; injects <code>&lt;meta http-equiv="Refresh"&gt;</code> while polling</li>
-          <li><strong>HandleDisplay</strong> &mdash; renders template with buffer content + polling state</li>
-        </ul>
+        <div class="columns">
+          <div class="column">
+            <h3 class="title is-5">What this demonstrates</h3>
+            <ul>
+              <li><strong>App + HandleRoot</strong> — starts model in a goroutine, redirects to <code>/display</code></li>
+              <li><strong>Auto-refresh</strong> — injects <code>&lt;meta http-equiv="Refresh"&gt;</code> while polling is active</li>
+              <li><strong>HandleDisplay</strong> — renders template with buffer content + polling state</li>
+              <li><strong>EndAction()</strong> — model signals completion, polling stops</li>
+            </ul>
+            <h3 class="title is-5">Server-side flow</h3>
+            <pre>GET /        → reset buffer, start goroutine, redirect /display
+GET /display → render template (auto-refresh while polling)
+             → model calls EndAction(), refresh stops</pre>
+          </div>
+          <div class="column is-5">
+            <figure class="image">
+              <img src="../01_polling.svg" alt="Polling state — partial output visible">
+              <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling — partial output</figcaption>
+            </figure>
+            <figure class="image mt-4">
+              <img src="../01_complete.svg" alt="Complete state — all output rendered">
+              <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">After completion — full output</figcaption>
+            </figure>
+          </div>
+        </div>
       </div>
+
+      <hr>
+      <h3 class="title is-5">Live Demo (WASM)</h3>
       <div id="output">
         <progress class="progress is-primary" max="100">Loading WASM...</progress>
       </div>
@@ -39,6 +67,7 @@
       </div>
     </div>
   </section>
+
   <footer class="footer">
     <div class="content has-text-centered">
       <p>

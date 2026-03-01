@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Water Tank Multi-Page</title>
+  <title>Example 08 — Water Tank Multi-Page</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">Water Tank Multi-Page</span>
+      <span class="navbar-item has-text-weight-bold">08 — Water Tank Multi-Page</span>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
@@ -17,21 +17,35 @@
       </div>
     </div>
   </nav>
+
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Multi-page with HTTP Refresh</h1>
+        <h2 class="subtitle">Multiple routes render different views of the same model, each auto-refreshing independently</h2>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
       <div class="content mb-5">
-        <h2 class="title is-4">Multi-page with HTTP Refresh</h2>
-        <p>
-          Multiple routes render different views of the same model. Each page auto-refreshes
-          independently via the HTTP <code>Refresh</code> header.
-        </p>
+        <h3 class="title is-5">What this demonstrates</h3>
         <ul>
-          <li><strong>Two views, one model</strong> &mdash; schematic and diagnostics tabs share the same simulation</li>
-          <li><strong>LayoutNavbar</strong> &mdash; built-in Bulma layout with navbar and status tag</li>
-          <li><strong>Per-page refresh</strong> &mdash; HTTP <code>Refresh</code> reloads the <em>current</em> page, not always <code>/</code></li>
-          <li><strong>Diagnostics</strong> &mdash; pump cycles, on-time, valve cycles, float trips, level history</li>
+          <li><strong>Two views, one model</strong> — schematic and diagnostics tabs share the same simulation</li>
+          <li><strong>LayoutNavbar</strong> — built-in Bulma layout with navbar and status tag</li>
+          <li><strong>Per-page HTTP Refresh</strong> — the <code>Refresh</code> header reloads the <em>current</em> page, so <code>/diagnostics</code> refreshes itself</li>
+          <li><strong>Diagnostics</strong> — pump cycles, on-time, valve cycles, float trips, level history table</li>
         </ul>
+        <h3 class="title is-5">Server-side flow</h3>
+        <pre>GET /             → renderSchematic(), app.HandleDisplay()
+GET /diagnostics  → renderDiagnostics(), app.HandleDisplay()
+POST /start       → sim.Start(), redirect /
+POST /stop        → sim.Stop(), redirect /</pre>
       </div>
+
+      <hr>
+      <h3 class="title is-5">Live Demo (WASM)</h3>
       <div class="tabs is-boxed mb-4">
         <ul>
           <li id="tab-schematic" class="is-active"><a>Schematic</a></li>
@@ -48,6 +62,7 @@
       </div>
     </div>
   </section>
+
   <footer class="footer">
     <div class="content has-text-centered">
       <p>
