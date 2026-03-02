@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.10] - 2026-03-02
+
+ - Example 10 non blocking multi action
+
 - Example 10: Water tank maintenance — background goroutines with progress, cancellation, and equipment lockout
 
 ## [0.17.6] - 2026-03-01
