@@ -83,6 +83,26 @@ Key elements:
 - **Read/Update/Delete forms** in a 3-column layout using Bulma columns
 - No polling needed; each form submission is a full page cycle
 
+## 7. HTMX Partial Updates
+
+Example 09 replaces HTTP Refresh header polling with HTMX — only the `#results` div is swapped each second, no full page reload. Fragment endpoints (`/fragment`, `/fragment/diagnostics`) return raw HTML without the page wrapper.
+
+Key elements:
+- `hx-get="/fragment" hx-trigger="every 1s" hx-swap="innerHTML"` on the results div
+- `renderAndCapture()` mutex prevents buffer interleaving from concurrent HTMX requests
+- `Controller` used directly — no `App` needed (no polling state management)
+
+## 8. Background Operations
+
+Example 10 adds long-running background maintenance goroutines alongside the simulation tick loop. Progress, cancellation, and equipment lockout are all visible through the existing HTMX 1-second polling — no new endpoints needed.
+
+Key elements:
+- **Progress bar** — Bulma `<progress>` element shows maintenance completion percentage
+- **Maintenance notification** — warning/success/info banner with current step and cancel/dismiss buttons
+- **Equipment lockout** — pump/valve control buttons disabled during their maintenance
+- **SVG indicators** — orange dashed circle and "MAINT xx%" text around equipment under maintenance
+- **`context.Context` cancellation** — cancel button triggers `CancelMaintenance()`, goroutine exits cleanly
+
 ## Pattern Summary
 
 | Pattern | Polling | Template vars used | Examples |
@@ -92,3 +112,5 @@ Key elements:
 | CRUD forms | No | `results` (via `StateDict`) | 06 |
 | Navigation + templates | No | All + custom | 05 |
 | Multi-page | Optional | `results`, `refresh` | 07, 08 |
+| HTMX partial updates | HTMX | `results` (via `RenderTemplate`) | 09, 10 |
+| Background operations | HTMX | `results` + maintenance state | 10 |

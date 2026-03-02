@@ -129,3 +129,8 @@ function render() {
 - **Global buffer**: `Reset()` before each render to avoid stale content from previous page
 - **Build tags**: Use `//go:build !(js && wasm)` on server `main.go` and `//go:build js && wasm` on WASM `main_wasm.go` for dual-build
 - **Shared code**: `simulation.go` (no build tag) is shared between server and WASM builds
+
+### Next steps
+
+- **Example 09** replaces HTTP Refresh polling with HTMX partial updates — only the `#results` div is swapped, no full page reload
+- **Example 10** adds background maintenance goroutines with progress tracking, cancellation, and equipment lockout — progress updates are picked up by the same HTMX 1s polling

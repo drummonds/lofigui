@@ -30,6 +30,7 @@ lofigui/
     07_water_tank/         # SVG schematic, simulation goroutine, WASM-compatible
     08_water_tank_multi/   # Multi-page with HTTP Refresh polling
     09_water_tank_htmx/    # HTMX partial updates (no full-page polling)
+    10_water_tank_maintenance/ # Background maintenance goroutines with progress/cancellation
 ```
 
 ## Python API
@@ -325,6 +326,44 @@ func renderAndCapture(fn func()) string {
 }
 ```
 
+### 8. Background operations with progress (example 10)
+
+Extends HTMX pattern (7) with long-running background goroutines alongside the simulation:
+
+```
+POST /maintenance/pump   -> sim.StartMaintenance("pump"), redirect /
+POST /maintenance/valve  -> sim.StartMaintenance("valve"), redirect /
+POST /maintenance/cancel -> sim.CancelMaintenance(), redirect /
+POST /maintenance/clear  -> sim.ClearMaintenance(), redirect /
+```
+
+Key concepts:
+- `runMaintenance(ctx, type)` goroutine runs N steps × 1s, updating progress/log under mutex
+- `context.Context` cancellation — `CancelMaintenance()` calls `cancel()`, goroutine selects on `ctx.Done()`
+- Equipment lockout — `TogglePump()`/`ToggleValve()` early-return during maintenance; float switch suppressed
+- Progress picked up by existing HTMX 1s polling — no new endpoints or polling mechanism needed
+- Single maintenance slot — `StartMaintenance()` rejects if one is already running
+
+```go
+func (s *Simulation) runMaintenance(ctx context.Context, maintType string) {
+    for i, step := range steps {
+        select {
+        case <-ctx.Done():
+            s.mu.Lock()
+            s.maintStatus = "cancelled"
+            s.mu.Unlock()
+            return
+        case <-time.After(1 * time.Second):
+            s.mu.Lock()
+            s.maintProgress = float64(i+1) / float64(len(steps)) * 100
+            s.appendLog(step)
+            s.mu.Unlock()
+        }
+    }
+    // set maintStatus = "completed"
+}
+```
+
 ## Template requirements
 
 Templates receive these variables from `state_dict` / `StateDict`:
@@ -366,12 +405,14 @@ Each example builds on previous ones. Study them in order to learn the framework
 | 07 | Water Tank | Generated SVG schematic (`buildSVG()`), simulation goroutine, clickable SVG `<a>` links, dual server/WASM build | Dashboard |
 | 08 | Water Tank Multi | Multiple routes sharing one model, `LayoutNavbar`, HTTP Refresh per-page, diagnostics view | Multi-page |
 | 09 | Water Tank HTMX | HTMX `hx-get`/`hx-trigger` for partial updates, fragment endpoints, `Controller` without `App`, `renderAndCapture` mutex, embedded template | HTMX |
+| 10 | Water Tank Maintenance | Background goroutines with progress, `context.Context` cancellation, equipment lockout, single maintenance slot | Background ops |
 
 **Choosing a starting point for new projects:**
 
 - **Simple status page** — start from 01 (polling) or 02 (sync)
 - **CRUD / forms** — start from 06
 - **Real-time dashboard** — start from 08 (HTTP Refresh) or 09 (HTMX)
+- **Background tasks with progress** — start from 10
 - **Browser-only (no server)** — start from 03 (WASM)
 
 ## Running examples / Development commands
@@ -399,6 +440,7 @@ task go-example:06       # Notes CRUD
 task go-example:07       # Water Tank (SVG dashboard)
 task go-example:08       # Water Tank Multi-Page (HTTP Refresh)
 task go-example:09       # Water Tank HTMX (partial updates)
+task go-example:10       # Water Tank Maintenance (background operations)
 task build-wasm:03       # Build WASM binary only (no serve)
 task build-wasm:04       # Build TinyGo WASM binary only
 
@@ -406,4 +448,5 @@ task build-wasm:04       # Build TinyGo WASM binary only
 task tidy                # Run go mod tidy for all modules
 task tidy:main           # Tidy root module only
 task tidy:01             # Tidy example 01 only (etc.)
+task tidy:10             # Tidy example 10
 ```
