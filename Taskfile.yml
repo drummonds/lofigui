@@ -127,6 +127,15 @@ tasks:
       - uv run --no-project python notes.py
 
   # Go example tasks (wildcard)
+  go-example:11:
+    desc: 'Water Tank Storage (WASM + API server)'
+    dir: examples/11_water_tank_storage/go
+    cmds:
+      - go mod tidy
+      - GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
+      - go run .
+
   go-example:*:
     desc: 'Run Go example (use go-wasm:NN for WASM examples)'
     vars:
@@ -241,11 +250,19 @@ tasks:
       - cp examples/10_water_tank_maintenance/templates/index.html docs/10_water_tank_maintenance/
       - cp examples/10_water_tank_maintenance/templates/app.js docs/10_water_tank_maintenance/
       - rm examples/10_water_tank_maintenance/go/main.wasm
+      # 11 Water Tank Storage
+      - mkdir -p docs/11_water_tank_storage
+      - cd examples/11_water_tank_storage/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/go/main.wasm docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/templates/app.js docs/11_water_tank_storage/
+      - rm examples/11_water_tank_storage/go/main.wasm
 
   # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10]
+    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10, tidy:11]
 
   tidy:main:
     desc: Run go tidy and update main
