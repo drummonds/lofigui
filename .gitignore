@@ -130,6 +130,9 @@ plz-out
 .playpen*
 hello_go
 
+# SeaweedFS temp data
+temp/
+
 # Poetry - keep lock file for examples but not for library
 # Note: examples should have their own poetry.lock
 poetry.lock

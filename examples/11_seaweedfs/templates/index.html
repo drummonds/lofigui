@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SeaweedFS WASM Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+    <nav class="navbar is-primary" role="navigation">
+        <div class="navbar-brand">
+            <span class="navbar-item has-text-weight-bold">SeaweedFS WASM Demo</span>
+        </div>
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <span id="conn-status" class="tag is-light">Loading...</span>
+            </div>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <div id="status" class="notification is-info">
+                <p>Loading Go WASM module...</p>
+                <progress class="progress is-primary" max="100">Loading...</progress>
+            </div>
+            <div id="results"></div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>SeaweedFS WASM Demo v0.1</p>
+        </div>
+    </footer>
+    <script src="wasm_exec.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
