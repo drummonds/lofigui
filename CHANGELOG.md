@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.13] - 2026-03-06
+
+ - Reising seaweed fs
+
 ## [0.17.12] - 2026-03-06
 
  - Adding example 11
