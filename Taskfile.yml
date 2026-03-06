@@ -152,6 +152,27 @@ tasks:
       - go mod tidy
       - go run .
 
+  go-wasm:11:
+    desc: 'Run SeaweedFS WASM demo (starts weed server in background)'
+    cmds:
+      - mkdir -p temp
+      - defer: { task: _weed:stop }
+      - |
+        weed server -dir=temp -master.port=9333 -volume.port=9334 &
+        WEED_PID=$!
+        echo $WEED_PID > temp/weed.pid
+        echo "Waiting for SeaweedFS master..."
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:9333/dir/status >/dev/null 2>&1; then
+            echo "SeaweedFS ready"
+            break
+          fi
+          sleep 0.5
+        done
+        (cd examples/11_seaweedfs/go && chmod +x build.sh && ./build.sh)
+        cd examples/11_seaweedfs && python3 serve.py
+        kill $WEED_PID 2>/dev/null || true
+
   go-wasm:*:
     desc: 'Build and serve Go WASM example'
     vars:
@@ -258,6 +279,37 @@ tasks:
       - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/
       - cp examples/11_water_tank_storage/templates/app.js docs/11_water_tank_storage/
       - rm examples/11_water_tank_storage/go/main.wasm
+
+  go-example:11:
+    desc: 'Run SeaweedFS demo (starts weed server in background)'
+    dir: examples/11_seaweedfs/go
+    cmds:
+      - mkdir -p ../../../temp
+      - defer: { task: _weed:stop }
+      - |
+        weed server -dir=../../../temp -master.port=9333 -volume.port=9334 &
+        WEED_PID=$!
+        echo $WEED_PID > ../../../temp/weed.pid
+        echo "Waiting for SeaweedFS master..."
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:9333/dir/status >/dev/null 2>&1; then
+            echo "SeaweedFS ready"
+            break
+          fi
+          sleep 0.5
+        done
+        go mod tidy && go run .
+        kill $WEED_PID 2>/dev/null || true
+
+  _weed:stop:
+    desc: 'Stop weed server if pid file exists'
+    internal: true
+    cmds:
+      - |
+        if [ -f temp/weed.pid ]; then
+          kill $(cat temp/weed.pid) 2>/dev/null || true
+          rm -f temp/weed.pid
+        fi
 
   # Go module tidy tasks (wildcard)
   tidy:
