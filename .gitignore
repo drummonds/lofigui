@@ -133,3 +133,7 @@ hello_go
 # Poetry - keep lock file for examples but not for library
 # Note: examples should have their own poetry.lock
 poetry.lock
+
+# Example 11 persistent data
+examples/11_water_tank_storage/go/data/
+.claude/settings.json
