@@ -254,42 +254,16 @@ lg.print("<script>alert('xss')</script>")
 
 Use `escape=False` or `html()` only with trusted input.
 
-## Examples
+## Examples & Documentation
 
-Each example introduces new features progressively. Study them in order, or jump to the one closest to your use case.
+See the **[documentation site](https://drummonds.github.io/lofigui/)** for interactive examples (including WASM demos), research notes, and the roadmap.
 
-| # | Name | Features introduced | Run command |
-|---|------|---------------------|-------------|
-| 01 | Hello World | `App`, background model, auto-refresh polling | `task go-example:01` |
-| 02 | SVG Graph | Synchronous render, SVG via `lofigui.HTML()` | `task go-example:02` |
-| 03 | WASM Hello World | Go compiled to WASM, browser-only, no server | `task go-wasm:03` |
-| 04 | TinyGo WASM | Smaller WASM binaries with TinyGo | `task go-wasm:04` |
-| 05 | Demo App | Python template inheritance (Jinja2) | `task example-05` |
-| 06 | Notes CRUD | Form POST, `Controller` directly (no App), redirect-after-POST | `task go-example:06` |
-| 07 | Water Tank | SVG schematic generation, simulation goroutine, clickable SVG links, WASM-compatible | `task go-example:07` |
-| 08 | Water Tank Multi | Multiple pages sharing one model, `LayoutNavbar`, HTTP Refresh polling | `task go-example:08` |
-| 09 | Water Tank HTMX | HTMX partial updates, fragment endpoints, no full-page reload | `task go-example:09` |
-
-**Starting points for new projects:**
-- **Status page / dashboard** — example 01 (polling) or 02 (sync)
-- **CRUD / forms app** — example 06
-- **Real-time dashboard** — example 08 (HTTP Refresh) or 09 (HTMX, smoother updates)
-- **Browser-only (no server)** — example 03 (WASM)
-
-Python examples also available for 01, 02, 05, 06: `task example-01`, `task example-02`, etc.
-
-### Using Taskfile
-
-The project uses [Task](https://taskfile.dev/) for all development commands:
+To run examples locally, use [Task](https://taskfile.dev/):
 
 ```bash
 task --list              # Show all available tasks
-task test                # Run Python + Go tests
-task lint                # Run linters
 task go-example:09       # Run any Go example by number
 task example-01          # Run any Python example by number
-task tidy                # go mod tidy for all modules
-task clean               # Clean build artifacts
 ```
 
 ## Development
@@ -366,5 +340,5 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 
 - **GitHub**: https://github.com/drummonds/lofigui
 - **PyPI**: https://pypi.org/project/lofigui/
-- **Documentation**: https://github.com/drummonds/lofigui/blob/main/README.md
+- **Documentation**: https://drummonds.github.io/lofigui/
 - **Issues**: https://github.com/drummonds/lofigui/issues
