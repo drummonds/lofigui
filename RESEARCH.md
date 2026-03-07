@@ -1,4 +1,178 @@
-# Lofigui Deep Research Report
+# Lofigui Research
+
+Design philosophy, trade-offs, and technical deep-dives.
+
+## Philosophy
+
+### The original vision: no CSS, no JavaScript
+
+lofigui started from a simple premise: what if a web UI was just `print()` statements rendered as plain HTML? No CSS framework, no JavaScript, no build step. The reasons:
+
+1. **Simplicity** — Every dependency is a thing to learn, update, and debug. Plain HTML is the lowest common denominator. A developer who can write `print("hello")` can build a UI.
+
+2. **Deployment** — A single binary (Go) or a minimal Python package that serves HTML over HTTP. No node_modules, no bundler, no static asset pipeline. Copy the binary to a server and run it. This matters especially for gokrazy deployments and internal tools where infrastructure is minimal.
+
+3. **Understandability** — "View Source" shows exactly what the server sent. There is no client-side rendering, no virtual DOM diffing, no hydration step. The browser does what browsers were built to do: render HTML.
+
+### The Bulma compromise
+
+Plain HTML is functional but ugly. For internal tools used daily, aesthetics matter enough to justify a CSS framework. Bulma was chosen because:
+
+- It is CSS-only — no JavaScript runtime
+- It is a single CDN link — no build step
+- It makes tables, forms, and layout look professional with class names alone
+
+This is the first trade-off: we accepted a CDN dependency for better-looking output. The framework still works without Bulma (plain HTML renders fine), but the examples and defaults assume it.
+
+### Removing JavaScript: precedent and practice
+
+The UK Government Digital Service [removed jQuery from GOV.UK](https://insidegovuk.blog.gov.uk/2022/08/11/how-and-why-we-removed-jquery-from-gov-uk/) in 2022 — a site serving millions of users. Their reasoning: fewer bytes, fewer failure modes, better accessibility. If GOV.UK can serve a nation without jQuery, an internal tool can certainly manage without React.
+
+lofigui takes this further. The base framework uses zero JavaScript. The browser's native capabilities — HTML rendering, form submission, HTTP Refresh — handle everything in examples 01-08.
+
+### Where JavaScript creeps back in
+
+Two features introduce JavaScript, both deliberately:
+
+**WASM** (examples 03, 04, 07, 08) — Go compiled to WebAssembly requires a small JS loader (`wasm_exec.js`). This is the price of running the same Go code in the browser without a server. The JS is boilerplate glue, not application logic.
+
+**HTMX** (examples 09, 10) — A single `<script>` tag that adds `hx-get` and `hx-trigger` attributes to HTML elements. HTMX exists because full-page HTTP Refresh polling has a real usability problem: if you are trying to enter information in a form or click a button, the page refresh interrupts you. The input loses focus, the form resets, the click never registers. For display-only dashboards, polling is fine. For anything interactive, it is maddening.
+
+HTMX solves this by updating only the parts of the page that change, leaving forms and buttons untouched. It is the minimum JavaScript needed to make multi-page dynamic sites usable.
+
+### The JavaScript budget
+
+The position is not "no JavaScript ever" but "justify every byte":
+
+| Layer                 | JS?          | Justification                                 |
+| --------------------- | ------------ | --------------------------------------------- |
+| Base (examples 01-08) | None         | Full-page refresh is sufficient               |
+| HTMX (examples 09-10) | ~14KB        | Partial updates make interactive pages usable |
+| WASM (examples 03-04) | ~16KB loader | Enables server-free deployment                |
+
+No bundler, no npm, no build step. Each JS dependency is a single file loaded from a CDN or embedded.
+
+### Print as interface
+
+The fundamental insight is that `print()` is the most natural programming interface. Every developer learns it first. lofigui preserves that — you print things, they appear on a web page. The abstraction cost is near zero.
+
+### Progressive complexity
+
+The examples are ordered deliberately:
+
+1. **Print and poll** (01) — the simplest useful pattern
+2. **Synchronous render** (02) — when you don't need async
+3. **WASM** (03, 04) — same code, no server
+4. **CRUD** (06) — forms and state
+5. **Real-time dashboards** (07-09) — SVG, multi-page, HTMX
+6. **Background operations** (10) — goroutines, cancellation, progress
+
+Each step adds one concept. You stop at the level of complexity your project needs.
+
+### The Bulma lesson applied more broadly
+
+godocs originally started with very simple hand-written CSS. Over time it grew complex and inconsistent — and it was actually _smaller_ to switch to Bulma for a more consistent result. The same principle may apply to charts and other areas: a focused, well-chosen dependency can be simpler than a DIY approach that accumulates complexity over time.
+
+### Where does lofigui sit?
+
+lofigui is for **single-process, small-audience tools**. The sweet spot: 1-10 users, one real object (a machine, a simulation, a long-running process) with a few pages showing different views of it. It is not competing with React or even Streamlit — it is competing with "I'll just use the terminal" or "I'll write a quick bash CGI script".
+
+---
+
+## Charts
+
+### The problem
+
+Charts are the next big gap in lofigui. The current approach (example 02) uses Go libraries to produce SVG server-side. The results are functional but poor — limited axis formatting, weak label placement, no interactivity, and mediocre visual quality compared to what users expect from modern dashboards.
+
+This was explored in the [gobank chart comparison](https://drummonds.github.io/gobank/research/chart-comparison.html), which tested three Go SVG renderers against financial data:
+
+### Go SVG libraries tested (gobank)
+
+| Library               | Strengths                               | Weaknesses                                                                                                      |
+| --------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Hand-rolled SVG**   | Full control, no dependencies           | Enormous effort for basic features (axis scaling, labels, legends). Every chart type is a fresh implementation. |
+| **go-analyze/charts** | Good chart variety, reasonable defaults | Axis formatting issues (decimal values where percentages expected), limited customisation                       |
+| **margaid**           | Clean line charts                       | Limited chart types, sparse documentation                                                                       |
+
+The go-chart library (used in lofigui example 02) has similar issues — it works for simple bar/line charts but struggles with axis formatting, date handling, and multi-series layouts.
+
+**Core issue**: Go's charting ecosystem is immature compared to JavaScript's. The libraries exist but produce output that looks 10 years behind what a JS library produces with the same data and less code.
+
+### The JavaScript charting landscape
+
+If we accept a JS dependency for charts (as we accepted HTMX for interactivity), the question is: which library, and does it drag in framework complexity?
+
+| Library             | Size             | Framework needed? | CDN single-file? | SVG output?      | Notes                                                                                              |
+| ------------------- | ---------------- | ----------------- | ---------------- | ---------------- | -------------------------------------------------------------------------------------------------- |
+| **Chart.js**        | ~65KB            | No                | Yes              | Canvas (not SVG) | Simple API, good defaults, huge community. Canvas means no CSS styling of chart elements.          |
+| **D3.js**           | ~90KB            | No                | Yes              | Yes (native SVG) | The gold standard. Total control over every pixel. Steep learning curve but unmatched flexibility. |
+| **Observable Plot** | ~50KB (needs D3) | No                | Yes              | Yes (SVG)        | D3's "high-level" layer. Concise API, good defaults, less boilerplate than raw D3.                 |
+| **Plotly.js**       | ~1MB             | No                | Yes              | SVG + Canvas     | Feature-rich but heavy. Built on D3. Good for scientific/financial charts.                         |
+| **Apache ECharts**  | ~400KB           | No                | Yes              | Canvas + SVG     | Rich interactive charts. Heavy but well-documented.                                                |
+| **Frappe Charts**   | ~17KB            | No                | Yes              | SVG              | Lightweight, GitHub-inspired aesthetics. Limited chart types.                                      |
+| **uPlot**           | ~35KB            | No                | Yes              | Canvas           | Extremely fast for time-series. Minimal but performant.                                            |
+| **Vega-Lite**       | ~400KB           | No                | Yes              | SVG + Canvas     | Declarative grammar-of-graphics. JSON spec, no imperative code.                                    |
+
+### What to avoid
+
+The key constraint is: **no React, no Svelte, no Angular, no build step**. Libraries that require a framework or a bundler are out:
+
+- **Recharts** — React-only
+- **Victory** — React-only
+- **Nivo** — React-only
+- **SvelteKit charts** — Svelte-only
+
+The lofigui pattern is: server renders HTML, browser displays it. A chart library must work with a `<script>` tag and a `<div>` target, nothing more.
+
+### Leading candidates for lofigui
+
+**D3.js** is the most interesting option. It:
+
+- Produces native SVG (inspectable, stylable with CSS, printable)
+- Works from a single CDN `<script>` tag
+- Has no framework dependency
+- Is the foundation most other libraries build on
+- Supports every chart type imaginable
+
+The downside is D3's verbosity — a simple line chart is ~30 lines of JS. But lofigui could generate the D3 JavaScript server-side (Go `fmt.Sprintf` with data injected into a template), keeping the complexity on the server while the browser just executes the rendering.
+
+**Observable Plot** is D3's high-level API, worth considering if D3 feels too low-level. Same SVG output, much less code.
+
+**Chart.js** is the simplest option if SVG isn't required. Canvas output means less flexibility but the API is very approachable.
+
+### How it would work in lofigui
+
+The pattern would mirror HTMX — a `<script>` tag in the template, with the Go server injecting data:
+
+```go
+// Server-side: Go generates the chart div + script
+lofigui.HTML(fmt.Sprintf(`
+<div id="chart-%s"></div>
+<script>
+  // D3 or Chart.js code here, with data from Go
+  const data = %s;
+  // ... render chart into #chart-%s
+</script>
+`, chartID, jsonData, chartID))
+```
+
+This keeps the Go code in control of _what_ to chart. The JS library handles _how_ to render it. No npm, no build step, no framework.
+
+### Potential example 12: water tank charts
+
+A natural next example would chart the water tank simulation data — tank level and pump/valve activity over time. This would:
+
+- Demonstrate time-series charting with real simulation data
+- Show how to pass Go data to a JS charting library
+- Build on the existing water tank examples (07-10)
+- Provide a reference pattern for charting in lofigui apps
+
+The chart would update via HTMX (like example 09) — the fragment endpoint returns fresh chart HTML with updated data on each poll.
+
+---
+
+# Technical Research
 
 ## 1. Codebase Overview
 
@@ -16,12 +190,12 @@ The framework has three layers:
 
 ### Execution Patterns
 
-| Pattern | Flow | Examples |
-|---|---|---|
+| Pattern             | Flow                                                                                                                                                                      | Examples       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | **Async + Polling** | `GET /` resets buffer, starts model in goroutine/background task, redirects to `/display`. `/display` includes `<meta http-equiv="Refresh">` tag while polling is active. | 01 (Go+Python) |
-| **Synchronous** | Model runs inline, `EndAction()` called immediately, redirects to `/display`. | 02 (Go+Python) |
-| **WASM** | Go compiled to WebAssembly, no server-side app. | 03, 04 |
-| **CRUD** | Form POSTs modify state, redirect to `GET /`. Uses `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly. | 06 (Go+Python) |
+| **Synchronous**     | Model runs inline, `EndAction()` called immediately, redirects to `/display`.                                                                                             | 02 (Go+Python) |
+| **WASM**            | Go compiled to WebAssembly, no server-side app.                                                                                                                           | 03, 04         |
+| **CRUD**            | Form POSTs modify state, redirect to `GET /`. Uses `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly.                                                                 | 06 (Go+Python) |
 
 ---
 
@@ -138,6 +312,7 @@ func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.C
 ```
 
 `ControllerName()` at `app.go:207-215`:
+
 ```go
 func (app *App) ControllerName() string {
     app.mu.RLock()      // ← tries to acquire read lock while write lock is held
@@ -159,6 +334,7 @@ func (app *App) ControllerName() string {
 When the user triggers the root endpoint while a model is already running:
 
 **Go**:
+
 ```go
 func (app *App) HandleRoot(...) {
     // ...
@@ -169,6 +345,7 @@ func (app *App) HandleRoot(...) {
 ```
 
 **Python**:
+
 ```python
 async def root(background_tasks: BackgroundTasks):
     lg.reset()
@@ -177,6 +354,7 @@ async def root(background_tasks: BackgroundTasks):
 ```
 
 There is no `context.Context`, channel, flag, or any other cancellation mechanism. The old goroutine/task:
+
 1. Continues running indefinitely
 2. Continues writing to the shared buffer (which was just reset)
 3. Eventually calls `EndAction()`, **prematurely stopping the polling for the NEW action**
@@ -184,6 +362,7 @@ There is no `context.Context`, channel, flag, or any other cancellation mechanis
 **This is the "tasks that should have been cancelled" bug.** The old task's `EndAction()` call terminates the polling that the new task needs.
 
 **Scenario**:
+
 ```
 T=0:  User hits /  → goroutine A starts, StartAction()
 T=2:  User hits /  → goroutine B starts, StartAction() (resets state)
@@ -210,6 +389,7 @@ def reset(ctx=None):
 The `print()` function puts messages into `ctx.queue`. `buffer()` drains the queue into the buffer string. `reset()` clears the buffer string but leaves the queue intact.
 
 **Scenario**:
+
 ```
 1. lg.print("msg1")     → queue: ["<p>msg1</p>"]
 2. lg.reset()            → buffer="" but queue still has ["<p>msg1</p>"]
@@ -222,6 +402,7 @@ The `print()` function puts messages into `ctx.queue`. `buffer()` drains the que
 **Impact**: When the user restarts an action (hits `/` again), messages from the previous run that were queued but not yet drained will persist into the new run's output.
 
 **Fix**: `reset()` should drain and discard the queue before clearing the buffer:
+
 ```python
 def reset(ctx=None):
     if ctx is None:
@@ -242,13 +423,13 @@ def reset(ctx=None):
 
 The demo app uses Controller API methods that were removed during the refactoring that moved action management to the App level:
 
-| Line | Call | Status |
-|------|------|--------|
-| 136 | `current_controller.is_action_running()` | Method doesn't exist on Controller |
-| 141 | `current_controller.get_refresh()` | Method doesn't exist on Controller |
-| 181 | `Controller(template_path="templates/process.html")` | Constructor doesn't accept `template_path` |
-| 186 | `current_controller.start_action(refresh_time=2)` | Method doesn't exist on Controller |
-| 207 | `current_controller.end_action()` | Method doesn't exist on Controller |
+| Line | Call                                                 | Status                                     |
+| ---- | ---------------------------------------------------- | ------------------------------------------ |
+| 136  | `current_controller.is_action_running()`             | Method doesn't exist on Controller         |
+| 141  | `current_controller.get_refresh()`                   | Method doesn't exist on Controller         |
+| 181  | `Controller(template_path="templates/process.html")` | Constructor doesn't accept `template_path` |
+| 186  | `current_controller.start_action(refresh_time=2)`    | Method doesn't exist on Controller         |
+| 207  | `current_controller.end_action()`                    | Method doesn't exist on Controller         |
 
 **Impact**: The demo app crashes with `AttributeError` on any process-related endpoint.
 
@@ -354,6 +535,7 @@ The fundamental design issue is that the framework has a "singleton active model
 3. **Global mutable state**: The buffer and action flags are global, shared across all requests and goroutines.
 
 A minimal fix would add a generation counter:
+
 ```go
 type App struct {
     // ...
