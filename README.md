@@ -338,7 +338,9 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 
 ## Links
 
-- **GitHub**: https://github.com/drummonds/lofigui
-- **PyPI**: https://pypi.org/project/lofigui/
-- **Documentation**: https://drummonds.github.io/lofigui/
-- **Issues**: https://github.com/drummonds/lofigui/issues
+| | |
+|---|---|
+| Documentation | https://h3-lofigui.statichost.page/ |
+| Source (Codeberg) | https://codeberg.org/hum3/lofigui |
+| Mirror (GitHub) | https://github.com/drummonds/lofigui |
+| Docs repo | https://codeberg.org/hum3/lofigui-docs |
