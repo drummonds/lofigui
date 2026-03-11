@@ -208,8 +208,16 @@ tasks:
       - chmod +x build.sh
       - ./build.sh
 
-  build:docs:
-    desc: Build WASM examples for GitHub Pages docs/ folder
+  docs:build:
+    desc: Build documentation (markdown to HTML)
+    cmds:
+      - task-plus md2html --file README.md --dst docs
+      - task-plus md2html --file CHANGELOG.md --dst docs
+      - task-plus md2html --file ROADMAP.md --dst docs
+      - task-plus md2html --index --dst docs --project lofigui
+
+  docs:build-wasm:
+    desc: Build WASM examples for docs/ folder
     vars:
       WASM_EXEC_JS:
         sh: find $(go env GOROOT) -name wasm_exec.js -print -quit

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Roadmap - lofigui</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="index.html">lofigui</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Roadmap</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="roadmap">Roadmap</h1>
+<h2 id="done">Done</h2>
+<ul>
+<li><strong>Go WASM</strong>: Examples 01, 03, 07, 08 deployed on GitHub Pages</li>
+<li><strong>Multi-page pattern</strong>: Server-side multi-route + WASM tabbed equivalent (example 08)</li>
+<li><strong>Python WASM</strong>: Pyodide proof-of-concept (example 03)</li>
+</ul>
+<h2 id="planned">Planned</h2>
+<ul>
+<li><strong>Example 02 WASM</strong>: go-chart in WASM — blocked by font loading in browser environment</li>
+<li><strong>Example 04 TinyGo</strong>: TinyGo build pipeline for smaller WASM binaries</li>
+<li><strong>Example 06 WASM CRUD</strong>: JavaScript form handlers to replace HTTP POST</li>
+<li><strong>HTMX integration</strong>: Example 09 demonstrates HTMX partial updates; framework-level support planned</li>
+<li><strong>Background operations</strong>: Example 10 demonstrates maintenance goroutines with progress, cancellation, and equipment lockout</li>
+<li><strong>Lofigui WASM library</strong>: Native browser version of lofigui for client-side use</li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>
