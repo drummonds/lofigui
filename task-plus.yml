@@ -1,3 +1,8 @@
+pages_build:
+    - task docs:build
+pages_deploy:
+    - site: h3-lofigui
+      type: statichost
 remotes:
-  - origin
-  - github
+    - origin
+    - github

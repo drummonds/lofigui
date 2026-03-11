@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Changelog - lofigui</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="index.html">lofigui</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Changelog</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="changelog">Changelog</h1>
+<p>All notable changes to this project will be documented in this file.</p>
+<p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
+and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<h2 id="unreleased"><a href="https://github.com/drummonds/lofigui/compare/v0.2.3...HEAD">Unreleased</a></h2>
+<h2 id="01715---2026-03-07">[0.17.15] - 2026-03-07</h2>
+<ul>
+<li>Adding research</li>
+</ul>
+<h2 id="01714---2026-03-07">[0.17.14] - 2026-03-07</h2>
+<ul>
+<li>Adding research paper</li>
+</ul>
+<h2 id="01713---2026-03-06">[0.17.13] - 2026-03-06</h2>
+<ul>
+<li>Reising seaweed fs</li>
+</ul>
+<h2 id="01712---2026-03-06">[0.17.12] - 2026-03-06</h2>
+<ul>
+<li>Adding example 11</li>
+</ul>
+<h2 id="01711---2026-03-02">[0.17.11] - 2026-03-02</h2>
+<ul>
+<li>Adding example 10 docs</li>
+</ul>
+<h2 id="01710---2026-03-02">[0.17.10] - 2026-03-02</h2>
+<ul>
+<li>
+<p>Example 10 non blocking multi action</p>
+</li>
+<li>
+<p>Example 10: Water tank maintenance — background goroutines with progress, cancellation, and equipment lockout</p>
+</li>
+</ul>
+<h2 id="0176---2026-03-01">[0.17.6] - 2026-03-01</h2>
+<ul>
+<li>
+<p>Updating documentation## [0.17.8] - 2026-03-01</p>
+</li>
+<li>
+<p>Adding 04 and 09 and summary pages</p>
+</li>
+</ul>
+<h2 id="0179---2026-03-01">[0.17.9] - 2026-03-01</h2>
+<ul>
+<li>Adding better documentation</li>
+</ul>
+<h2 id="0177---2026-03-01">[0.17.7] - 2026-03-01</h2>
+<ul>
+<li>Updating docs</li>
+</ul>
+<h2 id="0175---2026-03-01">[0.17.5] - 2026-03-01</h2>
+<ul>
+<li>Adding HTMX versions</li>
+</ul>
+<h2 id="0175---2026-02-28">[0.17.5] - 2026-02-28</h2>
+<ul>
+<li>Example 09: Water tank with HTMX partial updates (no full-page polling)</li>
+</ul>
+<h2 id="0174---2026-02-27">[0.17.4] - 2026-02-27</h2>
+<ul>
+<li>working on WASM documentation of Water tank simulation</li>
+</ul>
+<h2 id="0170---2026-02-26">[0.17.0] - 2026-02-26</h2>
+<ul>
+<li>Go water tank simulator</li>
+</ul>
+<h2 id="0161---2026-02-25">[0.16.1] - 2026-02-25</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Built-in Bulma 1.0.4 layout templates: LayoutSingle, LayoutNavbar, LayoutThreePanel (Go + Python)</li>
+<li><code>NewControllerWithLayout()</code> convenience constructor</li>
+<li>Python <code>lofigui.LAYOUT_SINGLE</code>, <code>LAYOUT_NAVBAR</code>, <code>LAYOUT_THREE_PANEL</code> exports</li>
+</ul>
+<h2 id="0151---2026-02-25">[0.15.1] - 2026-02-25</h2>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Python: <code>reset()</code> now drains the queue (BUG 4 — stale items persisted across resets)</li>
+<li>Python: <code>PrintContext.__exit__</code> also drains queue on context manager exit</li>
+<li>Python: Fixed mutable default arguments <code>extra: dict = {}</code> in <code>App.state_dict()</code> and <code>App.template_response()</code></li>
+<li>Python: Fixed example 05 to use <code>app_instance</code> API instead of removed <code>Controller</code> methods; replaced blocking <code>time.sleep</code> with <code>asyncio.sleep</code></li>
+</ul>
+<h2 id="0150---2026-02-25">[0.15.0] - 2026-02-25</h2>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><strong>Breaking</strong>: Go model function signature changed from <code>func(*App)</code> to <code>func(context.Context, *App)</code></li>
+<li><code>StartAction()</code> now returns a <code>context.Context</code> that is cancelled on <code>EndAction()</code> or when a new action starts</li>
+<li><code>HandleRoot()</code> passes cancellable context to model goroutines</li>
+<li>Old goroutines are automatically cancelled when a new action starts (prevents stale goroutines)</li>
+</ul>
+<h2 id="0140---2026-02-25">[0.14.0] - 2026-02-25</h2>
+<h3 id="fixed-1">Fixed</h3>
+<ul>
+<li>Go: <code>StateDict()</code> deadlock — replaced nested <code>ControllerName()</code> call with inline lookup, added <code>defer</code> for unlock</li>
+<li>Go: <code>HandleDisplay()</code> now injects polling state (refresh meta tag, polling status) via <code>StateDict()</code> + <code>RenderTemplate()</code></li>
+<li>Go: Extra context merge moved inside lock scope for safety</li>
+</ul>
+<h2 id="0134---2026-02-15">[0.13.4] - 2026-02-15</h2>
+<ul>
+<li>Project conformance: added ROADMAP.md, standard tasks (fmt, vet, check, clean), fixed CHANGELOG formatting</li>
+<li>Visual documentation: SVG captures of examples using url2svg, docs/UI_PATTERNS.md</li>
+</ul>
+<h2 id="0132---2026-02-13">[0.13.2] - 2026-02-13</h2>
+<ul>
+<li>Making more LLM compatible</li>
+</ul>
+<h2 id="0130---2025-11-05">[0.13.0] - 2025-11-05</h2>
+<ul>
+<li>Making auto favicon configurable</li>
+</ul>
+<h2 id="0120---2025-10-28">[0.12.0] - 2025-10-28</h2>
+<ul>
+<li>Refactoring to make app a more centralised and opinionated controller with just
+model specific info in the controller.</li>
+</ul>
+<h2 id="0110---2025-10-27">[0.11.0] - 2025-10-27</h2>
+<ul>
+<li>Using taskfile in CI to use same commands</li>
+</ul>
+<h2 id="0100---2025-10-27">[0.10.0] - 2025-10-27</h2>
+<ul>
+<li>Adding tinygo example</li>
+<li>Adding polling state</li>
+</ul>
+<h2 id="090---2025-10-27">[0.9.0] - 2025-10-27</h2>
+<ul>
+<li>Make changes to controller idempotent for both go and python</li>
+<li>adding tests and lint to precommit hook.</li>
+</ul>
+<h2 id="080---2025-10-27">[0.8.0] - 2025-10-27</h2>
+<ul>
+<li>When change python controller, make app shut down previous action safely.</li>
+</ul>
+<h2 id="060---2025-10-23">[0.6.0] - 2025-10-23</h2>
+<ul>
+<li>Bug fixing and making sure if start up on after action action is taken.</li>
+</ul>
+<h2 id="050---2025-10-23">[0.5.0] - 2025-10-23</h2>
+<ul>
+<li>restructuring to put core controller function into lofigui</li>
+<li>refactored example 01 to show this currently python only</li>
+</ul>
+<h2 id="040">[0.4.0]</h2>
+<h3 id="added-1">Added</h3>
+<ul>
+<li>Comprehensive test suite with pytest</li>
+<li>Type hints for all public functions and classes</li>
+<li>Docstrings for all public API functions</li>
+<li>HTML escaping by default in <code>print()</code> and <code>table()</code> functions with <code>escape</code> parameter</li>
+<li>Context manager support for <code>PrintContext</code> class</li>
+<li>Error handling and meaningful exceptions across all modules</li>
+<li>Buffer size warning system for <code>PrintContext</code></li>
+<li>Development dependencies: pytest, pytest-cov, mypy, flake8</li>
+<li>CI/CD GitHub Actions workflow</li>
+<li>MIT LICENSE file</li>
+<li>Community files: CONTRIBUTING.md, CODE_OF_CONDUCT.md</li>
+<li>Improved .gitignore</li>
+</ul>
+<h3 id="changed-1">Changed</h3>
+<ul>
+<li>Minimum Python version updated from 3.7 to 3.8 for better type hints support</li>
+<li>Updated all dependencies to latest versions</li>
+<li>Improved README with installation instructions and API documentation</li>
+<li>Fixed changelog filename from <code>changehistory,md</code> to <code>CHANGELOG.md</code></li>
+<li>Enhanced example documentation</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li>Fixed XSS vulnerabilities by adding HTML escaping to all output functions</li>
+<li>Added explicit warnings about using raw HTML functions</li>
+</ul>
+<h2 id="023---2023-06-xx"><a href="https://github.com/drummonds/lofigui/compare/v0.2.2...v0.2.3">0.2.3</a> - 2023-06-XX</h2>
+<h3 id="changed-2">Changed</h3>
+<ul>
+<li>Code reformatted with black</li>
+<li>Minor improvements and bug fixes</li>
+</ul>
+<h2 id="022---2023-06-xx"><a href="https://github.com/drummonds/lofigui/compare/v0.2.1...v0.2.2">0.2.2</a> - 2023-06-XX</h2>
+<h3 id="changed-3">Changed</h3>
+<ul>
+<li>Package improvements</li>
+</ul>
+<h2 id="021---2023-06-xx"><a href="https://github.com/drummonds/lofigui/compare/v0.2.0...v0.2.1">0.2.1</a> - 2023-06-XX</h2>
+<h3 id="changed-4">Changed</h3>
+<ul>
+<li>Minor updates</li>
+</ul>
+<h2 id="020---2023-06-xx"><a href="https://github.com/drummonds/lofigui/compare/v0.1.0...v0.2.0">0.2.0</a> - 2023-06-XX</h2>
+<h3 id="added-2">Added</h3>
+<ul>
+<li>Additional features and improvements</li>
+</ul>
+<h2 id="010---2023-06-08"><a href="https://github.com/drummonds/lofigui/releases/tag/v0.1.0">0.1.0</a> - 2023-06-08</h2>
+<h3 id="added-3">Added</h3>
+<ul>
+<li>Initial release</li>
+<li>Basic print functionality</li>
+<li>Markdown and HTML rendering</li>
+<li>Table generation with Bulma CSS</li>
+<li>PrintContext for buffering</li>
+<li>Example applications (hello world, SVG graph)</li>
+<li>MVC architecture pattern</li>
+<li>FastAPI integration examples</li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>
