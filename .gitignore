@@ -140,3 +140,4 @@ poetry.lock
 # Example 11 persistent data
 examples/11_water_tank_storage/go/data/
 .claude/settings.json
+.vscode/tasks.json

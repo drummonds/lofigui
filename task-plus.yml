@@ -1,3 +1,4 @@
+type: library
 pages_build:
     - task docs:build
 pages_deploy:
