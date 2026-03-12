@@ -490,7 +490,7 @@ wheels = [
 
 [[package]]
 name = "lofigui"
-version = "0.13.0"
+version = "0.17.19"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
