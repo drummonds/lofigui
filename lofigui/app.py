@@ -79,15 +79,15 @@ class App:
             d = d | extra.copy()
         return d
 
-    def render_template(
-        self, template_name: str, extra: Optional[Dict[str, Any]] = None
-    ) -> str:
+    def render_template(self, template_name: str, extra: Optional[Dict[str, Any]] = None) -> str:
         """Render a template with current state, return HTML string."""
         d = self.state_dict(extra)
         template = self.env.get_template(template_name)
         return template.render(**d)
 
-    def template_response(self, request: Any, template_name: str, extra: Optional[Dict[str, Any]] = None) -> Any:
+    def template_response(
+        self, request: Any, template_name: str, extra: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """Render and return a FastAPI/Starlette HTMLResponse.
 
         This is a convenience wrapper for FastAPI apps. For framework-agnostic
@@ -98,7 +98,11 @@ class App:
         if self.startup:
             self.startup = False
             self.startup_bounce_count += 1
-            if self.startup_bounce_count <= 3 and hasattr(request, "url") and request.url.path != "/":
+            if (
+                self.startup_bounce_count <= 3
+                and hasattr(request, "url")
+                and request.url.path != "/"
+            ):
                 return HTMLResponse('<head><meta http-equiv="Refresh" content="0; URL=/"/></head>')
 
         d = self.state_dict(extra)
