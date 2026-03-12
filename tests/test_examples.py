@@ -17,9 +17,11 @@ class TestPythonExamples:
         try:
             import hello
 
-            # Verify the app exists
+            # Verify the apps exist
             assert hasattr(hello, "app")
             assert hello.app is not None
+            assert hasattr(hello, "lg_app")
+            assert hello.lg_app is not None
 
             # Verify controller exists
             assert hasattr(hello, "controller")
@@ -184,7 +186,7 @@ class TestPythonExamplesWithFastAPI:
             client = TestClient(hello.app)
 
             # Disable startup protection for testing
-            hello.app.startup = False
+            hello.lg_app.startup = False
 
             # Test display endpoint without action (should show initial state)
             # First manually trigger model to populate buffer
