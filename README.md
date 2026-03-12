@@ -1,6 +1,6 @@
 # lofigui
 
-<!-- auto:version -->Latest: v0.17.16<!-- /auto:version -->
+<!-- auto:version -->Latest: v0.17.17<!-- /auto:version -->
 
 **Lofi GUI** - A minimalist library for creating really simple web-based GUIs for CLI tools and small projects. Available in both **Python** and **Go**, it provides a print-like interface for building lightweight web UIs with minimal complexity.
 
