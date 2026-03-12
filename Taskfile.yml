@@ -214,6 +214,7 @@ tasks:
       - task-plus md2html --file README.md --dst docs
       - task-plus md2html --file CHANGELOG.md --dst docs
       - task-plus md2html --file ROADMAP.md --dst docs
+      - task-plus md2html --file docs/index.md --dst docs
 
   docs:build-wasm:
     desc: Build WASM examples for docs/ folder

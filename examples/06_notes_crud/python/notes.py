@@ -11,7 +11,7 @@ This example demonstrates:
 import lofigui as lg
 from typing import Dict
 
-from fastapi import Request, BackgroundTasks, Form
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 import uvicorn
 
@@ -28,8 +28,14 @@ next_id = 4
 # Create controller with custom template directory
 controller = lg.Controller()
 
-# Use create_app which automatically includes favicon route
-app = lg.create_app(template_dir="../templates", controller=controller)
+# Create lofigui state manager and FastAPI app separately
+lg_app = lg.App(template_dir="../templates", controller=controller)
+app = FastAPI()
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    return lg.get_favicon_response()
 
 
 def list_notes():
@@ -173,7 +179,7 @@ async def root(request: Request):
     </div>
     """)
 
-    return app.template_response(request, "notes.html")
+    return lg_app.template_response(request, "notes.html")
 
 
 @app.post("/create", response_class=HTMLResponse)

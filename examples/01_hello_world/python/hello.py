@@ -11,18 +11,22 @@ This example demonstrates:
 import lofigui as lg
 from time import sleep
 
-from fastapi import Request, BackgroundTasks
+from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse
 import uvicorn
 
 
 # Create controller with custom template directory
-# The template directory can be anywhere, not just the default "templates"
 controller = lg.Controller()
 
-# Use create_app which automatically includes favicon route
-# Pass the same template_dir to create_app for consistency
-app = lg.create_app(template_dir="../templates", controller=controller)
+# Create lofigui state manager and FastAPI app separately
+lg_app = lg.App(template_dir="../templates", controller=controller)
+app = FastAPI()
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    return lg.get_favicon_response()
 
 
 # This is the model/business logic
@@ -34,27 +38,22 @@ def model():
         lg.print(f"Count {i}")
     lg.markdown('<a href="/">Restart</a>')
     lg.print("Done.")
-    app.end_action()  # Signal that the action is complete
+    lg_app.end_action()  # Signal that the action is complete
 
 
 @app.get("/", response_class=HTMLResponse)
 async def root(background_tasks: BackgroundTasks):
     """Root endpoint - starts the action and redirects to display"""
-    # Reset the buffer so runs don't concatenate
     lg.reset()
-
-    # Start the action in the background
     background_tasks.add_task(model)
-    app.start_action()
-
-    # Redirect to display page
+    lg_app.start_action()
     return '<head><meta http-equiv="Refresh" content="0; URL=/display"/></head>'
 
 
 @app.get("/display", response_class=HTMLResponse)
 async def display(request: Request):
     """Display endpoint - shows the current state with auto-refresh while running"""
-    return app.template_response(request, "hello.html")
+    return lg_app.template_response(request, "hello.html")
 
 
 if __name__ == "__main__":

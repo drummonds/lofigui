@@ -28,6 +28,7 @@ examples = [
     "uvicorn>=0.22.0",
     "pygal>=3.0.0",
     "httpx>=0.24.0",
+    "python-multipart>=0.0.5",
 ]
 
 [build-system]
