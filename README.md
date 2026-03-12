@@ -1,6 +1,6 @@
 # lofigui
 
-<!-- auto:version -->Latest: v0.17.15<!-- /auto:version -->
+<!-- auto:version -->Latest: v0.17.16<!-- /auto:version -->
 
 **Lofi GUI** - A minimalist library for creating really simple web-based GUIs for CLI tools and small projects. Available in both **Python** and **Go**, it provides a print-like interface for building lightweight web UIs with minimal complexity.
 
@@ -344,6 +344,7 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 | | |
 |---|---|
 | Documentation | https://h3-lofigui.statichost.page/ |
+| PyPI | https://pypi.org/project/lofigui/ |
 | Source (Codeberg) | https://codeberg.org/hum3/lofigui |
 | Mirror (GitHub) | https://github.com/drummonds/lofigui |
 <!-- /auto:links -->
