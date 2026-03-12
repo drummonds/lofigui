@@ -36,10 +36,26 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-  "examples/*",
+  "examples/",
+  "docs/",
+  "cmd/",
+  ".claude/",
+  ".github/",
+  "*.go",
   "go.mod",
   "go.sum",
-  "lofigui.go",
+  "*.d2",
+  "uv.lock",
+  "Taskfile.yml",
+  "task-plus.yml",
+  ".go-licenses-allowed.txt",
+  "CLAUDE.md",
+  "CONTRIBUTING.md",
+  "CODE_OF_CONDUCT.md",
+  "GO_CONTROLLER_GUIDE.md",
+  "GO_CONTROLLER_SUMMARY.md",
+  "RESEARCH.md",
+  "ROADMAP.md",
 ]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
