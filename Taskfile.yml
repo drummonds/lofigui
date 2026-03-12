@@ -214,7 +214,6 @@ tasks:
       - task-plus md2html --file README.md --dst docs
       - task-plus md2html --file CHANGELOG.md --dst docs
       - task-plus md2html --file ROADMAP.md --dst docs
-      - task-plus md2html --index --dst docs --project lofigui
 
   docs:build-wasm:
     desc: Build WASM examples for docs/ folder
