@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 	"github.com/flosch/pongo2/v6"
 )
 

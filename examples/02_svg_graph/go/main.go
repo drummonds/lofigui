@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 	"github.com/wcharczuk/go-chart/v2"
 )
 

@@ -6,7 +6,7 @@ package main
 import (
 	"syscall/js"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // model generates the basic output

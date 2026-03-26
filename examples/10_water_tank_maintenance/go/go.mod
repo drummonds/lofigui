@@ -1,12 +1,12 @@
-module github.com/drummonds/lofigui/examples/10_water_tank_maintenance
+module codeberg.org/hum3/lofigui/examples/10_water_tank_maintenance
 
 go 1.21
 
 require (
-	github.com/drummonds/lofigui v0.17.0
+	codeberg.org/hum3/lofigui v0.17.0
 	github.com/flosch/pongo2/v6 v6.0.0
 )
 
 require github.com/russross/blackfriday/v2 v2.1.0 // indirect
 
-replace github.com/drummonds/lofigui => ../../..
+replace codeberg.org/hum3/lofigui => ../../..

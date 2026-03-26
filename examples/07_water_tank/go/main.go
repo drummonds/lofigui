@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // render writes the SVG schematic and controls into the lofigui buffer.
