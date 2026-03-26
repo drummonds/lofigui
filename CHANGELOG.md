@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.23] - 2026-03-26
+
+ - Add lofigui.Yield() for WASM-friendly cooperative scheduling (issue #4)
+
 ## [0.17.22] - 2026-03-12
 
  - Decouple Python App from FastAPI, add docs index
