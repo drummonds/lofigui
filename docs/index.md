@@ -24,6 +24,8 @@ A minimalist library for creating simple web-based GUIs. Available in Python and
 | [08](08_water_tank_multi/) | Water Tank Multi | Multi-page with HTTP Refresh |
 | [09](09_water_tank_htmx/) | Water Tank HTMX | Partial updates with HTMX |
 | [10](10_water_tank_maintenance/) | Water Tank Maintenance | Background ops with progress |
+| [11](11_water_tank_storage/) | Water Tank Storage | WASM + API server with persistent state |
+| [12](12_batch_yield/) | Batch Yield | Cooperative scheduling with `lofigui.Yield()` |
 
 ## Links
 
