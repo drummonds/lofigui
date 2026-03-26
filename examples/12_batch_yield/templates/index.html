@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 12 — Batch Yield</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <style>
+    .output-panel { max-height: 600px; overflow-y: auto; border: 1px solid #dbdbdb; border-radius: 4px; padding: 0.75rem; }
+    #back-to-top { position: fixed; bottom: 2rem; right: 2rem; display: none; z-index: 100; }
+  </style>
+</head>
+<body id="top">
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">12 — Batch Yield</span>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span id="status-tag" class="tag is-success">Ready</span>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Cooperative Scheduling with Yield()</h1>
+        <h2 class="subtitle">Compare a batch loop <em>with</em> and <em>without</em> <code>lofigui.Yield()</code></h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="content mb-5">
+        <h3 class="title is-5">What this demonstrates</h3>
+        <ul>
+          <li><strong>With Yield()</strong> — <code>time.Sleep(1ms)</code> in WASM suspends the Go runtime, letting the browser repaint. Output streams in progressively.</li>
+          <li><strong>Without Yield()</strong> — <code>runtime.Gosched()</code> only yields between Go goroutines, NOT to the browser. The page freezes then all output appears at once.</li>
+        </ul>
+      </div>
+
+      <div class="buttons">
+        <button id="yieldBtn" class="button is-success" disabled>With Yield()</button>
+        <button id="noYieldBtn" class="button is-warning" disabled>Without Yield()</button>
+        <button id="bothBtn" class="button is-info" disabled>Run Both</button>
+        <button id="resetBtn" class="button is-light" disabled>Reset</button>
+      </div>
+
+      <hr>
+      <div class="columns">
+        <div class="column">
+          <h4 class="title is-5 has-text-success">With Yield()</h4>
+          <div id="output-yield" class="output-panel">
+            <progress class="progress is-primary" max="100">Loading WASM...</progress>
+          </div>
+        </div>
+        <div class="column">
+          <h4 class="title is-5 has-text-warning-dark">Without Yield()</h4>
+          <div id="output-noyield" class="output-panel">
+            <progress class="progress is-warning" max="100">Loading WASM...</progress>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <a id="back-to-top" class="button is-primary is-rounded" href="#top" title="Back to top">&#8679; Top</a>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>
+        <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/12_batch_yield">
+          Source on Codeberg
+        </a>
+      </p>
+    </div>
+  </footer>
+  <script src="wasm_exec.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

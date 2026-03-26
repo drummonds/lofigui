@@ -287,6 +287,14 @@ tasks:
       - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/
       - cp examples/11_water_tank_storage/templates/app.js docs/11_water_tank_storage/
       - rm examples/11_water_tank_storage/go/main.wasm
+      # 12 Batch Yield
+      - mkdir -p docs/12_batch_yield
+      - cd examples/12_batch_yield/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/12_batch_yield/
+      - cp examples/12_batch_yield/go/main.wasm docs/12_batch_yield/
+      - cp examples/12_batch_yield/templates/index.html docs/12_batch_yield/
+      - cp examples/12_batch_yield/templates/app.js docs/12_batch_yield/
+      - rm examples/12_batch_yield/go/main.wasm
 
   go-example:11:
     desc: 'Run SeaweedFS demo (starts weed server in background)'
@@ -322,7 +330,7 @@ tasks:
   # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10, tidy:11]
+    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:04, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10, tidy:11, tidy:12]
 
   tidy:main:
     desc: Run go tidy and update main
