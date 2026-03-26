@@ -9,7 +9,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 var (

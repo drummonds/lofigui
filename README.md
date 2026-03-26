@@ -69,7 +69,7 @@ uv add lofigui
 ### From source
 
 ```bash
-git clone https://github.com/drummonds/lofigui.git
+git clone https://codeberg.org/hum3/lofigui.git
 cd lofigui
 uv sync --all-extras
 ```
@@ -273,7 +273,7 @@ task example-01          # Run any Python example by number
 ### Setup
 
 ```bash
-git clone https://github.com/drummonds/lofigui.git
+git clone https://codeberg.org/hum3/lofigui.git
 cd lofigui
 uv sync --all-extras
 ```

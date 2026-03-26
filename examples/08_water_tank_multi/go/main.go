@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // renderSchematic writes the SVG schematic and controls into the lofigui buffer.

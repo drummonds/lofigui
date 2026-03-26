@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // Model function - contains business logic

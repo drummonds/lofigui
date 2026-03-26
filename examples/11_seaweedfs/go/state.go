@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // StoredFile tracks a file we've uploaded to SeaweedFS.

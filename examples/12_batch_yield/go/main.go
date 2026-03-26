@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 const batchSize = 40

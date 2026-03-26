@@ -143,27 +143,27 @@ func testGoExampleModules(t *testing.T) {
 		{
 			name:       "01_hello_world",
 			path:       "examples/01_hello_world/go",
-			moduleName: "github.com/drummonds/lofigui/examples/01_hello_world",
+			moduleName: "codeberg.org/hum3/lofigui/examples/01_hello_world",
 		},
 		{
 			name:       "02_svg_graph",
 			path:       "examples/02_svg_graph/go",
-			moduleName: "github.com/drummonds/lofigui/examples/02_svg_graph",
+			moduleName: "codeberg.org/hum3/lofigui/examples/02_svg_graph",
 		},
 		{
 			name:       "03_hello_world_wasm",
 			path:       "examples/03_hello_world_wasm/go",
-			moduleName: "github.com/drummonds/lofigui/examples/03_hello_world_wasm",
+			moduleName: "codeberg.org/hum3/lofigui/examples/03_hello_world_wasm",
 		},
 		{
 			name:       "06_notes_crud",
 			path:       "examples/06_notes_crud/go",
-			moduleName: "github.com/drummonds/lofigui/examples/06_notes_crud",
+			moduleName: "codeberg.org/hum3/lofigui/examples/06_notes_crud",
 		},
 		{
 			name:       "08_water_tank_multi",
 			path:       "examples/08_water_tank_multi/go",
-			moduleName: "github.com/drummonds/lofigui/examples/08_water_tank_multi",
+			moduleName: "codeberg.org/hum3/lofigui/examples/08_water_tank_multi",
 		},
 	}
 
@@ -187,11 +187,11 @@ func testGoExampleModules(t *testing.T) {
 				t.Errorf("go.mod does not contain expected module name %s", ex.moduleName)
 			}
 
-			if !strings.Contains(modContent, "github.com/drummonds/lofigui") {
+			if !strings.Contains(modContent, "codeberg.org/hum3/lofigui") {
 				t.Errorf("go.mod does not require lofigui package")
 			}
 
-			if !strings.Contains(modContent, "replace github.com/drummonds/lofigui => ../../..") {
+			if !strings.Contains(modContent, "replace codeberg.org/hum3/lofigui => ../../..") {
 				t.Errorf("go.mod does not have correct replace directive")
 			}
 		})
@@ -218,7 +218,7 @@ func testGoExampleHTTPHandlers(t *testing.T) {
 				t.Fatalf("Failed to list modules: %v\nOutput: %s", err, output)
 			}
 
-			if !strings.Contains(string(output), "github.com/drummonds/lofigui") {
+			if !strings.Contains(string(output), "codeberg.org/hum3/lofigui") {
 				t.Error("Example does not properly import lofigui")
 			}
 		})

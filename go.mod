@@ -1,4 +1,4 @@
-module github.com/drummonds/lofigui
+module codeberg.org/hum3/lofigui
 
 go 1.21
 

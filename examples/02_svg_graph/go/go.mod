@@ -1,9 +1,9 @@
-module github.com/drummonds/lofigui/examples/02_svg_graph
+module codeberg.org/hum3/lofigui/examples/02_svg_graph
 
 go 1.24.0
 
 require (
-	github.com/drummonds/lofigui v0.0.0
+	codeberg.org/hum3/lofigui v0.0.0
 	github.com/wcharczuk/go-chart/v2 v2.1.2
 )
 
@@ -14,4 +14,4 @@ require (
 	golang.org/x/image v0.32.0 // indirect
 )
 
-replace github.com/drummonds/lofigui => ../../..
+replace codeberg.org/hum3/lofigui => ../../..

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/drummonds/lofigui"
+	"codeberg.org/hum3/lofigui"
 )
 
 // Simple in-memory notes database
