@@ -9,5 +9,6 @@ import "time"
 // returns control to JavaScript. time.Sleep suspends the Go runtime
 // and lets the browser repaint and handle events.
 func Yield() {
+	defaultContext.checkCancelled()
 	time.Sleep(time.Millisecond)
 }

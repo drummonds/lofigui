@@ -163,6 +163,13 @@ http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 
 Model function signature: `func model(app *lofigui.App)`. Call `app.EndAction()` when done.
 
+Cancellation is transparent: if the action is replaced or stopped, `Print`, `Sleep`, and `Yield` panic with an internal sentinel that `HandleRoot` recovers. The model goroutine terminates cleanly.
+
+```go
+app.Sleep(1 * time.Second)  // cancellation-aware sleep
+ctx := app.Context()         // get raw context for database calls, HTTP clients, etc.
+```
+
 ### Controller with HTMX (no App — example 09)
 
 For HTMX-based apps, use `Controller` directly — no `App` or polling state needed. HTMX fetches fragment endpoints to update the page without full reloads.

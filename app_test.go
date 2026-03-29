@@ -534,7 +534,7 @@ func TestAppHandleRootRedirects(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
-	app.HandleRoot(w, req, func(_ context.Context, _ *App) {}, true)
+	app.HandleRoot(w, req, func(_ *App) {}, true)
 
 	if w.Code != http.StatusSeeOther {
 		t.Errorf("Expected status 303, got %d", w.Code)
@@ -542,4 +542,363 @@ func TestAppHandleRootRedirects(t *testing.T) {
 	if loc := w.Header().Get("Location"); loc != "/display" {
 		t.Errorf("Expected Location '/display', got %q", loc)
 	}
+}
+
+// TestAppSleepNormal verifies Sleep completes when not cancelled
+func TestAppSleepNormal(t *testing.T) {
+	app := NewApp()
+	app.StartAction()
+	start := time.Now()
+	app.Sleep(50 * time.Millisecond)
+	if elapsed := time.Since(start); elapsed < 40*time.Millisecond {
+		t.Errorf("Sleep returned too quickly: %v", elapsed)
+	}
+}
+
+// TestAppSleepCancellation verifies Sleep panics with sentinel when cancelled
+func TestAppSleepCancellation(t *testing.T) {
+	app := NewApp()
+	app.StartAction()
+
+	done := make(chan bool, 1)
+	go func() {
+		defer func() {
+			r := recover()
+			if r == nil {
+				done <- false
+				return
+			}
+			_, ok := r.(cancelledError)
+			done <- ok
+		}()
+		app.Sleep(5 * time.Second)
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	app.EndAction()
+
+	select {
+	case ok := <-done:
+		if !ok {
+			t.Error("Sleep did not panic with cancelledError")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Sleep goroutine did not terminate")
+	}
+}
+
+// TestAppHandleRootRecoversSentinel verifies the sentinel panic is caught
+func TestAppHandleRootRecoversSentinel(t *testing.T) {
+	app := NewApp()
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: `ok`,
+		Name:           "Test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.SetController(ctrl)
+	app.SetDisplayURL("/display")
+
+	done := make(chan bool, 1)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	app.HandleRoot(w, req, func(a *App) {
+		defer func() { done <- true }()
+		a.Sleep(5 * time.Second)
+	}, true)
+
+	// Cancel the action
+	time.Sleep(50 * time.Millisecond)
+	app.EndAction()
+
+	select {
+	case <-done:
+		// goroutine terminated cleanly
+	case <-time.After(2 * time.Second):
+		t.Fatal("Model goroutine did not terminate after cancellation")
+	}
+}
+
+// TestAppContextGetter verifies Context returns the action context
+func TestAppContextGetter(t *testing.T) {
+	app := NewApp()
+
+	// No action — should return Background
+	ctx := app.Context()
+	if ctx.Err() != nil {
+		t.Error("Expected non-cancelled context when no action running")
+	}
+
+	// Start action — should return cancellable context
+	app.StartAction()
+	ctx = app.Context()
+	if ctx.Err() != nil {
+		t.Error("Expected non-cancelled context after StartAction")
+	}
+
+	// End action — context should be cancelled
+	app.EndAction()
+	if ctx.Err() == nil {
+		t.Error("Expected cancelled context after EndAction")
+	}
+}
+
+// TestHandleStartsModelOnFirstRequest verifies Handle starts the model
+// when the buffer is empty and no action is running.
+func TestHandleStartsModelOnFirstRequest(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	started := make(chan struct{})
+	handler := app.Handle(func(a *App) {
+		Print("hello")
+		close(started)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	handler(w, req)
+
+	// Should have Refresh header (model is running)
+	if h := w.Header().Get("Refresh"); h == "" {
+		t.Error("Expected Refresh header on first request")
+	}
+
+	select {
+	case <-started:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Model did not start")
+	}
+}
+
+// TestHandleDoesNotRestartAfterCompletion verifies Handle does not restart
+// the model when it has completed (buffer non-empty, not running).
+func TestHandleDoesNotRestartAfterCompletion(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	callCount := 0
+	var mu sync.Mutex
+	done := make(chan struct{})
+
+	handler := app.Handle(func(a *App) {
+		mu.Lock()
+		callCount++
+		mu.Unlock()
+		Print("output")
+		close(done)
+		// Note: Handle auto-calls EndAction after model returns,
+		// but flush() sleeps 2s. We call EndAction directly to speed up the test.
+	})
+
+	// First request — starts the model
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	handler(w, req)
+
+	// Wait for model to finish
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Model did not complete")
+	}
+
+	// Manually EndAction (flush has a 2s sleep we don't want in tests)
+	app.EndAction()
+	time.Sleep(50 * time.Millisecond)
+
+	// Second request — should NOT restart
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	w = httptest.NewRecorder()
+	handler(w, req)
+
+	// No Refresh header (model completed)
+	if h := w.Header().Get("Refresh"); h != "" {
+		t.Errorf("Expected no Refresh header after completion, got %q", h)
+	}
+
+	// Body should contain the model output
+	if !strings.Contains(w.Body.String(), "output") {
+		t.Error("Expected model output in response body")
+	}
+
+	// Model should only have been called once
+	mu.Lock()
+	if callCount != 1 {
+		t.Errorf("Expected model to run once, ran %d times", callCount)
+	}
+	mu.Unlock()
+}
+
+// TestHandleAutoEndAction verifies Handle calls EndAction when model returns.
+func TestHandleAutoEndAction(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	done := make(chan struct{})
+	handler := app.Handle(func(a *App) {
+		Print("done")
+		close(done)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	handler(w, req)
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Model did not complete")
+	}
+
+	// flush() runs in the goroutine — wait a bit for EndAction
+	time.Sleep(100 * time.Millisecond)
+
+	if app.IsActionRunning() {
+		t.Error("Expected action to not be running after model returned")
+	}
+}
+
+// TestHandleLazyController verifies Handle creates a default controller
+// when none is set.
+func TestHandleLazyController(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	if app.GetController() != nil {
+		t.Fatal("Expected no controller initially")
+	}
+
+	handler := app.Handle(func(a *App) {
+		Print("lazy")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	handler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200, got %d", w.Code)
+	}
+	if app.GetController() == nil {
+		t.Error("Expected controller to be lazily created")
+	}
+}
+
+// TestAppListenAndServeGracefulShutdown verifies that app.ListenAndServe
+// returns nil (exit 0) when the model completes and signals done.
+func TestAppListenAndServeGracefulShutdown(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", app.Handle(func(a *App) {
+		Print("bye")
+	}))
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- app.ListenAndServe(":0", mux)
+	}()
+
+	// Wait for server to start
+	for i := 0; i < 50; i++ {
+		time.Sleep(50 * time.Millisecond)
+		app.mu.RLock()
+		srv := app.server
+		app.mu.RUnlock()
+		if srv != nil {
+			break
+		}
+	}
+
+	app.mu.RLock()
+	srv := app.server
+	app.mu.RUnlock()
+	if srv == nil {
+		t.Fatal("Server did not start")
+	}
+
+	// Signal done directly and verify nil return
+	app.signalDone()
+
+	select {
+	case err := <-errCh:
+		if err != nil {
+			t.Errorf("Expected nil error on graceful shutdown, got %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("ListenAndServe did not return after signalDone")
+	}
+}
+
+// TestAppListenAndServeFullLifecycle runs the full Handle lifecycle
+// through an actual HTTP server and verifies clean exit.
+func TestAppListenAndServeFullLifecycle(t *testing.T) {
+	app := NewApp()
+	defaultContext.Reset()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", app.Handle(func(a *App) {
+		Print("lifecycle test")
+	}))
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- app.ListenAndServe(":1399", mux)
+	}()
+
+	// Wait for server to be ready
+	var baseURL string
+	for i := 0; i < 50; i++ {
+		time.Sleep(50 * time.Millisecond)
+		app.mu.RLock()
+		srv := app.server
+		app.mu.RUnlock()
+		if srv != nil {
+			baseURL = "http://localhost:1399"
+			break
+		}
+	}
+	if baseURL == "" {
+		t.Fatal("Server did not start")
+	}
+
+	// First request — starts model
+	resp, err := http.Get(baseURL + "/")
+	if err != nil {
+		t.Fatalf("GET / failed: %v", err)
+	}
+	resp.Body.Close()
+
+	// Server should shut down after flush (EndAction + 2s grace + signalDone)
+	select {
+	case err := <-errCh:
+		if err != nil {
+			t.Errorf("Expected nil error, got %v", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("Server did not shut down after model completed")
+	}
+}
+
+// TestPrintChecksCancellation verifies Print panics when context is cancelled
+func TestPrintChecksCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defaultContext.setContext(ctx)
+	defer defaultContext.clearContext()
+
+	cancel() // cancel the context directly (simulates mid-goroutine cancellation)
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("Print did not panic after cancellation")
+		}
+		if _, ok := r.(cancelledError); !ok {
+			t.Fatalf("Print panicked with wrong type: %T", r)
+		}
+	}()
+	Print("should panic")
 }

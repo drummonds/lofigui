@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lofigui Research - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Lofigui Research</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="lofigui-research">Lofigui Research</h1>
+<p>Design philosophy, trade-offs, and technical deep-dives.</p>
+<h2 id="research-pages">Research Pages</h2>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="research-philosophy.html">Philosophy</a></td>
+<td>Design philosophy, the interactivity spectrum, and where lofigui sits</td>
+</tr>
+<tr>
+<td><a href="research-charts.html">Charts</a></td>
+<td>Charting options — Go SVG vs JavaScript libraries</td>
+</tr>
+<tr>
+<td><a href="research-layouts.html">Layouts</a></td>
+<td>Page layout complexity progression — single page to three-panel</td>
+</tr>
+<tr>
+<td><a href="research-technical.html">Technical</a></td>
+<td>Architecture overview, polling mechanism, task scheduling</td>
+</tr>
+<tr>
+<td><a href="research-bugs.html">Bugs</a></td>
+<td>Known bugs, interaction analysis, and root causes</td>
+</tr>
+<tr>
+<td><a href="research-python.html">Python</a></td>
+<td>Python implementation — API reference, installation, development</td>
+</tr>
+</tbody>
+</table>
+<h2 id="overview">Overview</h2>
+<p>lofigui is for <strong>single-process, small-audience tools</strong>. The sweet spot: 1-10 users, one real object (a machine, a simulation, a long-running process) with a few pages showing different views of it.</p>
+<p>Web applications sit on a spectrum from static sites to full SPAs. lofigui covers levels 2-4 (static+forms through HTMX partial updates). See <a href="research-philosophy.html">Philosophy</a> for the full interactivity spectrum.</p>
+<h3 id="layout-progression">Layout progression</h3>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th>Built-in</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single page</td>
+<td><code>LayoutSingle</code></td>
+<td>Quick tools, WASM apps</td>
+</tr>
+<tr>
+<td>Header (fixed)</td>
+<td><code>LayoutNavbar</code></td>
+<td>Dashboards, monitoring</td>
+</tr>
+<tr>
+<td>Three-panel</td>
+<td><code>LayoutThreePanel</code></td>
+<td>Multi-page apps, CRUD</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="research-layouts.html">Layouts</a> for details and examples.</p>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

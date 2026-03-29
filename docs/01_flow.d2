@@ -1,0 +1,44 @@
+title: |md
+  ## Example 01 — How it works
+|
+
+shape: sequence_diagram
+
+user: User
+browser: Browser
+server: Server
+model: Model
+
+user -> browser: Open http://localhost:1340
+browser -> server: GET /
+server.note: Buffer empty, not running\n→ StartAction, launch goroutine
+server -> model: go model(app)
+server -> browser: HTML + Refresh: 1
+browser.note: Page renders\n(empty output)
+
+browser -> server: GET / (auto-refresh 1s)
+server.note: Running → render buffer
+model.note: Print("Hello world.")\nSleep(1s)\nPrintf("Count 0")
+server -> browser: HTML + Refresh: 1
+browser.note: Shows partial output
+
+browser -> server: GET / (auto-refresh 1s) {
+  style.stroke-dash: 3
+}
+server.note: Running → render buffer
+model.note: Sleep(1s)\nPrintf("Count 1")\n...
+server -> browser: HTML + Refresh: 1 {
+  style.stroke-dash: 3
+}
+
+model.note: Print("Done.")\nmodel returns
+model -> server: goroutine returns
+server.note: flush():\nEndAction → polling stops
+
+browser -> server: GET / (final refresh)
+server.note: Buffer has content,\nnot running → render final page
+server -> browser: HTML (no Refresh header)
+browser.note: Final output displayed\nNo more refreshing
+
+server.note: Grace period (2s)\nthen Shutdown
+server.note: exit 0

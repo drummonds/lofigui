@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Technical - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Technical</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-technical">Research: Technical</h1>
+<p>Architecture overview, polling mechanism, and task scheduling.</p>
+<h2 id="1-codebase-overview">1. Codebase Overview</h2>
+<p>lofigui is a lightweight web-UI framework with dual Python and Go implementations. It provides a print-like interface for building server-side rendered HTML applications.</p>
+<h3 id="architecture">Architecture</h3>
+<p>The framework has three layers:</p>
+<ol>
+<li>
+<p><strong>Buffer Layer</strong> (<code>lofigui.go</code> / <code>context.py</code>, <code>print.py</code>, <code>markdown.py</code>) — Global mutable buffer that accumulates HTML fragments via <code>Print()</code>, <code>Markdown()</code>, <code>HTML()</code>, <code>Table()</code> calls. Python uses an <code>asyncio.Queue</code> that drains into a string buffer; Go uses a <code>strings.Builder</code> directly.</p>
+</li>
+<li>
+<p><strong>Controller Layer</strong> (<code>controller.go</code> / <code>controller.py</code>) — Wraps a template engine (pongo2 in Go, Jinja2 in Python). Renders templates with the buffer content injected as <code>{{ results | safe }}</code>.</p>
+</li>
+<li>
+<p><strong>App Layer</strong> (<code>app.go</code> / <code>app.py</code>) — Manages controller lifecycle, action state (running/stopped), and auto-refresh polling. Implements the &quot;singleton active model&quot; concept — only one background task should run at a time.</p>
+</li>
+</ol>
+<h3 id="execution-patterns">Execution Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Flow</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Async + Polling</strong></td>
+<td><code>GET /</code> resets buffer, starts model in goroutine/background task, redirects to <code>/display</code>. <code>/display</code> includes <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code> tag while polling is active.</td>
+<td>01 (Go+Python)</td>
+</tr>
+<tr>
+<td><strong>Synchronous</strong></td>
+<td>Model runs inline, <code>EndAction()</code> called immediately, redirects to <code>/display</code>.</td>
+<td>02 (Go+Python)</td>
+</tr>
+<tr>
+<td><strong>WASM</strong></td>
+<td>Go compiled to WebAssembly, no server-side app.</td>
+<td>03, 04</td>
+</tr>
+<tr>
+<td><strong>CRUD</strong></td>
+<td>Form POSTs modify state, redirect to <code>GET /</code>. Uses <code>ctrl.StateDict()</code> + <code>ctrl.RenderTemplate()</code> directly.</td>
+<td>06 (Go+Python)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-notification-system-pollingauto-refresh">2. Notification System (Polling/Auto-Refresh)</h2>
+<p>The &quot;notification system&quot; is a server-side polling mechanism using HTML <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code> tags. There is no WebSocket, SSE, or JavaScript-based notification — it's pure HTTP redirect-based polling.</p>
+<h3 id="how-it-works">How It Works</h3>
+<ol>
+<li><strong>Start</strong>: <code>app.StartAction()</code> sets <code>actionRunning=true</code>, <code>polling=true</code>, <code>PollCount=0</code>.</li>
+<li><strong>Poll Cycle</strong>: On each <code>/display</code> request, <code>app.StateDict()</code> (Python) checks <code>self.poll</code>:
+<ul>
+<li>If <code>True</code>: injects <code>&lt;meta http-equiv=&quot;Refresh&quot; content=&quot;N&quot;&gt;</code> into the <code>refresh</code> template variable. Increments <code>poll_count</code>.</li>
+<li>If <code>False</code>: sets <code>refresh=&quot;&quot;</code>, resets <code>poll_count=0</code>.</li>
+</ul>
+</li>
+<li><strong>Stop</strong>: <code>app.EndAction()</code> sets <code>actionRunning=false</code>, <code>polling=false</code>. Next <code>/display</code> request renders without the refresh tag — polling stops.</li>
+<li><strong>Template</strong>: The template must include <code>{{ refresh | safe }}</code> in the <code>&lt;head&gt;</code> for auto-refresh to work.</li>
+</ol>
+<h3 id="python-implementation-details">Python Implementation Details</h3>
+<ul>
+<li><code>App.state_dict()</code> builds the full context dict including <code>refresh</code>, <code>polling</code>, <code>poll_count</code>.</li>
+<li><code>App.template_response()</code> calls <code>state_dict()</code> then renders via Jinja2.</li>
+<li>The Python path works correctly: <code>template_response()</code> -&gt; <code>state_dict()</code> -&gt; injects refresh meta tag.</li>
+</ul>
+<h3 id="go-implementation-details">Go Implementation Details</h3>
+<ul>
+<li><code>App.StateDict()</code> is the method that should build the full context with polling info.</li>
+<li><code>Controller.StateDict()</code> only returns <code>request</code> and <code>results</code> (no polling info).</li>
+<li><code>App.HandleDisplay()</code> delegates to <code>ctrl.HandleDisplay()</code> which only uses <code>ctrl.StateDict()</code>.</li>
+</ul>
+<h3 id="startup-bounce-python-only">Startup Bounce (Python only)</h3>
+<p>The Python <code>App</code> has a <code>startup</code> flag. On the first call to <code>template_response()</code>, if the URL path isn't <code>/</code>, it redirects to <code>/</code>. This prevents a stale <code>/display</code> page from showing when the server restarts. The <code>startup_bounce_count</code> limit of 3 is effectively unreachable because <code>startup</code> is set to <code>False</code> on the first invocation.</p>
+<hr>
+<h2 id="3-task-scheduling-flow">3. Task Scheduling Flow</h2>
+<h3 id="go-flow-async-pattern">Go Flow (async pattern)</h3>
+<pre><code>User -&gt; GET / -&gt; app.HandleRoot(w, r, model, true)
+  1. RLock -&gt; read ctrl, displayURL -&gt; RUnlock
+  2. ctrl.context.Reset()
+  3. app.StartAction()          &lt;- sets actionRunning=true, polling=true
+  4. go modelFunc(app)          &lt;- goroutine launched, no cancellation mechanism
+  5. Write redirect HTML to /display
+
+Background goroutine:
+  model(app) {
+      lofigui.Print(&quot;...&quot;)
+      time.Sleep(...)
+      app.EndAction()           &lt;- sets actionRunning=false, polling=false
+  }
+
+User -&gt; GET /display -&gt; app.HandleDisplay(w, r)
+  1. RLock -&gt; read ctrl -&gt; RUnlock
+  2. ctrl.HandleDisplay(w, r, nil)  &lt;- uses ctrl.StateDict (NOT app.StateDict)
+</code></pre>
+<h3 id="python-flow-async-pattern">Python Flow (async pattern)</h3>
+<pre><code>User -&gt; GET / -&gt; root(background_tasks)
+  1. lg.reset()
+  2. background_tasks.add_task(model)
+  3. app.start_action()         &lt;- sets _action_running=True, poll=True
+  4. Return redirect HTML to /display
+
+Background task:
+  model() {
+      lg.print(&quot;...&quot;)
+      sleep(...)
+      app.end_action()          &lt;- sets _action_running=False, poll=False
+  }
+
+User -&gt; GET /display -&gt; display(request)
+  1. app.template_response(request, &quot;hello.html&quot;)
+     -&gt; app.state_dict(request)  &lt;- includes refresh meta tag if poll=True
+     -&gt; templates.TemplateResponse(...)
+</code></pre>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

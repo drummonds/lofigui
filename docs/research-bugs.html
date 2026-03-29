@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Bugs - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Bugs</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-bugs">Research: Bugs</h1>
+<p>Known bugs, interaction analysis, and root causes.</p>
+<h2 id="bugs-found">Bugs Found</h2>
+<h3 id="bug-1-critical-go-apphandledisplay-never-injects-pollingrefresh-state">BUG 1 (CRITICAL): Go <code>app.HandleDisplay()</code> never injects polling/refresh state</h3>
+<p><strong>File</strong>: <code>app.go</code></p>
+<p><code>ctrl.HandleDisplay()</code> calls <code>ctrl.StateDict(r)</code> which only returns <code>request</code> and <code>results</code>. The <code>refresh</code>, <code>polling</code>, <code>version</code>, <code>controller_name</code>, and <code>poll_count</code> template variables are NEVER populated.</p>
+<p><strong>Impact</strong>: In the Go async pattern (example 01), <code>{{ refresh | safe }}</code> in the template always renders as empty. The page never auto-refreshes. The entire polling mechanism is non-functional in Go.</p>
+<p><strong>Fix</strong>: <code>app.HandleDisplay()</code> should use <code>app.StateDict()</code> to build the full context, then pass it to <code>ctrl.HandleDisplay()</code> as extra context, or render the template directly.</p>
+<h3 id="bug-2-critical-go-appstatedict-deadlocks">BUG 2 (CRITICAL): Go <code>app.StateDict()</code> deadlocks</h3>
+<p><strong>File</strong>: <code>app.go</code></p>
+<p><code>StateDict()</code> acquires <code>app.mu.Lock()</code> then calls <code>app.ControllerName()</code> which tries <code>app.mu.RLock()</code>. <code>sync.RWMutex</code> is NOT re-entrant — a goroutine holding a write lock that attempts a read lock on the same mutex deadlocks permanently.</p>
+<p><strong>Impact</strong>: Any call to <code>app.StateDict()</code> hangs forever. Currently masked by BUG 1 (HandleDisplay doesn't call StateDict), but fixing BUG 1 naively triggers this deadlock.</p>
+<p><strong>Fix</strong>: Inline the controller name lookup inside <code>StateDict()</code> (use <code>app.controller</code> directly since lock is already held), or refactor to avoid nested locking.</p>
+<h3 id="bug-3-critical-no-cancellation-mechanism-for-running-goroutinestasks">BUG 3 (CRITICAL): No cancellation mechanism for running goroutines/tasks</h3>
+<p><strong>Files</strong>: <code>app.go</code> (Go), <code>examples/01_hello_world/python/hello.py</code> (Python)</p>
+<p>When the user triggers the root endpoint while a model is already running, a NEW goroutine/task is launched — the old one keeps running. There is no <code>context.Context</code>, channel, flag, or any other cancellation mechanism. The old goroutine continues writing to the shared buffer and eventually calls <code>EndAction()</code>, <strong>prematurely stopping the polling for the NEW action</strong>.</p>
+<p><strong>Scenario</strong>:</p>
+<pre><code>T=0:  User hits /  -&gt; goroutine A starts, StartAction()
+T=2:  User hits /  -&gt; goroutine B starts, StartAction() (resets state)
+T=5:  goroutine A finishes -&gt; calls EndAction() -&gt; STOPS POLLING
+T=5:  goroutine B is still running but polling is now off
+T=8:  goroutine B finishes -&gt; calls EndAction() (no-op, already stopped)
+</code></pre>
+<p><strong>Fix</strong>: Model function should accept <code>context.Context</code>. <code>HandleRoot</code> should cancel the previous context before starting a new one.</p>
+<h3 id="bug-4-significant-python-reset-doesnt-clear-the-asyncio-queue">BUG 4 (SIGNIFICANT): Python <code>reset()</code> doesn't clear the asyncio queue</h3>
+<p><strong>File</strong>: <code>lofigui/context.py</code></p>
+<p><code>print()</code> puts messages into <code>ctx.queue</code>. <code>buffer()</code> drains the queue into the buffer string. <code>reset()</code> clears the buffer string but leaves the queue intact — messages from the previous run survive the reset.</p>
+<p><strong>Fix</strong>: <code>reset()</code> should drain and discard the queue before clearing the buffer.</p>
+<h3 id="bug-5-significant-example-05-demo-apppy-is-completely-broken">BUG 5 (SIGNIFICANT): Example 05 (demo_app.py) is completely broken</h3>
+<p><strong>File</strong>: <code>examples/05_demo_app/demo_app.py</code></p>
+<p>Uses Controller API methods that were removed during refactoring: <code>is_action_running()</code>, <code>get_refresh()</code>, <code>start_action()</code>, <code>end_action()</code>, and a <code>template_path</code> constructor arg.</p>
+<p><strong>Impact</strong>: Crashes with <code>AttributeError</code> on any process-related endpoint.</p>
+<h3 id="bug-6-moderate-go-handleroot-race-between-reset-and-goroutine-writes">BUG 6 (MODERATE): Go <code>HandleRoot</code> race between reset and goroutine writes</h3>
+<p><strong>File</strong>: <code>app.go</code></p>
+<p>Between <code>ctrl.context.Reset()</code> and the new goroutine starting, an old goroutine can write to the buffer. These writes appear in the new action's output.</p>
+<p><strong>Impact</strong>: Stale output from previous runs can leak into new runs.</p>
+<h3 id="bug-7-moderate-go-statedict-doesnt-defer-unlock">BUG 7 (MODERATE): Go <code>StateDict</code> doesn't defer unlock</h3>
+<p><strong>File</strong>: <code>app.go</code></p>
+<p><code>app.mu.Lock()</code> is not deferred. If any code between Lock and Unlock panics, the mutex is never released, permanently deadlocking all future operations.</p>
+<p><strong>Fix</strong>: Use <code>defer app.mu.Unlock()</code> immediately after <code>app.mu.Lock()</code>.</p>
+<h3 id="bug-8-minor-python-mutable-default-arguments">BUG 8 (MINOR): Python mutable default arguments</h3>
+<p><strong>File</strong>: <code>lofigui/app.py</code></p>
+<p><code>state_dict(extra: dict = {})</code> and <code>template_response(extra: dict = {})</code> use mutable default arguments.</p>
+<p><strong>Fix</strong>: Use <code>extra: dict = None</code> and <code>if extra is None: extra = {}</code>.</p>
+<h3 id="bug-9-minor-python-start-demo-process-blocks-async-event-loop">BUG 9 (MINOR): Python <code>start_demo_process</code> blocks async event loop</h3>
+<p><strong>File</strong>: <code>examples/05_demo_app/demo_app.py</code></p>
+<p>Uses <code>time.sleep()</code> in an async handler, blocking all request processing.</p>
+<h3 id="bug-10-minor-go-context-uses-syncmutex-instead-of-syncrwmutex">BUG 10 (MINOR): Go Context uses sync.Mutex instead of sync.RWMutex</h3>
+<p><strong>File</strong>: <code>lofigui.go</code></p>
+<p><code>Buffer()</code> is a read-only operation but takes an exclusive lock, blocking concurrent readers unnecessarily.</p>
+<hr>
+<h2 id="bug-interaction-analysis">Bug Interaction Analysis</h2>
+<p>Bugs 1, 2, and 3 interact in a particularly insidious way:</p>
+<ul>
+<li><strong>BUG 1</strong> means Go's <code>app.HandleDisplay()</code> bypasses <code>app.StateDict()</code>, so the auto-refresh meta tag is never rendered. This masks <strong>BUG 2</strong> (the deadlock in <code>StateDict</code>).</li>
+<li>If you fix <strong>BUG 1</strong> by making <code>HandleDisplay</code> call <code>app.StateDict()</code>, you immediately hit <strong>BUG 2</strong> (deadlock).</li>
+<li>If you fix <strong>BUG 2</strong> AND <strong>BUG 1</strong>, the auto-refresh now works, but then <strong>BUG 3</strong> becomes much more visible — old goroutines calling <code>EndAction()</code> prematurely kill the new action's polling.</li>
+</ul>
+<p>The correct fix order is: BUG 2 -&gt; BUG 1 -&gt; BUG 3.</p>
+<p>Similarly, <strong>BUG 4</strong> (Python queue not cleared on reset) and <strong>BUG 3</strong> (no cancellation) interact: even if you add cancellation to stop old tasks from calling <code>EndAction()</code>, messages from old tasks still leak through the queue.</p>
+<hr>
+<h2 id="root-cause-missing-cancellation-architecture">Root Cause: Missing Cancellation Architecture</h2>
+<p>The fundamental design issue is that the framework has a &quot;singleton active model&quot; concept (only one action at a time) but no mechanism to enforce it:</p>
+<ol>
+<li><strong>No cancellation propagation</strong>: Go goroutines and Python background tasks have no way to learn they've been superseded.</li>
+<li><strong>No action ID/generation counter</strong>: There's no way to distinguish which action's <code>EndAction()</code> call is current.</li>
+<li><strong>Global mutable state</strong>: The buffer and action flags are global, shared across all requests and goroutines.</li>
+</ol>
+<p>A minimal fix would add a generation counter:</p>
+<pre><code class="language-go">type App struct {
+    // ...
+    actionGeneration uint64
+}
+
+func (app *App) StartAction() uint64 {
+    app.mu.Lock()
+    defer app.mu.Unlock()
+    app.actionGeneration++
+    app.actionRunning = true
+    app.polling = true
+    return app.actionGeneration
+}
+
+func (app *App) EndAction(generation uint64) {
+    app.mu.Lock()
+    defer app.mu.Unlock()
+    if generation == app.actionGeneration {
+        app.actionRunning = false
+        app.polling = false
+    }
+    // else: stale call from superseded goroutine -- ignore
+}
+</code></pre>
+<p>A fuller fix would use <code>context.Context</code> for cancellation signaling.</p>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

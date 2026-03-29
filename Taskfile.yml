@@ -214,7 +214,15 @@ tasks:
       - task-plus md2html --file README.md --dst docs
       - task-plus md2html --file CHANGELOG.md --dst docs
       - task-plus md2html --file ROADMAP.md --dst docs
+      - task-plus md2html --file RESEARCH.md --dst docs
+      - task-plus md2html --file docs/research-philosophy.md --dst docs
+      - task-plus md2html --file docs/research-charts.md --dst docs
+      - task-plus md2html --file docs/research-layouts.md --dst docs
+      - task-plus md2html --file docs/research-technical.md --dst docs
+      - task-plus md2html --file docs/research-bugs.md --dst docs
+      - task-plus md2html --file docs/research-python.md --dst docs
       - task-plus md2html --file docs/index.md --dst docs
+      - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 
   docs:build-wasm:
     desc: Build WASM examples for docs/ folder

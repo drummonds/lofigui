@@ -11,5 +11,6 @@ import "runtime"
 // Call Yield inside tight background loops that update the lofigui buffer
 // to keep the UI responsive.
 func Yield() {
+	defaultContext.checkCancelled()
 	runtime.Gosched()
 }
