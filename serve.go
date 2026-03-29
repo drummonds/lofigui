@@ -97,10 +97,10 @@ func (app *App) ListenAndServe(addr string, handler http.Handler) error {
 		}()
 
 		err = srv.Serve(ln)
-			if errors.Is(err, http.ErrServerClosed) {
-				return nil // graceful shutdown
-			}
-			return err
+		if errors.Is(err, http.ErrServerClosed) {
+			return nil // graceful shutdown
+		}
+		return err
 	}
 	return fmt.Errorf("all ports %d-%d in use", port, port+9)
 }
