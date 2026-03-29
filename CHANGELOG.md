@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.25] - 2026-03-29
+
+ - Updating docs
+
 ## [0.17.24] - 2026-03-29
 
  - Simplify example 01 with Handle, lazy controller, auto-flush and graceful shutdown
