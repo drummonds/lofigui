@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Philosophy - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Philosophy</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-philosophy">Research: Philosophy</h1>
+<p>Design philosophy and the interactivity spectrum.</p>
+<h2 id="the-original-vision-no-css-no-javascript">The original vision: no CSS, no JavaScript</h2>
+<p>lofigui started from a simple premise: what if a web UI was just <code>print()</code> statements rendered as plain HTML? No CSS framework, no JavaScript, no build step. The reasons:</p>
+<ol>
+<li>
+<p><strong>Simplicity</strong> — Every dependency is a thing to learn, update, and debug. Plain HTML is the lowest common denominator. A developer who can write <code>print(&quot;hello&quot;)</code> can build a UI.</p>
+</li>
+<li>
+<p><strong>Deployment</strong> — A single binary (Go) or a minimal Python package that serves HTML over HTTP. No node_modules, no bundler, no static asset pipeline. Copy the binary to a server and run it. This matters especially for gokrazy deployments and internal tools where infrastructure is minimal.</p>
+</li>
+<li>
+<p><strong>Understandability</strong> — &quot;View Source&quot; shows exactly what the server sent. There is no client-side rendering, no virtual DOM diffing, no hydration step. The browser does what browsers were built to do: render HTML.</p>
+</li>
+</ol>
+<h2 id="the-bulma-compromise">The Bulma compromise</h2>
+<p>Plain HTML is functional but ugly. For internal tools used daily, aesthetics matter enough to justify a CSS framework. Bulma was chosen because:</p>
+<ul>
+<li>It is CSS-only — no JavaScript runtime</li>
+<li>It is a single CDN link — no build step</li>
+<li>It makes tables, forms, and layout look professional with class names alone</li>
+</ul>
+<p>This is the first trade-off: we accepted a CDN dependency for better-looking output. The framework still works without Bulma (plain HTML renders fine), but the examples and defaults assume it.</p>
+<p>godocs originally started with very simple hand-written CSS. Over time it grew complex and inconsistent — and it was actually <em>more</em> CSS and <em>more</em> complexity than switching to Bulma for a more consistent result. Making a custom CSS resulted in much more complexity and more CSS than restricting to a standard. The same principle may apply to charts and other areas: a focused, well-chosen dependency can be simpler than a DIY approach that accumulates complexity over time.</p>
+<h2 id="removing-javascript-precedent-and-practice">Removing JavaScript: precedent and practice</h2>
+<p>The UK Government Digital Service <a href="https://insidegovuk.blog.gov.uk/2022/08/11/how-and-why-we-removed-jquery-from-gov-uk/">removed jQuery from GOV.UK</a> in 2022 — a site serving millions of users. Their reasoning: fewer bytes, fewer failure modes, better accessibility. If GOV.UK can serve a nation without jQuery, an internal tool can certainly manage without React.</p>
+<p>lofigui takes this further. The base framework uses zero JavaScript. The browser's native capabilities — HTML rendering, form submission, HTTP Refresh — handle everything in examples 01-08.</p>
+<h2 id="where-javascript-creeps-back-in">Where JavaScript creeps back in</h2>
+<p>Two features introduce JavaScript, both deliberately:</p>
+<p><strong>WASM</strong> (examples 03, 04, 07, 08) — Go compiled to WebAssembly requires a small JS loader (<code>wasm_exec.js</code>). This is the price of running the same Go code in the browser without a server. The JS is boilerplate glue, not application logic.</p>
+<p><strong>HTMX</strong> (examples 09, 10) — A single <code>&lt;script&gt;</code> tag that adds <code>hx-get</code> and <code>hx-trigger</code> attributes to HTML elements. HTMX exists because full-page HTTP Refresh polling has a real usability problem: if you are trying to enter information in a form or click a button, the page refresh interrupts you. The input loses focus, the form resets, the click never registers. For display-only dashboards, polling is fine. For anything interactive, it is maddening.</p>
+<p>HTMX solves this by updating only the parts of the page that change, leaving forms and buttons untouched. It is the minimum JavaScript needed to make multi-page dynamic sites usable.</p>
+<h2 id="the-javascript-budget">The JavaScript budget</h2>
+<p>The position is not &quot;no JavaScript ever&quot; but &quot;justify every byte&quot;:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>JS?</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base (examples 01-08)</td>
+<td>None</td>
+<td>Full-page refresh is sufficient</td>
+</tr>
+<tr>
+<td>HTMX (examples 09-10)</td>
+<td>~14KB</td>
+<td>Partial updates make interactive pages usable</td>
+</tr>
+<tr>
+<td>WASM (examples 03-04)</td>
+<td>~16KB loader</td>
+<td>Enables server-free deployment</td>
+</tr>
+</tbody>
+</table>
+<p>No bundler, no npm, no build step. Each JS dependency is a single file loaded from a CDN or embedded.</p>
+<h2 id="the-interactivity-spectrum">The interactivity spectrum</h2>
+<p>Web applications sit on a spectrum of interactivity. lofigui deliberately targets the lower end, where simplicity wins. Understanding the spectrum helps choose the right approach for a given project.</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Approach</th>
+<th>lofigui support</th>
+<th>JS required</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Static sites</td>
+<td>Docs only</td>
+<td>None</td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Static + forms</td>
+<td>Full (CRUD pattern)</td>
+<td>None</td>
+<td><a href="06_notes.svg">06</a> (Notes CRUD)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Polling (whole page)</td>
+<td>Full (App + Refresh)</td>
+<td>None</td>
+<td><a href="01_hello_world/">01</a> (Hello World), <a href="02_chart.svg">02</a> (SVG Graph), <a href="07_water_tank/">07</a> (Water Tank), <a href="08_water_tank_multi/">08</a> (Multi-Page)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>HTMX (partial updates)</td>
+<td>Full (Controller + HTMX)</td>
+<td>~14KB</td>
+<td><a href="09_water_tank_htmx/">09</a> (Water Tank HTMX), <a href="10_water_tank_maintenance/">10</a> (Maintenance), <a href="12_batch_yield/">12</a> (Batch Yield)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>SPA (full Ajax)</td>
+<td>Out of scope</td>
+<td>Framework</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Most internal tools and dashboards live at levels 2-4. lofigui covers that range with a <code>print()</code>-based API and zero-to-minimal JavaScript.</p>
+<h3 id="1-static-sites">1. Static sites</h3>
+<p>Pure HTML + CSS. No server, no forms, no JavaScript. Documentation, landing pages, blogs. Generated once, served from a CDN or file server.</p>
+<p><em>Examples: GitHub Pages, statichost.eu docs, this documentation site.</em></p>
+<h3 id="2-static--static-forms">2. Static + static forms</h3>
+<p>HTML + CSS + traditional HTML form submissions. The form POSTs to the server, the server processes it and returns a new page. Each interaction is a full page load. No JavaScript needed — the browser handles form encoding and submission natively.</p>
+<p><em>lofigui examples: 06 (Notes CRUD) — form POST, redirect, re-render.</em></p>
+<h3 id="3-refreshing-whole-page-polling">3. Refreshing whole page (polling)</h3>
+<p>The server renders the complete page. The browser periodically reloads it via <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code>. Good for dashboards and status pages where the user watches but doesn't interact. The entire page is replaced on each refresh cycle.</p>
+<p><strong>Limitation</strong>: you cannot interact with the page while it refreshes. Clicking a button, filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring user input during live updates.</p>
+<p><em>lofigui examples: 01 (Hello World polling), 07-08 (Water Tank dashboards).</em></p>
+<h3 id="4-htmx-partial-updates-dynamic-pages">4. HTMX partial updates (dynamic pages)</h3>
+<p>Only parts of the page update — the rest stays stable. Forms, text inputs, and buttons remain functional while live data refreshes around them. HTMX makes this possible with <code>hx-get</code> and <code>hx-trigger</code> attributes — the server still renders HTML, but the browser swaps only the targeted <code>&lt;div&gt;</code>.</p>
+<p>This is the sweet spot for lofigui: server-rendered HTML with just enough client-side behaviour to make forms and controls usable alongside live data. A text box on a dynamic form — impossible with full-page polling — works naturally with HTMX partial updates.</p>
+<p><em>lofigui examples: 09 (Water Tank HTMX), 10 (Maintenance with progress).</em></p>
+<h3 id="5-fully-interactive-single-page-apps-spa">5. Fully interactive single-page apps (SPA)</h3>
+<p>Full client-side rendering with Ajax/fetch. React, Vue, Svelte territory. The server becomes a JSON API; the browser builds the entire UI. Maximum interactivity, maximum complexity: bundlers, virtual DOM, state management, hydration.</p>
+<p><strong>lofigui does not target this level.</strong> If your project needs a full SPA, use a proper SPA framework. lofigui's value is avoiding that complexity for the many tools that don't need it.</p>
+<h2 id="print-as-interface">Print as interface</h2>
+<p>The fundamental insight is that <code>print()</code> is the most natural programming interface. Every developer learns it first. lofigui preserves that — you print things, they appear on a web page. The abstraction cost is near zero.</p>
+<h2 id="progressive-complexity">Progressive complexity</h2>
+<p>The examples are ordered deliberately:</p>
+<ol>
+<li><strong>Print and poll</strong> (01) — the simplest useful pattern</li>
+<li><strong>Synchronous render</strong> (02) — when you don't need async</li>
+<li><strong>WASM</strong> (03, 04) — same code, no server</li>
+<li><strong>CRUD</strong> (06) — forms and state</li>
+<li><strong>Real-time dashboards</strong> (07-09) — SVG, multi-page, HTMX</li>
+<li><strong>Background operations</strong> (10) — goroutines, cancellation, progress</li>
+</ol>
+<p>Each step adds one concept. You stop at the level of complexity your project needs.</p>
+<h2 id="where-does-lofigui-sit">Where does lofigui sit?</h2>
+<p>lofigui is for <strong>single-process, small-audience tools</strong>. The sweet spot: 1-10 users, one real object (a machine, a simulation, a long-running process) with a few pages showing different views of it. It is not competing with React or even Streamlit — it is competing with &quot;I'll just use the terminal&quot; or &quot;I'll write a quick bash CGI script&quot;.</p>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

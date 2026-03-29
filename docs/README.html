@@ -50,22 +50,10 @@
             <div class="content">
                 <h1 id="lofigui">lofigui</h1>
 <!-- auto:version -->Latest: v0.17.23<!-- /auto:version -->
-<p><strong>Lofi GUI</strong> - A minimalist library for creating really simple web-based GUIs for CLI tools and small projects. Available in both <strong>Python</strong> and <strong>Go</strong>, it provides a print-like interface for building lightweight web UIs with minimal complexity.</p>
-<p>The aplication is where you have a single real object (eg machine or long running)
-processing which then have a number of pages around it to show various aspects
-of it.</p>
-<p><a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python Version"></a>
-<a href="https://golang.org/dl/"><img src="https://img.shields.io/badge/go-1.21+-blue.svg" alt="Go Version"></a>
+<p><strong>Lofi GUI</strong> - A minimalist Go library for creating really simple web-based GUIs for CLI tools and small projects. It provides a print-like interface for building lightweight web UIs with minimal complexity.</p>
+<p>The application is where you have a single real object (e.g. machine or long-running process) which then has a number of pages around it to show various aspects of it.</p>
+<p><a href="https://golang.org/dl/"><img src="https://img.shields.io/badge/go-1.21+-blue.svg" alt="Go Version"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></p>
-<h2 id="-now-available-in-go">🚀 Now Available in Go!</h2>
-<p>Check out the <strong><a href="go/README.md">Go version</a></strong> for:</p>
-<ul>
-<li><strong>10-100x faster</strong> performance</li>
-<li><strong>Single binary</strong> deployment</li>
-<li><strong>WebAssembly</strong> support (~2MB vs ~10MB for Python)</li>
-<li><strong>Type safety</strong> at compile time</li>
-</ul>
-<p>Choose the version that fits your needs - same simple API, different strengths!</p>
 <h2 id="overview">Overview</h2>
 <p><code>lofigui</code> provides a print-like interface for building lightweight web applications with minimal complexity. Perfect for:</p>
 <ul>
@@ -76,250 +64,59 @@ of it.</p>
 </ul>
 <h2 id="key-features">Key Features</h2>
 <ul>
-<li><strong>Simple API</strong>: Print-like interface (<code>print()</code>, <code>markdown()</code>, <code>html()</code>, <code>table()</code>)</li>
-<li><strong>No JavaScript</strong>: Pure HTML/CSS using the Bulma framework to make it look prettier as I am terrible at design.</li>
-<li><strong>MVC Architecture</strong>: Model, view, and controller architecture</li>
-<li><strong>Async-ready</strong>: Built on asyncio for modern web frameworks (FastAPI, etc.)</li>
-<li><strong>Type-safe</strong>: Full type hints and mypy support</li>
-<li><strong>Secure</strong>: HTML escaping by default to prevent XSS attacks</li>
+<li><strong>Simple API</strong>: Print-like interface (<code>Print()</code>, <code>Markdown()</code>, <code>HTML()</code>, <code>Table()</code>)</li>
+<li><strong>No JavaScript</strong>: Pure HTML/CSS using the Bulma framework</li>
+<li><strong>Single binary</strong>: Deploy as one executable, no dependencies</li>
+<li><strong>WebAssembly</strong>: Same code runs in the browser via WASM</li>
+<li><strong>Built-in layouts</strong>: <code>LayoutSingle</code>, <code>LayoutNavbar</code>, <code>LayoutThreePanel</code></li>
 </ul>
-<h2 id="element">Element</h2>
-<p>Your project is essentially a web site.  To make design simple you completely refresh pages so no code for partial refreshes.  To make things dynamic it has to be asynchonous so for python using fastapi as a server and Uvicorn to provide the https server.</p>
-<p>Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.</p>
-<h3 id="model-view-controller-architecture">model view controller architecture</h3>
-<p>All I really want to do is to write the model.  The controller and view (in the browser and templating system) are a necessary evil.  The controller includes the routing and webserver. The controller is split between the app (single instance) and a model specific controller. The view is the html templating and the browser.</p>
-<h3 id="buffer">Buffer</h3>
-<p>In order to be able to decouple the display from the output and to be able to refesh you need to be able to buffer the output.  It is more efficient to buffer the output in the browser but more complicated.  Moving the buffer to the server simplifies the software but requires you to refresh the whole page.
-lofigui relies on hyperlinks to perform updates.  Forms are useful for nice buttons but in general to get the right level of interactivity (click on somthing and it changes) you don't want to have forms.  HTMLx would play nicely here if you were intersted in improving interactivity and spending a bit more time on the UI.</p>
-<h2 id="installation">Installation</h2>
-<h3 id="using-pip">Using pip</h3>
-<pre><code class="language-bash">pip install lofigui
-</code></pre>
-<h3 id="using-uv">Using uv</h3>
-<pre><code class="language-bash">uv add lofigui
-</code></pre>
-<h3 id="from-source">From source</h3>
-<pre><code class="language-bash">git clone https://github.com/drummonds/lofigui.git
-cd lofigui
-uv sync --all-extras
-</code></pre>
 <h2 id="quick-start">Quick Start</h2>
-<p>Look at the example for a quick start.</p>
-<h2 id="api-reference">API Reference</h2>
-<h3 id="output-functions">Output Functions</h3>
-<h4 id="printmsg-ctxnone-endn-escapetrue"><code>print(msg, ctx=None, end=&quot;\n&quot;, escape=True)</code></h4>
-<p>Print text to the buffer as HTML paragraphs.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>msg</code> (str): Message to print</li>
-<li><code>ctx</code> (PrintContext, optional): Custom context (default: global context)</li>
-<li><code>end</code> (str): End character - <code>&quot;\n&quot;</code> for paragraphs, <code>&quot;&quot;</code> for inline</li>
-<li><code>escape</code> (bool): Escape HTML entities (default: True)</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">import lofigui as lg
+<pre><code class="language-go">package main
 
-lg.print(&quot;Hello world&quot;)  # &lt;p&gt;Hello world&lt;/p&gt;
-lg.print(&quot;Inline&quot;, end=&quot;&quot;)  # &amp;nbsp;Inline&amp;nbsp;
-lg.print(&quot;&lt;script&gt;alert('safe')&lt;/script&gt;&quot;)  # Escaped by default
-lg.print(&quot;&lt;b&gt;Bold&lt;/b&gt;&quot;, escape=False)  # Raw HTML (use with caution!)
-</code></pre>
-<h4 id="markdownmsg-ctxnone"><code>markdown(msg, ctx=None)</code></h4>
-<p>Convert markdown to HTML and add to buffer.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>msg</code> (str): Markdown-formatted text</li>
-<li><code>ctx</code> (PrintContext, optional): Custom context</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">lg.markdown(&quot;# Heading\n\nThis is **bold** text&quot;)
-</code></pre>
-<h4 id="htmlmsg-ctxnone"><code>html(msg, ctx=None)</code></h4>
-<p>Add raw HTML to buffer (no escaping).</p>
-<p><strong>WARNING:</strong> Only use with trusted input to avoid XSS vulnerabilities.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>msg</code> (str): Raw HTML</li>
-<li><code>ctx</code> (PrintContext, optional): Custom context</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">lg.html(&quot;&lt;div class='notification is-info'&gt;Custom HTML&lt;/div&gt;&quot;)
-</code></pre>
-<h4 id="tabletable-headernone-ctxnone-escapetrue"><code>table(table, header=None, ctx=None, escape=True)</code></h4>
-<p>Generate an HTML table with Bulma styling.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>table</code> (Sequence[Sequence]): Table data as nested sequences</li>
-<li><code>header</code> (List[str], optional): Column headers</li>
-<li><code>ctx</code> (PrintContext, optional): Custom context</li>
-<li><code>escape</code> (bool): Escape cell content (default: True)</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">data = [
-    [&quot;Alice&quot;, 30, &quot;Engineer&quot;],
-    [&quot;Bob&quot;, 25, &quot;Designer&quot;],
-]
-lg.table(data, header=[&quot;Name&quot;, &quot;Age&quot;, &quot;Role&quot;])
-</code></pre>
-<h3 id="buffer-management">Buffer Management</h3>
-<h4 id="bufferctxnone"><code>buffer(ctx=None)</code></h4>
-<p>Get accumulated HTML output.</p>
-<p><strong>Returns:</strong> str</p>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">content = lg.buffer()
-</code></pre>
-<h4 id="resetctxnone"><code>reset(ctx=None)</code></h4>
-<p>Clear the buffer.</p>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">lg.reset()
-</code></pre>
-<h3 id="context-management">Context Management</h3>
-<h4 id="printcontextmax-buffer-sizenone"><code>PrintContext(max_buffer_size=None)</code></h4>
-<p>Context manager for buffering HTML output.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>max_buffer_size</code> (int, optional): Warn if buffer exceeds this size</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">from lofigui import PrintContext, print
+import (
+    &quot;net/http&quot;
+    &quot;codeberg.org/hum3/lofigui&quot;
+)
 
-# Using context manager (auto-cleanup)
-with PrintContext() as ctx:
-    print(&quot;Hello&quot;, ctx=ctx)
-    # Buffer automatically reset on exit
+func model(app *lofigui.App) {
+    lofigui.Print(&quot;Hello world&quot;)
+    app.EndAction()
+}
 
-# Or create manually
-ctx = PrintContext(max_buffer_size=10000)
+func main() {
+    ctrl, _ := lofigui.NewControllerWithLayout(lofigui.LayoutNavbar, &quot;My App&quot;)
+    app := lofigui.NewApp()
+    app.SetController(ctrl)
+    app.SetDisplayURL(&quot;/display&quot;)
+
+    http.HandleFunc(&quot;/&quot;, func(w http.ResponseWriter, r *http.Request) {
+        app.HandleRoot(w, r, model, true)
+    })
+    http.HandleFunc(&quot;/display&quot;, func(w http.ResponseWriter, r *http.Request) {
+        app.HandleDisplay(w, r)
+    })
+    http.HandleFunc(&quot;/favicon.ico&quot;, lofigui.ServeFavicon)
+    http.ListenAndServe(&quot;:8080&quot;, nil)
+}
 </code></pre>
-<h3 id="favicon-support">Favicon Support</h3>
-<h4 id="get-favicon-response"><code>get_favicon_response()</code></h4>
-<p>Get a FastAPI/Starlette Response object for serving the favicon.</p>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">@app.get(&quot;/favicon.ico&quot;)
-async def favicon():
-    return lg.get_favicon_response()
+<h2 id="element">Element</h2>
+<p>Your project is essentially a web site. To make design simple you completely refresh pages so no code for partial refreshes. To make things dynamic it has to be asynchronous, using goroutines for background processing.</p>
+<p>Like a normal terminal program you essentially just print things to a screen but now have the ability to print enriched objects.</p>
+<h3 id="model-view-controller-architecture">Model View Controller architecture</h3>
+<p>All I really want to do is to write the model. The controller and view (in the browser and templating system) are a necessary evil. The controller includes the routing and web server. The controller is split between the app (single instance) and a model-specific controller. The view is the HTML templating (pongo2) and the browser.</p>
+<h3 id="buffer">Buffer</h3>
+<p>In order to decouple the display from the output and be able to refresh, you need to buffer the output. It is more efficient to buffer the output in the browser but more complicated. Moving the buffer to the server simplifies the software but requires you to refresh the whole page. lofigui relies on hyperlinks to perform updates. HTMX plays nicely here for improving interactivity (examples 09-10).</p>
+<h2 id="installation">Installation</h2>
+<pre><code class="language-bash">go get codeberg.org/hum3/lofigui
 </code></pre>
-<h4 id="get-favicon-html-tag"><code>get_favicon_html_tag()</code></h4>
-<p>Get an HTML link tag with embedded favicon data URI.</p>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python"># In your template &lt;head&gt;
-{{ get_favicon_html_tag()|safe }}
-</code></pre>
-<h4 id="save-favicon-icopath"><code>save_favicon_ico(path)</code></h4>
-<p>Save the favicon to a file.</p>
-<p><strong>Example:</strong></p>
-<pre><code class="language-python">lg.save_favicon_ico(&quot;static/favicon.ico&quot;)
-</code></pre>
-<h2 id="architecture">Architecture</h2>
-<h3 id="mvc-pattern">MVC Pattern</h3>
-<p><code>lofigui</code> follows the Model-View-Controller pattern:</p>
-<ul>
-<li><strong>Model</strong>: Your business logic (functions that call <code>lg.print()</code>, etc.)</li>
-<li><strong>View</strong>: Jinja2 templates that render the buffered HTML</li>
-<li><strong>Controller</strong>: FastAPI/Flask routes that orchestrate model and view</li>
-</ul>
-<h3 id="buffering-strategy">Buffering Strategy</h3>
-<p>Server-side buffering simplifies the architecture:</p>
-<ol>
-<li>Model functions write to a queue</li>
-<li><code>buffer()</code> drains the queue and returns HTML</li>
-<li>Templates render the complete HTML</li>
-<li>Full page refresh (no partial DOM updates)</li>
-</ol>
-<p>This approach trades interactivity for simplicity - perfect for internal tools.</p>
-<h3 id="security">Security</h3>
-<p>By default, all output functions escape HTML to prevent XSS attacks:</p>
-<pre><code class="language-python">lg.print(&quot;&lt;script&gt;alert('xss')&lt;/script&gt;&quot;)
-# Output: &lt;p&gt;&amp;lt;script&amp;gt;alert('xss')&amp;lt;/script&amp;gt;&lt;/p&gt;
-</code></pre>
-<p>Use <code>escape=False</code> or <code>html()</code> only with trusted input.</p>
 <h2 id="examples--documentation">Examples &amp; Documentation</h2>
-<p>See the <strong><a href="https://drummonds.github.io/lofigui/">documentation site</a></strong> for interactive examples (including WASM demos), research notes, and the roadmap.</p>
+<p>See the <strong><a href="https://h3-lofigui.statichost.page/">documentation site</a></strong> for interactive examples (including WASM demos), research notes, and the roadmap.</p>
 <p>To run examples locally, use <a href="https://taskfile.dev/">Task</a>:</p>
 <pre><code class="language-bash">task --list              # Show all available tasks
 task go-example:09       # Run any Go example by number
-task example-01          # Run any Python example by number
 </code></pre>
-<h2 id="development">Development</h2>
-<h3 id="setup">Setup</h3>
-<pre><code class="language-bash">git clone https://github.com/drummonds/lofigui.git
-cd lofigui
-uv sync --all-extras
-</code></pre>
-<h3 id="running-tests">Running Tests</h3>
-<pre><code class="language-bash">uv run pytest
-</code></pre>
-<p>With coverage:</p>
-<pre><code class="language-bash">uv run pytest --cov=lofigui --cov-report=html
-</code></pre>
-<h3 id="type-checking">Type Checking</h3>
-<pre><code class="language-bash">uv run mypy lofigui
-</code></pre>
-<h3 id="code-formatting">Code Formatting</h3>
-<pre><code class="language-bash">uv run black lofigui tests
-</code></pre>
-<h2 id="comparison-with-alternatives">Comparison with Alternatives</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>lofigui</th>
-<th>Streamlit</th>
-<th>PyWebIO</th>
-<th>Textual</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>JavaScript</td>
-<td>No</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Complexity</td>
-<td>Very Low</td>
-<td>Medium</td>
-<td>Medium</td>
-<td>Medium</td>
-</tr>
-<tr>
-<td>Use Case</td>
-<td>Internal tools</td>
-<td>Data apps</td>
-<td>Web apps</td>
-<td>Terminal UIs</td>
-</tr>
-<tr>
-<td>Learning Curve</td>
-<td>Minimal</td>
-<td>Moderate</td>
-<td>Moderate</td>
-<td>Moderate</td>
-</tr>
-<tr>
-<td>Partial Updates</td>
-<td>Via HTMX</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Choose lofigui if:</strong></p>
-<ul>
-<li>You want maximum simplicity</li>
-<li>You're building internal tools</li>
-<li>You don't need fancy interactivity</li>
-<li>You want to understand every line of code</li>
-</ul>
-<p><strong>Choose alternatives if:</strong></p>
-<ul>
-<li>You need rich interactivity</li>
-<li>You're building public-facing apps</li>
-<li>You want widgets and components</li>
-</ul>
+<h2 id="python">Python</h2>
+<p>A Python implementation also exists with the same API using FastAPI and Jinja2. See <a href="https://h3-lofigui.statichost.page/research-python.html">Python Notes</a> for installation, API reference, and development instructions.</p>
 <h2 id="roadmap">Roadmap</h2>
 <p>See <a href="ROADMAP.md">ROADMAP.md</a> for planned features and future direction.</p>
 <h2 id="contributing">Contributing</h2>

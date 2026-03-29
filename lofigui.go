@@ -3,19 +3,36 @@
 package lofigui
 
 import (
+	"context"
 	"fmt"
 	"html"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/russross/blackfriday/v2"
 )
+
+// cancelledError is the sentinel type for panic-based cancellation.
+// Unexported so external code cannot catch it accidentally.
+type cancelledError struct{}
+
+func (cancelledError) Error() string { return "lofigui: action cancelled" }
+
+// errCancelled is the singleton sentinel value.
+var errCancelled = cancelledError{}
+
+// ctxWrapper wraps context.Context so atomic.Value always stores the same concrete type.
+type ctxWrapper struct {
+	ctx context.Context
+}
 
 // Context manages the output buffer for HTML generation
 type Context struct {
 	buffer        strings.Builder
 	mu            sync.Mutex
 	maxBufferSize int
+	ctx           atomic.Value // stores ctxWrapper; checked by output functions for cancellation
 }
 
 // Global default context
@@ -23,8 +40,28 @@ var defaultContext = NewContext()
 
 // NewContext creates a new Context with optional max buffer size
 func NewContext() *Context {
-	return &Context{
+	c := &Context{
 		maxBufferSize: 0, // 0 means unlimited
+	}
+	c.ctx.Store(ctxWrapper{context.Background()})
+	return c
+}
+
+// setContext stores a context for transparent cancellation checking.
+func (c *Context) setContext(ctx context.Context) {
+	c.ctx.Store(ctxWrapper{ctx})
+}
+
+// clearContext resets to a context that is never cancelled.
+func (c *Context) clearContext() {
+	c.ctx.Store(ctxWrapper{context.Background()})
+}
+
+// checkCancelled panics with the sentinel if the stored context is cancelled.
+// Called by output functions before writing to the buffer.
+func (c *Context) checkCancelled() {
+	if w, ok := c.ctx.Load().(ctxWrapper); ok && w.ctx.Err() != nil {
+		panic(errCancelled)
 	}
 }
 
@@ -36,6 +73,8 @@ func Print(msg string, options ...PrintOption) {
 
 // Print adds text to the buffer as HTML paragraphs
 func (c *Context) Print(msg string, options ...PrintOption) {
+	c.checkCancelled()
+
 	opts := &printOptions{
 		end:    "\n",
 		escape: true,
@@ -93,6 +132,7 @@ func Markdown(msg string) {
 
 // Markdown converts markdown to HTML and adds to buffer
 func (c *Context) Markdown(msg string) {
+	c.checkCancelled()
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -108,6 +148,7 @@ func HTML(msg string) {
 
 // HTML adds raw HTML to buffer (no escaping)
 func (c *Context) HTML(msg string) {
+	c.checkCancelled()
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -121,6 +162,8 @@ func Table(data [][]string, options ...TableOption) {
 
 // Table generates an HTML table
 func (c *Context) Table(data [][]string, options ...TableOption) {
+	c.checkCancelled()
+
 	opts := &tableOptions{
 		header: nil,
 		escape: true,

@@ -5,9 +5,43 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/flosch/pongo2/v6"
 )
+
+// defaultTemplate is the built-in template used when no controller is set.
+// defaultTemplate is the built-in template used when no controller is set.
+const defaultTemplate = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ version }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <nav class="navbar is-primary" role="navigation">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">{{ version }}</span>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        {% if polling == "Running" %}
+        <span class="tag is-warning">Running</span>
+        {% else %}
+        <span class="tag is-success">Done</span>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  <section class="section">
+    <div class="container content">
+      {{ results | safe }}
+    </div>
+  </section>
+</body>
+</html>`
 
 // App provides a wrapper around a Controller with safe controller replacement.
 //
@@ -40,6 +74,9 @@ type App struct {
 	refreshTime   int    // Seconds between refresh when polling
 	displayURL    string // URL to redirect to for display
 	cancelFunc    context.CancelFunc
+	actionCtx     context.Context // context for the current action
+	server        *http.Server    // set by app.ListenAndServe for graceful shutdown
+	done          chan struct{}   // closed by Handle when model completes
 	mu            sync.RWMutex
 }
 
@@ -110,6 +147,24 @@ func (app *App) SetController(ctrl *Controller) {
 	app.controller = ctrl
 }
 
+// ensureController lazily creates a default controller if none is set.
+// Must be called with app.mu held (at least read lock).
+// Returns the controller (possibly newly created) or an error.
+func (app *App) ensureController() (*Controller, error) {
+	if app.controller != nil {
+		return app.controller, nil
+	}
+	ctrl, err := NewController(ControllerConfig{
+		TemplateString: defaultTemplate,
+		Name:           "Default Controller",
+	})
+	if err != nil {
+		return nil, err
+	}
+	app.controller = ctrl
+	return ctrl, nil
+}
+
 // StartAction starts an action and enables auto-refresh polling.
 // This implements the singleton active model concept - only one action
 // can be running at a time across the entire app.
@@ -132,6 +187,8 @@ func (app *App) StartAction() context.Context {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	app.cancelFunc = cancel
+	app.actionCtx = ctx
+	defaultContext.setContext(ctx)
 	return ctx
 }
 
@@ -147,6 +204,8 @@ func (app *App) EndAction() {
 		app.cancelFunc()
 		app.cancelFunc = nil
 	}
+	app.actionCtx = nil
+	defaultContext.clearContext()
 }
 
 // IsActionRunning returns whether an action is currently running.
@@ -179,25 +238,30 @@ func (app *App) SetDisplayURL(url string) {
 // This function:
 //  1. Resets the buffer (if resetBuffer is true)
 //  2. Starts the action (app-level state) and gets a cancellable context
-//  3. Launches the model function in a goroutine with the context
+//  3. Launches the model function in a goroutine
 //  4. Returns HTML that redirects to the display page
 //
-// The model function receives a context.Context that is cancelled when the action
-// is stopped (EndAction) or replaced by a new action (another HandleRoot call).
+// The model function receives the App for calling Sleep, EndAction, etc.
+// Cancellation is transparent: if the action is cancelled (by a new HandleRoot
+// call or EndAction), output functions and Sleep panic with an internal sentinel
+// that is recovered here. The server continues running.
+//
+// For advanced use, call app.Context() inside the model to get the raw
+// context.Context for passing to database calls, HTTP clients, etc.
 //
 // Example:
 //
 //	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 //	    app.HandleRoot(w, r, model, true)
 //	})
-func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(context.Context, *App), resetBuffer bool) {
-	app.mu.RLock()
-	ctrl := app.controller
+func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc func(*App), resetBuffer bool) {
+	app.mu.Lock()
+	ctrl, err := app.ensureController()
 	displayURL := app.displayURL
-	app.mu.RUnlock()
+	app.mu.Unlock()
 
-	if ctrl == nil {
-		http.Error(w, "No controller set", http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -205,22 +269,131 @@ func (app *App) HandleRoot(w http.ResponseWriter, r *http.Request, modelFunc fun
 		ctrl.context.Reset()
 	}
 
-	ctx := app.StartAction()
-	go modelFunc(ctx, app)
+	app.StartAction()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				if _, ok := r.(cancelledError); ok {
+					return // cancelled — goroutine exits cleanly
+				}
+				panic(r) // re-panic real errors
+			}
+		}()
+		modelFunc(app)
+	}()
 
 	http.Redirect(w, r, displayURL, http.StatusSeeOther)
+}
+
+// Handle is a single-endpoint handler that starts the model on the first
+// request and renders the current state on subsequent polling requests.
+//
+// On each request:
+//   - If no action is running and buffer is empty: starts the model in a
+//     background goroutine and renders the page with auto-refresh.
+//   - If an action is running: renders the current buffer (polling continues).
+//   - If no action is running but buffer has content: renders the final output
+//     with no refresh (model completed).
+//
+// When the model goroutine returns normally, EndAction is called automatically
+// to stop polling. The model does not need to call EndAction itself.
+//
+// The buffer acts as state: empty means ready to start, non-empty after
+// completion means done. For restart support, use HandleRoot and HandleDisplay.
+//
+// Example:
+//
+//	http.HandleFunc("/", app.Handle(model))
+func (app *App) Handle(modelFunc func(*App)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		app.mu.Lock()
+		ctrl, err := app.ensureController()
+		running := app.actionRunning
+		bufferEmpty := ctrl != nil && ctrl.context.Buffer() == ""
+		app.mu.Unlock()
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !running && bufferEmpty {
+			app.StartAction()
+			go func() {
+				defer func() {
+					if r := recover(); r != nil {
+						if _, ok := r.(cancelledError); ok {
+							return
+						}
+						panic(r)
+					}
+				}()
+				modelFunc(app)
+				app.flush()
+			}()
+		}
+
+		app.WriteRefreshHeader(w)
+		data := app.StateDict(r, nil)
+		if err := ctrl.RenderTemplate(w, data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+// flush stops polling and, after a grace period for the browser to pick up
+// the final render, signals the server to shut down. Called automatically
+// by Handle when the model goroutine returns.
+//
+// For explicit use in a model, call Flush() — same behaviour but public.
+func (app *App) flush() {
+	app.EndAction()
+	// Grace period: the browser has a pending refresh from the last response's
+	// Refresh header. Give it time to arrive and render the final output.
+	time.Sleep(2 * time.Second)
+	app.signalDone()
+}
+
+// Flush stops polling and signals the server to shut down after a grace
+// period for the browser to display the final output.
+func (app *App) Flush() {
+	app.flush()
+}
+
+// Sleep pauses for the given duration, or until the action is cancelled.
+// If cancelled, Sleep panics with the internal sentinel value, which
+// HandleRoot's recover wrapper catches to terminate the goroutine cleanly.
+func (app *App) Sleep(d time.Duration) {
+	ctx := app.Context()
+	select {
+	case <-ctx.Done():
+		panic(errCancelled)
+	case <-time.After(d):
+	}
+}
+
+// Context returns the context for the currently running action.
+// Use this to pass context to database calls, HTTP clients, etc.
+// Returns context.Background() if no action is running.
+func (app *App) Context() context.Context {
+	app.mu.RLock()
+	defer app.mu.RUnlock()
+	if app.actionCtx != nil {
+		return app.actionCtx
+	}
+	return context.Background()
 }
 
 // HandleDisplay renders the template with full app state (including polling/refresh).
 // Sets the HTTP Refresh header when polling is active, so the browser reloads
 // the current page (not a hardcoded URL). Returns an error if no controller is set.
 func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
-	app.mu.RLock()
-	ctrl := app.controller
-	app.mu.RUnlock()
+	app.mu.Lock()
+	ctrl, err := app.ensureController()
+	app.mu.Unlock()
 
-	if ctrl == nil {
-		http.Error(w, "No controller set", http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -16,23 +15,15 @@ import (
 
 const batchSize = 40
 
-func modelWithYield(ctx context.Context, app *lofigui.App) {
+func modelWithYield(app *lofigui.App) {
 	lofigui.Markdown("## With Yield()")
 	lofigui.Printf("Generating %d customers...", batchSize)
 
 	for i := 1; i <= batchSize; i++ {
-		select {
-		case <-ctx.Done():
-			lofigui.Print("Cancelled.")
-			app.EndAction()
-			return
-		default:
-		}
-
 		name := fmt.Sprintf("Customer-%04d", i)
 		balance := rand.Float64() * 10000
 		lofigui.Printf("%s — balance: £%.2f", name, balance)
-		time.Sleep(500 * time.Millisecond)
+		app.Sleep(500 * time.Millisecond)
 		lofigui.Yield()
 	}
 
@@ -40,19 +31,11 @@ func modelWithYield(ctx context.Context, app *lofigui.App) {
 	app.EndAction()
 }
 
-func modelWithoutYield(ctx context.Context, app *lofigui.App) {
+func modelWithoutYield(app *lofigui.App) {
 	lofigui.Markdown("## Without Yield()")
 	lofigui.Printf("Generating %d customers...", batchSize)
 
 	for i := 1; i <= batchSize; i++ {
-		select {
-		case <-ctx.Done():
-			lofigui.Print("Cancelled.")
-			app.EndAction()
-			return
-		default:
-		}
-
 		name := fmt.Sprintf("Customer-%04d", i)
 		balance := rand.Float64() * 10000
 		lofigui.Printf("%s — balance: £%.2f", name, balance)
@@ -88,9 +71,9 @@ func main() {
 		app.HandleRoot(w, r, modelWithoutYield, true)
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		app.HandleRoot(w, r, func(ctx context.Context, a *lofigui.App) {
-			modelWithYield(ctx, a)
-			modelWithoutYield(ctx, a)
+		app.HandleRoot(w, r, func(a *lofigui.App) {
+			modelWithYield(a)
+			modelWithoutYield(a)
 		}, true)
 	})
 	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {

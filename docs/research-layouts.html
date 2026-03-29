@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Page Layouts - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Page Layouts</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-page-layouts">Research: Page Layouts</h1>
+<p>Progression of page layout complexity in lofigui.</p>
+<h2 id="layout-spectrum">Layout spectrum</h2>
+<p>lofigui provides built-in layout templates (<code>layouts.go</code>) that cover the common cases. Each adds one structural element to the previous.</p>
+<h3 id="1-single-page-no-chrome">1. Single page (no chrome)</h3>
+<p>The simplest layout: content in a centered container, nothing else. No header, no navigation, no footer.</p>
+<pre><code>+------------------------------------------+
+|                                          |
+|           {{ results | safe }}           |
+|                                          |
++------------------------------------------+
+</code></pre>
+<p><strong>Template</strong>: <code>LayoutSingle</code> — <code>section &gt; container &gt; results</code>.</p>
+<p><strong>Use when</strong>: quick status pages, single-purpose tools, WASM apps. The page is the output.</p>
+<p><em>lofigui examples: 01 (Hello World), 02 (SVG Graph), 03-04 (WASM).</em></p>
+<h3 id="2-single-page-with-header-bar-non-scrolling">2. Single page with header bar (non-scrolling)</h3>
+<p>A fixed navbar at the top with app name and status indicator. The content scrolls beneath it. Footer shows version.</p>
+<pre><code>+==========================================+
+|  App Name                     [Running]  |  &lt;- fixed navbar
++==========================================+
+|                                          |
+|           {{ results | safe }}           |  &lt;- scrolls
+|                                          |
++------------------------------------------+
+|              version info                |  &lt;- footer
++------------------------------------------+
+</code></pre>
+<p><strong>Template</strong>: <code>LayoutNavbar</code> — navbar (is-primary, fixed) + section + footer.</p>
+<p>The navbar stays visible while content scrolls. The status tag (<code>Running</code>/<code>Stopped</code>) updates on each refresh cycle. Good for dashboards where you want the app identity and state always visible.</p>
+<p><strong>Use when</strong>: single-view dashboards, monitoring tools, long-running processes. The user needs to know what they are looking at and whether it is active.</p>
+<p><em>lofigui examples: 07 (Water Tank), 08 (Water Tank Multi-Page).</em></p>
+<h3 id="3-single-page-with-header-bar-scrolling">3. Single page with header bar (scrolling)</h3>
+<p>Same as above but the navbar scrolls with the content — it is part of the page flow, not fixed. Use this when the header is informational but not critical to keep visible.</p>
+<p>This is just <code>LayoutNavbar</code> without the <code>is-fixed-top</code> class. Not a separate built-in layout — modify the template string or use a custom template.</p>
+<p><strong>Use when</strong>: the header is helpful context but not essential during scrolling. Reports, logs, generated output where the user reads top-to-bottom.</p>
+<h3 id="4-three-panel-layout-header--sidebar--main">4. Three-panel layout (header + sidebar + main)</h3>
+<p>Navbar at top, sidebar on the left (navigation, controls, filters), main content area on the right.</p>
+<pre><code>+==========================================+
+|  App Name                     [Running]  |  &lt;- fixed navbar
++==========================================+
+| Sidebar    |                             |
+| (is-3)     |    {{ results | safe }}     |
+|            |                             |
+| - Nav      |    Main content area        |
+| - Controls |                             |
+| - Filters  |                             |
++------------------------------------------+
+|              version info                |  &lt;- footer
++------------------------------------------+
+</code></pre>
+<p><strong>Template</strong>: <code>LayoutThreePanel</code> — navbar + columns (sidebar is-3 + main) + footer. Pass sidebar content via the <code>sidebar</code> extra context key.</p>
+<p>The sidebar is a Bulma <code>box</code> in a <code>column is-3</code>. It can contain navigation links, control forms, filter dropdowns, or any HTML. The main content fills the remaining <code>column</code>.</p>
+<p><strong>Use when</strong>: multi-page apps, CRUD tools with navigation, dashboards with controls alongside live data.</p>
+<p><em>lofigui examples: 09 (Water Tank HTMX with nav), 10 (Maintenance with controls).</em></p>
+<h2 id="choosing-a-layout">Choosing a layout</h2>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th>Built-in constant</th>
+<th>Navbar</th>
+<th>Sidebar</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single page</td>
+<td><code>LayoutSingle</code></td>
+<td>No</td>
+<td>No</td>
+<td>Quick tools, WASM apps</td>
+</tr>
+<tr>
+<td>Header (fixed)</td>
+<td><code>LayoutNavbar</code></td>
+<td>Yes (fixed)</td>
+<td>No</td>
+<td>Dashboards, monitoring</td>
+</tr>
+<tr>
+<td>Header (scrolling)</td>
+<td>Custom</td>
+<td>Yes (scrolls)</td>
+<td>No</td>
+<td>Reports, logs</td>
+</tr>
+<tr>
+<td>Three-panel</td>
+<td><code>LayoutThreePanel</code></td>
+<td>Yes (fixed)</td>
+<td>Yes</td>
+<td>Multi-page apps, CRUD</td>
+</tr>
+</tbody>
+</table>
+<h2 id="custom-layouts">Custom layouts</h2>
+<p>For layouts beyond these patterns, use <code>NewController</code> with a <code>TemplateString</code> or <code>TemplatePath</code>. The built-in layouts are plain HTML strings — copy and modify. The only requirement is that the template includes <code>{{ results | safe }}</code> somewhere in the body, and <code>{{ refresh | safe }}</code> in the head if polling is used.</p>
+<h3 id="example-custom-template-from-string">Example: custom template from string</h3>
+<pre><code class="language-go">ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
+    TemplateString: `&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  {{ refresh | safe }}
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;columns&quot;&gt;
+    &lt;div class=&quot;column is-2&quot;&gt;{{ nav | safe }}&lt;/div&gt;
+    &lt;div class=&quot;column&quot;&gt;{{ results | safe }}&lt;/div&gt;
+    &lt;div class=&quot;column is-3&quot;&gt;{{ aside | safe }}&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;`,
+    Name: &quot;Custom Layout&quot;,
+})
+</code></pre>
+<p>Pass extra context keys (<code>nav</code>, <code>aside</code>) via <code>app.HandleDisplay</code> or <code>ctrl.RenderTemplate</code>.</p>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

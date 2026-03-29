@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Python Implementation - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Python Implementation</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-python-implementation">Research: Python Implementation</h1>
+<p>lofigui has a Python implementation alongside the primary Go version. The Python API mirrors the Go API but uses FastAPI as the web server and Jinja2 for templates.</p>
+<h2 id="installation">Installation</h2>
+<h3 id="using-pip">Using pip</h3>
+<pre><code class="language-bash">pip install lofigui
+</code></pre>
+<h3 id="using-uv">Using uv</h3>
+<pre><code class="language-bash">uv add lofigui
+</code></pre>
+<h2 id="api-reference">API Reference</h2>
+<h3 id="output-functions">Output Functions</h3>
+<h4 id="printmsg-ctxnone-endn-escapetrue"><code>print(msg, ctx=None, end=&quot;\n&quot;, escape=True)</code></h4>
+<p>Print text to the buffer as HTML paragraphs.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>msg</code> (str): Message to print</li>
+<li><code>ctx</code> (PrintContext, optional): Custom context (default: global context)</li>
+<li><code>end</code> (str): End character - <code>&quot;\n&quot;</code> for paragraphs, <code>&quot;&quot;</code> for inline</li>
+<li><code>escape</code> (bool): Escape HTML entities (default: True)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">import lofigui as lg
+
+lg.print(&quot;Hello world&quot;)  # &lt;p&gt;Hello world&lt;/p&gt;
+lg.print(&quot;Inline&quot;, end=&quot;&quot;)  # &amp;nbsp;Inline&amp;nbsp;
+lg.print(&quot;&lt;script&gt;alert('safe')&lt;/script&gt;&quot;)  # Escaped by default
+lg.print(&quot;&lt;b&gt;Bold&lt;/b&gt;&quot;, escape=False)  # Raw HTML (use with caution!)
+</code></pre>
+<h4 id="markdownmsg-ctxnone"><code>markdown(msg, ctx=None)</code></h4>
+<p>Convert markdown to HTML and add to buffer.</p>
+<pre><code class="language-python">lg.markdown(&quot;# Heading\n\nThis is **bold** text&quot;)
+</code></pre>
+<h4 id="htmlmsg-ctxnone"><code>html(msg, ctx=None)</code></h4>
+<p>Add raw HTML to buffer (no escaping). Only use with trusted input.</p>
+<pre><code class="language-python">lg.html(&quot;&lt;div class='notification is-info'&gt;Custom HTML&lt;/div&gt;&quot;)
+</code></pre>
+<h4 id="tabletable-headernone-ctxnone-escapetrue"><code>table(table, header=None, ctx=None, escape=True)</code></h4>
+<p>Generate an HTML table with Bulma styling.</p>
+<pre><code class="language-python">data = [
+    [&quot;Alice&quot;, 30, &quot;Engineer&quot;],
+    [&quot;Bob&quot;, 25, &quot;Designer&quot;],
+]
+lg.table(data, header=[&quot;Name&quot;, &quot;Age&quot;, &quot;Role&quot;])
+</code></pre>
+<h3 id="buffer-management">Buffer Management</h3>
+<pre><code class="language-python">content = lg.buffer()   # get accumulated HTML
+lg.reset()              # clear buffer
+</code></pre>
+<h3 id="context-management">Context Management</h3>
+<pre><code class="language-python">from lofigui import PrintContext, print
+
+# Using context manager (auto-cleanup)
+with PrintContext() as ctx:
+    print(&quot;Hello&quot;, ctx=ctx)
+    # Buffer automatically reset on exit
+
+# Or create manually
+ctx = PrintContext(max_buffer_size=10000)
+</code></pre>
+<h3 id="favicon-support">Favicon Support</h3>
+<pre><code class="language-python">@app.get(&quot;/favicon.ico&quot;)
+async def favicon():
+    return lg.get_favicon_response()
+
+# In template &lt;head&gt;: {{ get_favicon_html_tag()|safe }}
+
+# Save to file
+lg.save_favicon_ico(&quot;static/favicon.ico&quot;)
+</code></pre>
+<h2 id="architecture">Architecture</h2>
+<p>The Python implementation uses:</p>
+<ul>
+<li><strong>FastAPI</strong> as the web server (async-ready)</li>
+<li><strong>Jinja2</strong> for templates (vs pongo2 in Go)</li>
+<li><strong>asyncio.Queue</strong> for the buffer (vs <code>strings.Builder</code> in Go)</li>
+</ul>
+<h3 id="mvc-pattern">MVC Pattern</h3>
+<ul>
+<li><strong>Model</strong>: Functions that call <code>lg.print()</code>, etc.</li>
+<li><strong>View</strong>: Jinja2 templates that render <code>{{ results | safe }}</code></li>
+<li><strong>Controller</strong>: FastAPI routes that orchestrate model and view</li>
+</ul>
+<h3 id="buffering">Buffering</h3>
+<p>Server-side buffering: model functions write to a queue, <code>buffer()</code> drains the queue and returns HTML, templates render the complete page. Full page refresh — no partial DOM updates.</p>
+<h3 id="security">Security</h3>
+<p>All output functions escape HTML by default:</p>
+<pre><code class="language-python">lg.print(&quot;&lt;script&gt;alert('xss')&lt;/script&gt;&quot;)
+# Output: &lt;p&gt;&amp;lt;script&amp;gt;alert('xss')&amp;lt;/script&amp;gt;&lt;/p&gt;
+</code></pre>
+<p>Use <code>escape=False</code> or <code>html()</code> only with trusted input.</p>
+<h2 id="python-examples">Python Examples</h2>
+<pre><code class="language-bash">task example-01          # Hello World (FastAPI)
+task example-02          # SVG Graph (Pygal)
+task example-05          # Demo App (template inheritance)
+task example-06          # Notes CRUD
+</code></pre>
+<h2 id="development">Development</h2>
+<pre><code class="language-bash">uv sync --all-extras     # Install dev dependencies
+uv run pytest            # Run tests
+uv run pytest --cov=lofigui --cov-report=html  # With coverage
+uv run mypy lofigui      # Type checking
+uv run black lofigui tests  # Code formatting
+</code></pre>
+<h2 id="comparison-with-python-alternatives">Comparison with Python Alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>lofigui</th>
+<th>Streamlit</th>
+<th>PyWebIO</th>
+<th>Textual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JavaScript</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Very Low</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Internal tools</td>
+<td>Data apps</td>
+<td>Web apps</td>
+<td>Terminal UIs</td>
+</tr>
+<tr>
+<td>Learning Curve</td>
+<td>Minimal</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>Partial Updates</td>
+<td>Via HTMX</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

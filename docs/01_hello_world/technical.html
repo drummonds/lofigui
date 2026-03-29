@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>01 Hello World — Technical Details</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <style>
+    .annotation {
+      background: #f5f5f5;
+      border-left: 4px solid #3273dc;
+      padding: 1em 1.2em;
+      margin: 1em 0;
+      font-size: 0.95em;
+    }
+    .code-block {
+      margin: 1em 0;
+    }
+    .code-block pre {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 1.2em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <section class="section">
+    <div class="container content" style="max-width: 800px;">
+
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+          <ul>
+            <li><a href="../index.html">lofigui</a></li>
+            <li><a href="index.html">01 Hello World</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Technical Details</a></li>
+          </ul>
+        </nav>
+
+        <h1 class="title">01 Hello World — Technical Details</h1>
+
+        <p>This page covers the internals of how the simplest lofigui app works: the request lifecycle, polling mechanism, and graceful shutdown.</p>
+
+        <hr>
+
+        <h2 class="title is-4">Request lifecycle</h2>
+
+        <figure class="image">
+          <img src="01_flow.svg" alt="Sequence diagram: browser polls server while model runs, server exits when model completes">
+        </figure>
+
+        <hr>
+
+        <h2 class="title is-4">Handle — single-endpoint serving</h2>
+
+        <p><code>app.Handle(model)</code> combines start and display into one endpoint. It uses the buffer as state:</p>
+
+        <table class="table is-bordered">
+          <thead>
+            <tr>
+              <th>Buffer</th>
+              <th>Action running</th>
+              <th>Behaviour</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Empty</td>
+              <td>No</td>
+              <td>Start model goroutine, render with Refresh header</td>
+            </tr>
+            <tr>
+              <td>Any</td>
+              <td>Yes</td>
+              <td>Render current buffer with Refresh header (polling)</td>
+            </tr>
+            <tr>
+              <td>Non-empty</td>
+              <td>No</td>
+              <td>Render final output, no Refresh header (done)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="annotation">
+          <strong>Why the buffer?</strong> — After the model completes, the browser has one pending refresh from the last response's Refresh header. Without the buffer check, that stale refresh would restart the model. The non-empty buffer signals "completed" without needing a third state flag.
+        </div>
+
+        <hr>
+
+        <h2 class="title is-4">Auto flush and shutdown</h2>
+
+        <p>When the model goroutine returns normally, <code>Handle</code> calls <code>flush()</code> automatically:</p>
+
+        <ol>
+          <li><strong>EndAction()</strong> — stops polling (no more Refresh headers)</li>
+          <li><strong>Grace period (2s)</strong> — the browser's pending refresh arrives, gets the final page without a Refresh header</li>
+          <li><strong>signalDone()</strong> — triggers <code>http.Server.Shutdown()</code></li>
+        </ol>
+
+        <p>The server returns <code>nil</code> from <code>app.ListenAndServe</code> on graceful shutdown (exit code 0). Panics and bind errors return non-nil (exit code 1).</p>
+
+        <div class="annotation">
+          <strong>Flush is implicit in Handle, explicit elsewhere</strong> — models using <code>HandleRoot</code>/<code>HandleDisplay</code> (later examples) call <code>EndAction()</code> directly. The server stays alive for restart. <code>Flush()</code> is available as a public method for models that want to trigger shutdown explicitly.
+        </div>
+
+        <hr>
+
+        <h2 class="title is-4">Lazy defaults</h2>
+
+        <p>For the simplest case, <code>NewApp()</code> provides sensible defaults that later examples override:</p>
+
+        <table class="table is-bordered">
+          <thead>
+            <tr>
+              <th>Default</th>
+              <th>Value</th>
+              <th>Override</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Controller</td>
+              <td>Built-in Bulma template (created lazily on first request)</td>
+              <td><code>app.SetController(ctrl)</code></td>
+            </tr>
+            <tr>
+              <td>Refresh time</td>
+              <td>1 second</td>
+              <td><code>app.SetRefreshTime(n)</code></td>
+            </tr>
+            <tr>
+              <td>Display URL</td>
+              <td><code>/display</code></td>
+              <td><code>app.SetDisplayURL(url)</code></td>
+            </tr>
+            <tr>
+              <td>Favicon</td>
+              <td>Auto-registered on DefaultServeMux</td>
+              <td>Register your own <code>/favicon.ico</code> handler first</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <hr>
+
+        <h2 class="title is-4">HandleRoot / HandleDisplay</h2>
+
+        <p>For apps that need restart support or a long-lived server, use separate endpoints:</p>
+
+        <div class="code-block"><pre><code>http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    app.HandleRoot(w, r, model, true)
+})
+http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
+    app.HandleDisplay(w, r)
+})</code></pre></div>
+
+        <p><code>HandleRoot</code> resets the buffer, starts the model, and redirects to <code>/display</code>. <code>HandleDisplay</code> renders the current state. The model calls <code>EndAction()</code> when done. The server stays alive — visiting <code>/</code> again restarts the model.</p>
+
+    </div>
+  </section>
+</body>
+</html>

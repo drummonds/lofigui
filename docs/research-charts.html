@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: Charts - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: Charts</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-charts">Research: Charts</h1>
+<p>Charting options for lofigui — Go SVG vs JavaScript libraries.</p>
+<h2 id="the-problem">The problem</h2>
+<p>Charts are the next big gap in lofigui. The current approach (example 02) uses Go libraries to produce SVG server-side. The results are functional but poor — limited axis formatting, weak label placement, no interactivity, and mediocre visual quality compared to what users expect from modern dashboards.</p>
+<p>This was explored in the <a href="https://drummonds.github.io/gobank/research/chart-comparison.html">gobank chart comparison</a>, which tested three Go SVG renderers against financial data.</p>
+<h2 id="go-svg-libraries-tested-gobank">Go SVG libraries tested (gobank)</h2>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Strengths</th>
+<th>Weaknesses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hand-rolled SVG</strong></td>
+<td>Full control, no dependencies</td>
+<td>Enormous effort for basic features (axis scaling, labels, legends). Every chart type is a fresh implementation.</td>
+</tr>
+<tr>
+<td><strong>go-analyze/charts</strong></td>
+<td>Good chart variety, reasonable defaults</td>
+<td>Axis formatting issues (decimal values where percentages expected), limited customisation</td>
+</tr>
+<tr>
+<td><strong>margaid</strong></td>
+<td>Clean line charts</td>
+<td>Limited chart types, sparse documentation</td>
+</tr>
+</tbody>
+</table>
+<p>The go-chart library (used in lofigui example 02) has similar issues — it works for simple bar/line charts but struggles with axis formatting, date handling, and multi-series layouts.</p>
+<p><strong>Core issue</strong>: Go's charting ecosystem is immature compared to JavaScript's. The libraries exist but produce output that looks 10 years behind what a JS library produces with the same data and less code.</p>
+<h2 id="the-javascript-charting-landscape">The JavaScript charting landscape</h2>
+<p>If we accept a JS dependency for charts (as we accepted HTMX for interactivity), the question is: which library, and does it drag in framework complexity?</p>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Size</th>
+<th>Framework needed?</th>
+<th>CDN single-file?</th>
+<th>SVG output?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chart.js</strong></td>
+<td>~65KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>Canvas (not SVG)</td>
+<td>Simple API, good defaults, huge community. Canvas means no CSS styling of chart elements.</td>
+</tr>
+<tr>
+<td><strong>D3.js</strong></td>
+<td>~90KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes (native SVG)</td>
+<td>The gold standard. Total control over every pixel. Steep learning curve but unmatched flexibility.</td>
+</tr>
+<tr>
+<td><strong>Observable Plot</strong></td>
+<td>~50KB (needs D3)</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes (SVG)</td>
+<td>D3's &quot;high-level&quot; layer. Concise API, good defaults, less boilerplate than raw D3.</td>
+</tr>
+<tr>
+<td><strong>Plotly.js</strong></td>
+<td>~1MB</td>
+<td>No</td>
+<td>Yes</td>
+<td>SVG + Canvas</td>
+<td>Feature-rich but heavy. Built on D3. Good for scientific/financial charts.</td>
+</tr>
+<tr>
+<td><strong>Apache ECharts</strong></td>
+<td>~400KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>Canvas + SVG</td>
+<td>Rich interactive charts. Heavy but well-documented.</td>
+</tr>
+<tr>
+<td><strong>Frappe Charts</strong></td>
+<td>~17KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>SVG</td>
+<td>Lightweight, GitHub-inspired aesthetics. Limited chart types.</td>
+</tr>
+<tr>
+<td><strong>uPlot</strong></td>
+<td>~35KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>Canvas</td>
+<td>Extremely fast for time-series. Minimal but performant.</td>
+</tr>
+<tr>
+<td><strong>Vega-Lite</strong></td>
+<td>~400KB</td>
+<td>No</td>
+<td>Yes</td>
+<td>SVG + Canvas</td>
+<td>Declarative grammar-of-graphics. JSON spec, no imperative code.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-to-avoid">What to avoid</h2>
+<p>The key constraint is: <strong>no React, no Svelte, no Angular, no build step</strong>. Libraries that require a framework or a bundler are out:</p>
+<ul>
+<li><strong>Recharts</strong> — React-only</li>
+<li><strong>Victory</strong> — React-only</li>
+<li><strong>Nivo</strong> — React-only</li>
+<li><strong>SvelteKit charts</strong> — Svelte-only</li>
+</ul>
+<p>The lofigui pattern is: server renders HTML, browser displays it. A chart library must work with a <code>&lt;script&gt;</code> tag and a <code>&lt;div&gt;</code> target, nothing more.</p>
+<h2 id="leading-candidates-for-lofigui">Leading candidates for lofigui</h2>
+<p><strong>D3.js</strong> is the most interesting option. It:</p>
+<ul>
+<li>Produces native SVG (inspectable, stylable with CSS, printable)</li>
+<li>Works from a single CDN <code>&lt;script&gt;</code> tag</li>
+<li>Has no framework dependency</li>
+<li>Is the foundation most other libraries build on</li>
+<li>Supports every chart type imaginable</li>
+</ul>
+<p>The downside is D3's verbosity — a simple line chart is ~30 lines of JS. But lofigui could generate the D3 JavaScript server-side (Go <code>fmt.Sprintf</code> with data injected into a template), keeping the complexity on the server while the browser just executes the rendering.</p>
+<p><strong>Observable Plot</strong> is D3's high-level API, worth considering if D3 feels too low-level. Same SVG output, much less code.</p>
+<p><strong>Chart.js</strong> is the simplest option if SVG isn't required. Canvas output means less flexibility but the API is very approachable.</p>
+<h2 id="how-it-would-work-in-lofigui">How it would work in lofigui</h2>
+<p>The pattern would mirror HTMX — a <code>&lt;script&gt;</code> tag in the template, with the Go server injecting data:</p>
+<pre><code class="language-go">// Server-side: Go generates the chart div + script
+lofigui.HTML(fmt.Sprintf(`
+&lt;div id=&quot;chart-%s&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+  // D3 or Chart.js code here, with data from Go
+  const data = %s;
+  // ... render chart into #chart-%s
+&lt;/script&gt;
+`, chartID, jsonData, chartID))
+</code></pre>
+<p>This keeps the Go code in control of <em>what</em> to chart. The JS library handles <em>how</em> to render it. No npm, no build step, no framework.</p>
+<h2 id="potential-example-water-tank-charts">Potential example: water tank charts</h2>
+<p>A natural next example would chart the water tank simulation data — tank level and pump/valve activity over time. This would:</p>
+<ul>
+<li>Demonstrate time-series charting with real simulation data</li>
+<li>Show how to pass Go data to a JS charting library</li>
+<li>Build on the existing water tank examples (07-10)</li>
+<li>Provide a reference pattern for charting in lofigui apps</li>
+</ul>
+<p>The chart would update via HTMX (like example 09) — the fragment endpoint returns fresh chart HTML with updated data on each poll.</p>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

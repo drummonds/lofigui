@@ -3,13 +3,30 @@
 <div class="columns">
 <div class="column is-3">
 
-<!-- auto:pages -->
-<!-- /auto:pages -->
+<aside class="menu">
+<p class="menu-label">Pages</p>
+<ul class="menu-list">
+<li><a href="README.html">lofigui README</a></li>
+<li><a href="ROADMAP.html">Roadmap</a></li>
+<li>
+<a href="RESEARCH.html">Research</a>
+<ul>
+<li><a href="research-philosophy.html">Philosophy</a></li>
+<li><a href="research-charts.html">Charts</a></li>
+<li><a href="research-layouts.html">Page Layouts</a></li>
+<li><a href="research-technical.html">Technical</a></li>
+<li><a href="research-bugs.html">Bugs</a></li>
+<li><a href="research-python.html">Python</a></li>
+</ul>
+</li>
+<li><a href="CHANGELOG.html">Changelog</a></li>
+</ul>
+</aside>
 
 </div>
 <div class="column is-9">
 
-A minimalist library for creating simple web-based GUIs. Available in Python and Go.
+A minimalist Go library for creating simple web-based GUIs. Some parts available as Python.
 
 ## Examples
 
