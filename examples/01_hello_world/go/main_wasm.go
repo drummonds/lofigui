@@ -3,48 +3,18 @@
 package main
 
 import (
-	"fmt"
-	"sync"
 	"syscall/js"
-	"time"
 
 	"codeberg.org/hum3/lofigui"
 )
 
-var (
-	mu      sync.Mutex
-	running bool
-)
+var app = lofigui.NewApp()
 
 func goStart(this js.Value, args []js.Value) any {
-	mu.Lock()
-	if running {
-		mu.Unlock()
+	if app.IsActionRunning() {
 		return nil
 	}
-	running = true
-	mu.Unlock()
-
-	lofigui.Reset()
-	lofigui.Print("Hello world.")
-
-	go func() {
-		for i := 0; i < 5; i++ {
-			<-time.After(1 * time.Second)
-			mu.Lock()
-			if !running {
-				mu.Unlock()
-				return
-			}
-			mu.Unlock()
-			lofigui.Print(fmt.Sprintf("Count %d", i))
-		}
-		lofigui.Print("Done.")
-		mu.Lock()
-		running = false
-		mu.Unlock()
-	}()
-
+	app.RunModel(model)
 	return nil
 }
 
@@ -53,17 +23,13 @@ func goRender(this js.Value, args []js.Value) any {
 }
 
 func goIsRunning(this js.Value, args []js.Value) any {
-	mu.Lock()
-	defer mu.Unlock()
-	return js.ValueOf(running)
+	return js.ValueOf(app.IsActionRunning())
 }
 
 func main() {
 	js.Global().Set("goStart", js.FuncOf(goStart))
 	js.Global().Set("goRender", js.FuncOf(goRender))
 	js.Global().Set("goIsRunning", js.FuncOf(goIsRunning))
-
 	js.Global().Call("wasmReady")
-
 	<-make(chan struct{})
 }
