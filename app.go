@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -73,6 +74,7 @@ type App struct {
 	PollCount     int    // Number of polling cycles
 	refreshTime   int    // Seconds between refresh when polling
 	displayURL    string // URL to redirect to for display
+	hold          bool   // Keep server running after model completes (for screenshots)
 	cancelFunc    context.CancelFunc
 	actionCtx     context.Context // context for the current action
 	server        *http.Server    // set by app.ListenAndServe for graceful shutdown
@@ -81,11 +83,16 @@ type App struct {
 }
 
 // NewApp creates a new App with no controller.
+//
+// If the LOFIGUI_HOLD environment variable is set (any non-empty value),
+// the server will not shut down after the model completes. This is useful
+// for taking screenshots with tools like url2svg.
 func NewApp() *App {
 	return &App{
 		Version:     "Lofigui",
 		refreshTime: 1,
 		displayURL:  "/display",
+		hold:        os.Getenv("LOFIGUI_HOLD") != "",
 	}
 }
 
@@ -95,6 +102,7 @@ func NewAppWithController(ctrl *Controller) *App {
 		Version:     "Lofigui",
 		refreshTime: 1,
 		displayURL:  "/display",
+		hold:        os.Getenv("LOFIGUI_HOLD") != "",
 	}
 	app.SetController(ctrl)
 	return app
@@ -348,6 +356,12 @@ func (app *App) Handle(modelFunc func(*App)) http.HandlerFunc {
 // For explicit use in a model, call Flush() — same behaviour but public.
 func (app *App) flush() {
 	app.EndAction()
+	app.mu.RLock()
+	hold := app.hold
+	app.mu.RUnlock()
+	if hold {
+		return // keep server running for screenshots
+	}
 	// Grace period: the browser has a pending refresh from the last response's
 	// Refresh header. Give it time to arrive and render the final output.
 	time.Sleep(2 * time.Second)
@@ -358,6 +372,31 @@ func (app *App) flush() {
 // period for the browser to display the final output.
 func (app *App) Flush() {
 	app.flush()
+}
+
+// RunModel resets the buffer, starts the action, and runs the model function
+// in a background goroutine. When the model returns, EndAction is called
+// automatically. Cancellation panics from Sleep are recovered cleanly.
+//
+// If a previous action is running, it is cancelled before the new one starts.
+// Use IsActionRunning to guard against unwanted restarts.
+//
+// This is the WASM-friendly equivalent of Handle — same lifecycle, no HTTP.
+func (app *App) RunModel(modelFunc func(*App)) {
+	Reset()
+	app.StartAction()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				if _, ok := r.(cancelledError); ok {
+					return
+				}
+				panic(r)
+			}
+		}()
+		modelFunc(app)
+		app.EndAction()
+	}()
 }
 
 // Sleep pauses for the given duration, or until the action is cancelled.

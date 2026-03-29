@@ -170,6 +170,25 @@ app.Sleep(1 * time.Second)  // cancellation-aware sleep
 ctx := app.Context()         // get raw context for database calls, HTTP clients, etc.
 ```
 
+### RunModel (WASM support)
+
+`RunModel` is the WASM-friendly equivalent of `Handle` — same lifecycle (reset, start action, recover cancellation, end action) without HTTP:
+
+```go
+app.RunModel(model)  // resets buffer, starts action, runs model in goroutine
+```
+
+This allows the same `model(app *lofigui.App)` function to be shared between server and WASM builds (see example 01 `model.go`).
+
+### Hold mode (screenshots)
+
+Set `LOFIGUI_HOLD=1` to keep the server running after the model completes. The page stops auto-refreshing but the server stays up, so screenshot tools like `url2svg` can capture the final output:
+
+```bash
+LOFIGUI_HOLD=1 task go-example:01
+# server stays up at http://localhost:1340 — capture with url2svg
+```
+
 ### Controller with HTMX (no App — example 09)
 
 For HTMX-based apps, use `Controller` directly — no `App` or polling state needed. HTMX fetches fragment endpoints to update the page without full reloads.
