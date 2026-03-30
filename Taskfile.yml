@@ -82,6 +82,19 @@ tasks:
       - rm -f examples/03_hello_world_wasm/go/main.wasm 2>/dev/null || true
       - rm -f examples/04_tinygo_wasm/go/main.wasm 2>/dev/null || true
 
+  clean:ports:
+    desc: Kill processes on demo server ports (1340-1349)
+    cmds:
+      - |
+        for port in $(seq 1340 1349); do
+          pid=$(lsof -ti :$port 2>/dev/null)
+          if [ -n "$pid" ]; then
+            echo "Killing PID $pid on port $port"
+            kill $pid 2>/dev/null || true
+          fi
+        done
+        echo "Demo ports 1340-1349 cleared"
+
   check-licenses:
     desc: Check Go dependencies for license compliance
     cmds:
