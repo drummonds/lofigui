@@ -116,7 +116,7 @@ func model(app *lofigui.App) {
           <strong>Defaults</strong> — <code>NewApp()</code> provides a built-in template (Bulma-styled), 1-second refresh, and a <code>/favicon.ico</code> handler. Later examples show how to override each of these with custom controllers, templates, and separate start/display endpoints.
         </div>
 
-        <p><a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">Full source on Codeberg</a></p>
+        <p>The full source is split across two files: <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">main.go</a> (the server) and <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go</a> (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single <code>main.go</code> is all you need.</p>
 
         <hr>
 
@@ -130,35 +130,20 @@ func model(app *lofigui.App) {
 
         <h2 class="title is-4">WASM: running in the browser</h2>
 
-        <p>The <a href="demo.html">live demo</a> runs the same model code compiled to WebAssembly — entirely in your browser, no server required. The model logic (<code>Print</code>, loop, sleep) is identical; the differences are in the wiring.</p>
+        <p>The <a href="demo.html">live demo</a> runs the same <code>model()</code> function compiled to WebAssembly — entirely in your browser, no server required. Because the model lives in its own file (<code>model.go</code>), both the server and WASM builds share it unchanged.</p>
 
-        <p>A separate <code>main_wasm.go</code> file (build-tagged <code>js && wasm</code>) replaces the server with three functions exported to JavaScript:</p>
+        <p>A separate <code>main_wasm.go</code> file (build-tagged <code>js && wasm</code>) replaces the server with a single call:</p>
 
         <div class="code-block"><pre><code><span class="has-text-grey">//go:build js && wasm</span>
 
-func goStart(this js.Value, args []js.Value) any {
-    lofigui.Reset()
-    lofigui.Print("Hello world.")
-    go func() {
-        for i := 0; i &lt; 5; i++ {
-            &lt;-time.After(1 * time.Second)
-            lofigui.Print(fmt.Sprintf("Count %d", i))
-        }
-        lofigui.Print("Done.")
-    }()
-    return nil
-}
+package main
 
-func goRender(this js.Value, args []js.Value) any {
-    return js.ValueOf(lofigui.Buffer())
-}
+import "codeberg.org/hum3/lofigui"
 
-func goIsRunning(this js.Value, args []js.Value) any {
-    return js.ValueOf(running)
-}</code></pre></div>
+func main() { lofigui.RunWASM(model) }</code></pre></div>
 
         <div class="annotation">
-          <strong>What changes:</strong> instead of the server handling requests and the browser refreshing, a small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. The same <code>lofigui.Print()</code> calls write to the same buffer — the only difference is who reads it.
+          <strong>RunWASM</strong> exports three functions to JavaScript — <code>goStart()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07–12.
         </div>
 
         <div class="annotation">
