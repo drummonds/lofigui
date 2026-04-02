@@ -1,6 +1,7 @@
 const outputDiv = document.getElementById('output');
 const statusTag = document.getElementById('status-tag');
 const startBtn = document.getElementById('startBtn');
+const cancelBtn = document.getElementById('cancel-btn');
 
 let renderInterval = null;
 
@@ -16,6 +17,7 @@ function updateStatus() {
     statusTag.textContent = running ? 'Running' : 'Ready';
     statusTag.className = running ? 'tag is-warning' : 'tag is-success';
     startBtn.disabled = running;
+    cancelBtn.style.display = running ? 'inline-flex' : 'none';
     if (!running && renderInterval) {
         clearInterval(renderInterval);
         renderInterval = null;
@@ -46,5 +48,11 @@ async function loadWASM() {
 }
 
 startBtn.addEventListener('click', start);
+cancelBtn.addEventListener('click', function() {
+    if (typeof goCancel === 'function') {
+        goCancel();
+        render();
+    }
+});
 
 loadWASM();

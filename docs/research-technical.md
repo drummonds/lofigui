@@ -82,6 +82,140 @@ User -> GET /display -> app.HandleDisplay(w, r)
   2. ctrl.HandleDisplay(w, r, nil)  <- uses ctrl.StateDict (NOT app.StateDict)
 ```
 
+---
+
+## 4. Handle (Single-Endpoint Pattern)
+
+`Handle(model)` returns an `http.HandlerFunc` that manages the full lifecycle on a single URL. It uses buffer state as a signal:
+
+```
+GET /  (buffer empty, not running)   → start model in goroutine, render with Refresh header
+GET /  (running)                     → render current buffer (polling continues)
+GET /  (not running, buffer has content) → render final output, no refresh
+```
+
+### State machine
+
+| Buffer  | Running | Action |
+|---------|---------|--------|
+| empty   | false   | Start model, render with polling |
+| any     | true    | Render current output, keep polling |
+| content | false   | Render final output, stop polling |
+
+When the model goroutine returns normally, `flush()` is called which:
+1. Calls `EndAction()` — stops polling, cancels context
+2. If `LOFIGUI_HOLD` is **not** set: waits 2 seconds (grace period for browser to pick up final render), then signals server shutdown via `signalDone()`
+3. If `LOFIGUI_HOLD` **is** set: returns immediately — server stays alive
+
+### Restart behaviour
+
+With `Handle`, the model only starts when the buffer is empty **and** no action is running. After the model completes, the buffer retains content, so subsequent requests just render the final output — no automatic restart. For restart support, use `HandleRoot` + `HandleDisplay` instead (the model can include a link to `HandleRoot`'s URL).
+
+---
+
+## 5. HOLD Mode
+
+Setting `LOFIGUI_HOLD=1` keeps the server running after the model completes. This is designed for screenshot capture with tools like `url2svg`.
+
+### How it works
+
+```go
+// In NewApp():
+hold: os.Getenv("LOFIGUI_HOLD") != "",
+
+// In flush():
+func (app *App) flush() {
+    app.EndAction()
+    if app.hold {
+        return  // keep server running
+    }
+    time.Sleep(2 * time.Second)  // grace period
+    app.signalDone()             // trigger server shutdown
+}
+```
+
+### Usage for screenshot capture
+
+```bash
+# Start server — stays alive after model completes
+LOFIGUI_HOLD=1 go run .
+
+# In another terminal, capture with url2svg
+url2svg --url http://localhost:1340 -o screenshot.svg
+```
+
+The `docs:capture:*` Taskfile tasks automate this: start server in background, trigger the model, capture at timed intervals, then kill the server.
+
+---
+
+## 6. Cancellation Flow
+
+Cancellation is **transparent** — model code does not need explicit cancel handling. The framework uses a panic-recover mechanism with an internal sentinel type.
+
+### Trigger
+
+- **Server**: `HandleCancel(redirectURL)` calls `EndAction()`, sets `cancelled=true`, redirects, and triggers graceful shutdown
+- **WASM**: `goCancel()` calls `EndAction()`
+- **Restart**: `StartAction()` cancels the previous action's context before starting a new one
+
+### Mechanism
+
+```
+EndAction() / StartAction()
+  → cancels context via cancelFunc()
+  → next Print(), Sleep(), or Yield() call checks context
+  → panics with cancelledError{} sentinel
+  → Handle/HandleRoot's recover wrapper catches it
+  → goroutine exits cleanly
+```
+
+### Detail
+
+1. `EndAction()` calls `cancelFunc()`, setting the context to done
+2. `defaultContext` stores the action context; `checkCancelled()` checks it
+3. `Print()`, `Sleep()`, `Yield()` all call `checkCancelled()` — if the context is done, they `panic(errCancelled)`
+4. The `go func()` in `Handle`/`HandleRoot` has `defer recover()` that catches `cancelledError` and returns silently
+5. The buffer retains whatever was printed before cancellation — this becomes the final output
+
+### Server shutdown after cancel
+
+When using `app.ListenAndServe`, `HandleCancel` triggers the same graceful shutdown as normal model completion:
+
+1. `EndAction()` cancels the context and stops polling
+2. `cancelled` flag is set on the app
+3. The HTTP redirect is sent to the client
+4. After a 2-second grace period, `signalDone()` triggers `srv.Shutdown()`
+5. `ListenAndServe` returns `ErrCancelled` (not `nil`) — allowing the caller to exit with a non-zero status
+
+```go
+if err := app.ListenAndServe(":1340", nil); err != nil {
+    if errors.Is(err, lofigui.ErrCancelled) {
+        log.Println(err)
+        os.Exit(1)
+    }
+    log.Fatal(err)
+}
+```
+
+Normal completion returns `nil` (exit 0). Cancel returns `ErrCancelled` (exit 1).
+
+### Overriding cancel behaviour
+
+For long-running servers that should keep running after cancel (e.g. HTMX apps, multi-page dashboards), write a custom handler instead of using `HandleCancel`:
+
+```go
+http.HandleFunc("/cancel", func(w http.ResponseWriter, r *http.Request) {
+    app.EndAction()
+    http.Redirect(w, r, "/", http.StatusSeeOther)
+})
+```
+
+This calls `EndAction()` (stops the model) without triggering server shutdown.
+
+### Buffer state after cancel
+
+After cancellation, the buffer has partial content and `actionRunning` is false. With `Handle`, this means subsequent requests render the partial output as the "done" state (no restart, no polling).
+
 ### Python Flow (async pattern)
 
 ```

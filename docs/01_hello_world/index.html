@@ -96,6 +96,8 @@ func model(app *lofigui.App) {
           <strong>StartAction / EndAction</strong> — <code>Handle</code> calls <code>StartAction()</code> before launching the model goroutine, which enables auto-refresh polling. The model calls <code>EndAction()</code> when it's done — the browser stops refreshing and the output stays put.
         </div>
 
+        <p><a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go source on Codeberg</a></p>
+
         <hr>
 
         <h2 class="title is-4">The server — wiring it up</h2>
@@ -105,6 +107,7 @@ func model(app *lofigui.App) {
         <div class="code-block"><pre><code>func main() {
     app := lofigui.NewApp()
     http.HandleFunc("/", app.Handle(model))
+    http.HandleFunc("/cancel", app.HandleCancel("/"))
     log.Fatal(lofigui.ListenAndServe(":1340", nil))
 }</code></pre></div>
 
@@ -128,6 +131,27 @@ func model(app *lofigui.App) {
 
         <hr>
 
+        <h2 class="title is-4">Cancellation</h2>
+
+        <p>Both the server and WASM builds support cancelling a running model mid-flow. The navbar shows a <strong>Cancel</strong> button while the model is running.</p>
+
+        <div class="code-block"><pre><code><span class="has-text-grey">// Server: register a cancel endpoint</span>
+http.HandleFunc("/cancel", app.HandleCancel("/"))
+
+<span class="has-text-grey">// WASM: goCancel() is exported automatically by RunWASM</span></code></pre></div>
+
+        <div class="annotation">
+          <strong>Transparent cancellation</strong> — when cancel is triggered, <code>EndAction()</code> cancels the context. The next call to <code>Print</code>, <code>Sleep</code>, or <code>Yield</code> in the model goroutine panics with an internal sentinel. <code>Handle</code>'s recover wrapper catches it, and the goroutine exits cleanly. The buffer retains its partial output. The model doesn't need any explicit cancellation code.
+        </div>
+
+        <div class="annotation">
+          <strong>Server shutdown</strong> — when using <code>app.ListenAndServe</code>, <code>HandleCancel</code> also triggers graceful server shutdown (same as normal model completion). For long-running servers that should keep running after cancel, write a custom handler that calls <code>app.EndAction()</code> directly instead of using <code>HandleCancel</code>.
+        </div>
+
+        <p>See <a href="../research-technical.html">technical details</a> for the full cancel flow.</p>
+
+        <hr>
+
         <h2 class="title is-4">WASM: running in the browser</h2>
 
         <p>The <a href="demo.html">live demo</a> runs the same <code>model()</code> function compiled to WebAssembly — entirely in your browser, no server required. Because the model lives in its own file (<code>model.go</code>), both the server and WASM builds share it unchanged.</p>
@@ -143,7 +167,7 @@ import "codeberg.org/hum3/lofigui"
 func main() { lofigui.RunWASM(model) }</code></pre></div>
 
         <div class="annotation">
-          <strong>RunWASM</strong> exports three functions to JavaScript — <code>goStart()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07–12.
+          <strong>RunWASM</strong> exports four functions to JavaScript — <code>goStart()</code>, <code>goCancel()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07–12.
         </div>
 
         <div class="annotation">
@@ -151,6 +175,19 @@ func main() { lofigui.RunWASM(model) }</code></pre></div>
         </div>
 
         <p><a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
+
+        <h3 class="title is-5">Server vs WASM lifecycle</h3>
+
+        <p>The server app and WASM app run the same model, but their lifecycles differ:</p>
+
+        <ul>
+          <li><strong>Server</strong> — the model starts automatically on the first HTTP request to <code>/</code>. While the model runs, the browser polls for updates via the Refresh header. When the model completes, the server exits (unless <code>LOFIGUI_HOLD=1</code> is set).</li>
+          <li><strong>WASM</strong> — the page loads with a <strong>Start</strong> button. The user clicks to begin, and JavaScript polls <code>goRender()</code> every 500ms to update the output. After the model completes, clicking Start again restarts it.</li>
+        </ul>
+
+        <div class="annotation">
+          <strong>Why the difference?</strong> The server uses <code>Handle()</code> which auto-starts on an empty buffer — request-driven. WASM uses <code>RunWASM()</code> which exports <code>goStart()</code> behind a button — user-driven. The model code itself is identical in both cases.
+        </div>
 
       </div>
     </div>
@@ -161,6 +198,8 @@ func main() { lofigui.RunWASM(model) }</code></pre></div>
       <a href="../index.html">&larr; Back to docs</a>
       &nbsp;&middot;&nbsp;
       <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world">Source on Codeberg</a>
+      &nbsp;&middot;&nbsp;
+      <a target="_blank" href="https://pkg.go.dev/codeberg.org/hum3/lofigui">pkg.go.dev</a>
     </div>
   </footer>
 </body>

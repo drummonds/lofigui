@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
   <rect x="0" y="0" width="1024" height="768" fill="white"/>
-  <text x="8" y="50.2" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="32" font-weight="700">Test start</text>
-  <text x="8" y="93.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Hello world.</text>
-  <text x="8" y="127.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Count 0</text>
+  <rect x="0" y="0" width="1009" height="52" fill="rgb(0,209,178)"/>
+  <text x="12" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Lofigui</text>
+  <rect x="864.6" y="14" width="62.7" height="24" rx="6" fill="rgb(255,183,15)"/>
+  <text x="873.6" y="29.4" fill="rgb(41,29,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Running</text>
+  <a xlink:href="http://localhost:1340/cancel">
+    <rect x="943.3" y="14" width="53.7" height="24" rx="6" fill="rgb(255,235,239)"/>
+    <text x="952.3" y="29.4" fill="rgb(128,0,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Cancel</text>
+  </a>
+  <text x="48" y="117.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Hello world.</text>
+  <text x="48" y="157.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Count 0</text>
+  <text x="48" y="197.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Count 1</text>
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
 </svg>

@@ -98,6 +98,12 @@ func (app *App) ListenAndServe(addr string, handler http.Handler) error {
 
 		err = srv.Serve(ln)
 		if errors.Is(err, http.ErrServerClosed) {
+			app.mu.RLock()
+			cancelled := app.cancelled
+			app.mu.RUnlock()
+			if cancelled {
+				return ErrCancelled
+			}
 			return nil // graceful shutdown
 		}
 		return err
