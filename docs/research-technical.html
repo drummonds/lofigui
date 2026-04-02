@@ -219,7 +219,7 @@ url2svg --url http://localhost:1340 -o screenshot.svg
 <p>Cancellation is <strong>transparent</strong> — model code does not need explicit cancel handling. The framework uses a panic-recover mechanism with an internal sentinel type.</p>
 <h3 id="trigger">Trigger</h3>
 <ul>
-<li><strong>Server</strong>: <code>HandleCancel(redirectURL)</code> calls <code>EndAction()</code> and redirects</li>
+<li><strong>Server</strong>: <code>HandleCancel(redirectURL)</code> calls <code>EndAction()</code>, sets <code>cancelled=true</code>, redirects, and triggers graceful shutdown</li>
 <li><strong>WASM</strong>: <code>goCancel()</code> calls <code>EndAction()</code></li>
 <li><strong>Restart</strong>: <code>StartAction()</code> cancels the previous action's context before starting a new one</li>
 </ul>
@@ -239,6 +239,32 @@ url2svg --url http://localhost:1340 -o screenshot.svg
 <li>The <code>go func()</code> in <code>Handle</code>/<code>HandleRoot</code> has <code>defer recover()</code> that catches <code>cancelledError</code> and returns silently</li>
 <li>The buffer retains whatever was printed before cancellation — this becomes the final output</li>
 </ol>
+<h3 id="server-shutdown-after-cancel">Server shutdown after cancel</h3>
+<p>When using <code>app.ListenAndServe</code>, <code>HandleCancel</code> triggers the same graceful shutdown as normal model completion:</p>
+<ol>
+<li><code>EndAction()</code> cancels the context and stops polling</li>
+<li><code>cancelled</code> flag is set on the app</li>
+<li>The HTTP redirect is sent to the client</li>
+<li>After a 2-second grace period, <code>signalDone()</code> triggers <code>srv.Shutdown()</code></li>
+<li><code>ListenAndServe</code> returns <code>ErrCancelled</code> (not <code>nil</code>) — allowing the caller to exit with a non-zero status</li>
+</ol>
+<pre><code class="language-go">if err := app.ListenAndServe(&quot;:1340&quot;, nil); err != nil {
+    if errors.Is(err, lofigui.ErrCancelled) {
+        log.Println(err)
+        os.Exit(1)
+    }
+    log.Fatal(err)
+}
+</code></pre>
+<p>Normal completion returns <code>nil</code> (exit 0). Cancel returns <code>ErrCancelled</code> (exit 1).</p>
+<h3 id="overriding-cancel-behaviour">Overriding cancel behaviour</h3>
+<p>For long-running servers that should keep running after cancel (e.g. HTMX apps, multi-page dashboards), write a custom handler instead of using <code>HandleCancel</code>:</p>
+<pre><code class="language-go">http.HandleFunc(&quot;/cancel&quot;, func(w http.ResponseWriter, r *http.Request) {
+    app.EndAction()
+    http.Redirect(w, r, &quot;/&quot;, http.StatusSeeOther)
+})
+</code></pre>
+<p>This calls <code>EndAction()</code> (stops the model) without triggering server shutdown.</p>
 <h3 id="buffer-state-after-cancel">Buffer state after cancel</h3>
 <p>After cancellation, the buffer has partial content and <code>actionRunning</code> is false. With <code>Handle</code>, this means subsequent requests render the partial output as the &quot;done&quot; state (no restart, no polling).</p>
 <h3 id="python-flow-async-pattern">Python Flow (async pattern)</h3>
