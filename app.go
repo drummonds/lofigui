@@ -86,7 +86,7 @@ type App struct {
 	actionCtx     context.Context // context for the current action
 	server        *http.Server    // set by app.ListenAndServe for graceful shutdown
 	done          chan struct{}   // closed by Handle when model completes
-	cancelled     bool           // true when shutdown was triggered by cancel, not normal completion
+	cancelled     bool            // true when shutdown was triggered by cancel, not normal completion
 	mu            sync.RWMutex
 }
 
