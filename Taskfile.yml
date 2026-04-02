@@ -82,12 +82,12 @@ tasks:
       - rm -f examples/03_hello_world_wasm/go/main.wasm 2>/dev/null || true
       - rm -f examples/04_tinygo_wasm/go/main.wasm 2>/dev/null || true
 
-  clean:ports:
+  clean-ports:
     desc: Kill processes on demo server ports (1340-1349)
     cmds:
       - |
         for port in $(seq 1340 1349); do
-          pid=$(lsof -ti :$port 2>/dev/null)
+          pid=$(lsof -ti :$port 2>/dev/null) || true
           if [ -n "$pid" ]; then
             echo "Killing PID $pid on port $port"
             kill $pid 2>/dev/null || true
@@ -221,6 +221,37 @@ tasks:
       - chmod +x build.sh
       - ./build.sh
 
+  docs:capture:01:
+    desc: Capture screenshots for example 01 documentation
+    dir: examples/01_hello_world/go
+    cmds:
+      - |
+        LOFIGUI_HOLD=1 go run . &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        for i in $(seq 1 30); do
+          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          sleep 0.5
+        done
+        # First curl triggered model — wait for partial progress
+        sleep 2
+        url2svg --url http://localhost:1340 -o ../../../docs/01_polling.svg
+        # Wait for model completion (~5s loop + margin)
+        sleep 5
+        url2svg --url http://localhost:1340 -o ../../../docs/01_complete.svg
+
+  docs:capture:
+    desc: Capture all example screenshots
+    cmds:
+      - task: docs:capture:01
+
+  docs:open:01:
+    desc: Start example 01 in HOLD mode for manual inspection
+    dir: examples/01_hello_world/go
+    cmds:
+      - echo "Server at http://localhost:1340 — Ctrl-C to stop"
+      - LOFIGUI_HOLD=1 go run .
+
   docs:build:
     desc: Build documentation (markdown to HTML)
     cmds:
@@ -234,6 +265,7 @@ tasks:
       - task-plus md2html --file docs/research-technical.md --dst docs
       - task-plus md2html --file docs/research-bugs.md --dst docs
       - task-plus md2html --file docs/research-python.md --dst docs
+      - task-plus md2html --file docs/recipes.md --dst docs
       - task-plus md2html --file docs/index.md --dst docs
       - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 

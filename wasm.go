@@ -30,6 +30,11 @@ func RunWASM(model func(*App)) {
 		return js.ValueOf(Buffer())
 	}))
 
+	js.Global().Set("goCancel", js.FuncOf(func(this js.Value, args []js.Value) any {
+		app.EndAction()
+		return nil
+	}))
+
 	js.Global().Set("goIsRunning", js.FuncOf(func(this js.Value, args []js.Value) any {
 		return js.ValueOf(app.IsActionRunning())
 	}))

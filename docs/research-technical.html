@@ -147,6 +147,100 @@ User -&gt; GET /display -&gt; app.HandleDisplay(w, r)
   1. RLock -&gt; read ctrl -&gt; RUnlock
   2. ctrl.HandleDisplay(w, r, nil)  &lt;- uses ctrl.StateDict (NOT app.StateDict)
 </code></pre>
+<hr>
+<h2 id="4-handle-single-endpoint-pattern">4. Handle (Single-Endpoint Pattern)</h2>
+<p><code>Handle(model)</code> returns an <code>http.HandlerFunc</code> that manages the full lifecycle on a single URL. It uses buffer state as a signal:</p>
+<pre><code>GET /  (buffer empty, not running)   → start model in goroutine, render with Refresh header
+GET /  (running)                     → render current buffer (polling continues)
+GET /  (not running, buffer has content) → render final output, no refresh
+</code></pre>
+<h3 id="state-machine">State machine</h3>
+<table>
+<thead>
+<tr>
+<th>Buffer</th>
+<th>Running</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>empty</td>
+<td>false</td>
+<td>Start model, render with polling</td>
+</tr>
+<tr>
+<td>any</td>
+<td>true</td>
+<td>Render current output, keep polling</td>
+</tr>
+<tr>
+<td>content</td>
+<td>false</td>
+<td>Render final output, stop polling</td>
+</tr>
+</tbody>
+</table>
+<p>When the model goroutine returns normally, <code>flush()</code> is called which:</p>
+<ol>
+<li>Calls <code>EndAction()</code> — stops polling, cancels context</li>
+<li>If <code>LOFIGUI_HOLD</code> is <strong>not</strong> set: waits 2 seconds (grace period for browser to pick up final render), then signals server shutdown via <code>signalDone()</code></li>
+<li>If <code>LOFIGUI_HOLD</code> <strong>is</strong> set: returns immediately — server stays alive</li>
+</ol>
+<h3 id="restart-behaviour">Restart behaviour</h3>
+<p>With <code>Handle</code>, the model only starts when the buffer is empty <strong>and</strong> no action is running. After the model completes, the buffer retains content, so subsequent requests just render the final output — no automatic restart. For restart support, use <code>HandleRoot</code> + <code>HandleDisplay</code> instead (the model can include a link to <code>HandleRoot</code>'s URL).</p>
+<hr>
+<h2 id="5-hold-mode">5. HOLD Mode</h2>
+<p>Setting <code>LOFIGUI_HOLD=1</code> keeps the server running after the model completes. This is designed for screenshot capture with tools like <code>url2svg</code>.</p>
+<h3 id="how-it-works-1">How it works</h3>
+<pre><code class="language-go">// In NewApp():
+hold: os.Getenv(&quot;LOFIGUI_HOLD&quot;) != &quot;&quot;,
+
+// In flush():
+func (app *App) flush() {
+    app.EndAction()
+    if app.hold {
+        return  // keep server running
+    }
+    time.Sleep(2 * time.Second)  // grace period
+    app.signalDone()             // trigger server shutdown
+}
+</code></pre>
+<h3 id="usage-for-screenshot-capture">Usage for screenshot capture</h3>
+<pre><code class="language-bash"># Start server — stays alive after model completes
+LOFIGUI_HOLD=1 go run .
+
+# In another terminal, capture with url2svg
+url2svg --url http://localhost:1340 -o screenshot.svg
+</code></pre>
+<p>The <code>docs:capture:*</code> Taskfile tasks automate this: start server in background, trigger the model, capture at timed intervals, then kill the server.</p>
+<hr>
+<h2 id="6-cancellation-flow">6. Cancellation Flow</h2>
+<p>Cancellation is <strong>transparent</strong> — model code does not need explicit cancel handling. The framework uses a panic-recover mechanism with an internal sentinel type.</p>
+<h3 id="trigger">Trigger</h3>
+<ul>
+<li><strong>Server</strong>: <code>HandleCancel(redirectURL)</code> calls <code>EndAction()</code> and redirects</li>
+<li><strong>WASM</strong>: <code>goCancel()</code> calls <code>EndAction()</code></li>
+<li><strong>Restart</strong>: <code>StartAction()</code> cancels the previous action's context before starting a new one</li>
+</ul>
+<h3 id="mechanism">Mechanism</h3>
+<pre><code>EndAction() / StartAction()
+  → cancels context via cancelFunc()
+  → next Print(), Sleep(), or Yield() call checks context
+  → panics with cancelledError{} sentinel
+  → Handle/HandleRoot's recover wrapper catches it
+  → goroutine exits cleanly
+</code></pre>
+<h3 id="detail">Detail</h3>
+<ol>
+<li><code>EndAction()</code> calls <code>cancelFunc()</code>, setting the context to done</li>
+<li><code>defaultContext</code> stores the action context; <code>checkCancelled()</code> checks it</li>
+<li><code>Print()</code>, <code>Sleep()</code>, <code>Yield()</code> all call <code>checkCancelled()</code> — if the context is done, they <code>panic(errCancelled)</code></li>
+<li>The <code>go func()</code> in <code>Handle</code>/<code>HandleRoot</code> has <code>defer recover()</code> that catches <code>cancelledError</code> and returns silently</li>
+<li>The buffer retains whatever was printed before cancellation — this becomes the final output</li>
+</ol>
+<h3 id="buffer-state-after-cancel">Buffer state after cancel</h3>
+<p>After cancellation, the buffer has partial content and <code>actionRunning</code> is false. With <code>Handle</code>, this means subsequent requests render the partial output as the &quot;done&quot; state (no restart, no polling).</p>
 <h3 id="python-flow-async-pattern">Python Flow (async pattern)</h3>
 <pre><code>User -&gt; GET / -&gt; root(background_tasks)
   1. lg.reset()

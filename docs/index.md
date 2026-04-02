@@ -20,6 +20,7 @@
 </ul>
 </li>
 <li><a href="CHANGELOG.html">Changelog</a></li>
+<li><a href="recipes.html">Recipes</a></li>
 </ul>
 </aside>
 
@@ -45,6 +46,8 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 | [12](12_batch_yield/) | Batch Yield | Cooperative scheduling with `lofigui.Yield()` |
 
 ## Links
+
+- [pkg.go.dev](https://pkg.go.dev/codeberg.org/hum3/lofigui)
 
 <!-- auto:links -->
 <!-- /auto:links -->

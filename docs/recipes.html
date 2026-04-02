@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recipes: Screenshot Capture - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Recipes: Screenshot Capture</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="recipes-screenshot-capture">Recipes: Screenshot Capture</h1>
+<p>How to automatically capture screenshots from running examples for documentation.</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>Start the example server with <code>LOFIGUI_HOLD=1</code> (keeps server alive after model completes)</li>
+<li>Trigger the model by hitting the server URL</li>
+<li>Capture at timed intervals using <a href="https://github.com/nicholasgasior/url2svg">url2svg</a> (headless Chrome → SVG)</li>
+<li>Kill the server</li>
+</ol>
+<h2 id="taskfile-commands">Taskfile commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task docs:capture:01</code></td>
+<td>Auto-capture polling + complete screenshots for example 01</td>
+</tr>
+<tr>
+<td><code>task docs:capture</code></td>
+<td>Capture all example screenshots</td>
+</tr>
+<tr>
+<td><code>task docs:open:01</code></td>
+<td>Start example 01 in HOLD mode for manual inspection</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-example-capture-config">Per-example capture config</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Port</th>
+<th>Captures</th>
+<th>Timing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>1340</td>
+<td><code>01_polling.svg</code> (mid-run), <code>01_complete.svg</code> (done)</td>
+<td>2s delay for polling, 7s for complete</td>
+</tr>
+</tbody>
+</table>
+<h2 id="adding-captures-for-a-new-example">Adding captures for a new example</h2>
+<ol>
+<li>
+<p>Add a <code>docs:capture:NN</code> task to <code>Taskfile.yml</code>:</p>
+<ul>
+<li>Set <code>dir</code> to the example's <code>go/</code> directory</li>
+<li>Start server with <code>LOFIGUI_HOLD=1 go run . &amp;</code></li>
+<li>Wait for port with curl loop</li>
+<li>Trigger model, then capture at appropriate delays</li>
+<li>Use <code>trap</code> to kill server on exit</li>
+</ul>
+</li>
+<li>
+<p>Add the task to <code>docs:capture</code>'s dependency list</p>
+</li>
+<li>
+<p>Reference the SVGs from the example's docs page</p>
+</li>
+</ol>
+<h2 id="manual-inspection">Manual inspection</h2>
+<p><code>task docs:open:NN</code> starts the server in HOLD mode without auto-capture. The server stays running until Ctrl-C, so you can:</p>
+<ul>
+<li>Open the page in a browser to check layout</li>
+<li>Run <code>url2svg</code> manually with different options</li>
+<li>Test the cancel button mid-flow</li>
+</ul>
+<h2 id="url2svg-options">url2svg options</h2>
+<pre><code class="language-bash">url2svg --url http://localhost:1340 -o output.svg           # default 1024x768
+url2svg --url http://localhost:1340 -o output.svg -width 800  # custom width
+url2svg --url http://localhost:1340 -o output.svg -full-page  # full scroll height
+</code></pre>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

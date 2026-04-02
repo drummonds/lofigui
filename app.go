@@ -2,6 +2,7 @@ package lofigui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,6 +11,11 @@ import (
 
 	"github.com/flosch/pongo2/v6"
 )
+
+// ErrCancelled is returned by [App.ListenAndServe] when the server shuts down
+// because the user cancelled the running action (via [App.HandleCancel]),
+// as opposed to the model completing normally.
+var ErrCancelled = errors.New("lofigui: cancelled by user")
 
 // defaultTemplate is the built-in template used when no controller is set.
 // defaultTemplate is the built-in template used when no controller is set.
@@ -30,6 +36,7 @@ const defaultTemplate = `<!DOCTYPE html>
       <div class="navbar-item">
         {% if polling == "Running" %}
         <span class="tag is-warning">Running</span>
+        <a href="/cancel" class="tag is-danger is-light ml-1">Cancel</a>
         {% else %}
         <span class="tag is-success">Done</span>
         {% endif %}
@@ -79,6 +86,7 @@ type App struct {
 	actionCtx     context.Context // context for the current action
 	server        *http.Server    // set by app.ListenAndServe for graceful shutdown
 	done          chan struct{}   // closed by Handle when model completes
+	cancelled     bool           // true when shutdown was triggered by cancel, not normal completion
 	mu            sync.RWMutex
 }
 
@@ -440,6 +448,41 @@ func (app *App) HandleDisplay(w http.ResponseWriter, r *http.Request) {
 	data := app.StateDict(r, nil)
 	if err := ctrl.RenderTemplate(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// HandleCancel returns an http.HandlerFunc that cancels the running action
+// and redirects to the given URL. The model goroutine terminates cleanly
+// via the panic-recover mechanism, and the buffer retains its partial output.
+//
+// When using [App.ListenAndServe], HandleCancel also triggers graceful server
+// shutdown after a 2-second grace period. Unlike normal model completion,
+// [App.ListenAndServe] returns [ErrCancelled] so the caller can distinguish
+// cancel from success and exit with a non-zero status.
+//
+// For long-running servers that should keep running after cancel, write a
+// custom handler that calls [App.EndAction] directly instead.
+//
+// Example:
+//
+//	http.HandleFunc("/cancel", app.HandleCancel("/"))
+func (app *App) HandleCancel(redirectURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		app.EndAction()
+		app.mu.Lock()
+		app.cancelled = true
+		app.mu.Unlock()
+		http.Redirect(w, r, redirectURL, http.StatusSeeOther)
+		go func() {
+			app.mu.RLock()
+			hold := app.hold
+			app.mu.RUnlock()
+			if hold {
+				return
+			}
+			time.Sleep(2 * time.Second)
+			app.signalDone()
+		}()
 	}
 }
 
