@@ -20,18 +20,37 @@ lofigui/
     controller.py          #   Controller
     app.py                 #   App (extends FastAPI), create_app()
     favicon.py             #   Favicon utilities
+  docs/
+    examples.md            # Example documentation standards and structure
+    index.md               # Docs landing page
+    research-philosophy.md # Design philosophy and interactivity spectrum
   examples/
-    01_hello_world/        # Async with polling (Python + Go)
-    02_svg_graph/          # Synchronous render (Python + Go)
-    03_hello_world_wasm/   # Go WASM
-    04_tinygo_wasm/        # TinyGo WASM
+    01_hello_world/        # Level 3: Async with polling (Python + Go)
+    02_svg_graph/          # Level 2: Scrolling output showcase (Python + Go)
+    03_hello_world_wasm/   # Level 6: Go WASM
+    04_tinygo_wasm/        # Level 6: TinyGo WASM
     05_demo_app/           # Python template inheritance
-    06_notes_crud/         # CRUD app (Python + Go)
-    07_water_tank/         # SVG schematic, simulation goroutine, WASM-compatible
-    08_water_tank_multi/   # Multi-page with HTTP Refresh polling
-    09_water_tank_htmx/    # HTMX partial updates (no full-page polling)
-    10_water_tank_maintenance/ # Background maintenance goroutines with progress/cancellation
+    06_notes_crud/         # Level 4: CRUD app (Python + Go)
+    07_water_tank/         # Level 3: SVG schematic, simulation goroutine, WASM-compatible
+    08_water_tank_multi/   # Level 3: Multi-page with HTTP Refresh polling
+    09_water_tank_htmx/    # Level 5: HTMX partial updates (no full-page polling)
+    10_water_tank_maintenance/ # Level 5: Background maintenance goroutines with progress/cancellation
 ```
+
+## Example documentation
+
+Each example has two separate pages in `docs/NN_name/`:
+
+- **`index.html`** — documentation page, rendered from `examples/NN_name/index.md` via `task-plus md2html`. Contains screenshots, annotated code walkthrough, explanation. **Never overwritten by `docs:build-wasm`.**
+- **`demo.html`** — WASM demo page, copied from `examples/NN_name/templates/index.html`. Clean standalone page with Start/Cancel buttons.
+
+See `docs/examples.md` for the full standard: required sections, CSS classes, build process, and interactivity spectrum mapping.
+
+When generating or refreshing example documentation:
+1. Read the example's Go source (main.go, model.go)
+2. Read `docs/examples.md` for the standard format
+3. Write `examples/NN_name/index.md` following the required sections
+4. Run `task docs:build` to render, verify with `tp pages`
 
 ## Python API
 
@@ -142,6 +161,11 @@ ctrl, err := lofigui.NewControllerFromDir("templates", "page.html")
 ### App
 
 ```go
+// Simplest form — registers /, /cancel, favicon, starts server:
+app := lofigui.NewApp()
+app.Run(":1340", model)
+
+// Unbundled form — for custom routes, multiple endpoints:
 app := lofigui.NewApp()
 app.Version = "My App v1.0"
 app.SetController(ctrl)
@@ -277,12 +301,12 @@ GET /        -> reset buffer, start model in goroutine/background task, redirect
 GET /display -> render template (includes auto-refresh meta tag while polling)
 ```
 
-### 2. Synchronous (example 02)
+### 2. Scrolling output (example 02)
 
-Model runs inline, result displayed immediately:
+Model runs in background like example 01, printing all output types (Markdown, HTML, Table, SVG charts) with sleeps between sections. Demonstrates the full range of lofigui output capabilities.
 
 ```
-GET / -> reset buffer, run model (calls EndAction immediately), redirect to /display
+GET / -> same as pattern 1 (async polling), model prints progressively
 ```
 
 ### 3. WASM (examples 03, 04)
@@ -423,7 +447,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 | # | Name | Key features introduced | Base pattern |
 |---|------|------------------------|-------------|
 | 01 | Hello World | `App`, `HandleRoot`, `HandleDisplay`, background goroutine, auto-refresh polling | Async polling |
-| 02 | SVG Graph | Synchronous render (no polling), SVG output via `lofigui.HTML()` | Sync inline |
+| 02 | Output Showcase | All output types: `Print`, `Printf`, `Markdown`, `HTML`, `Table`, inline SVG charts | Async polling |
 | 03 | WASM Hello World | Go compiled to WASM, browser-side rendering, no server | WASM |
 | 04 | TinyGo WASM | TinyGo for smaller WASM binaries (~500KB vs ~2MB) | WASM |
 | 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
@@ -435,7 +459,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 
 **Choosing a starting point for new projects:**
 
-- **Simple status page** — start from 01 (polling) or 02 (sync)
+- **Simple status page** — start from 01 (polling) or 02 (scrolling output)
 - **CRUD / forms** — start from 06
 - **Real-time dashboard** — start from 08 (HTTP Refresh) or 09 (HTMX)
 - **Background tasks with progress** — start from 10

@@ -1,206 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Example 01 — Hello World</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-  <style>
-    .code-block { background: #f5f5f5; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
-    .code-block pre { margin: 0; padding: 1.25em; }
-    .code-block code { background: none; }
-    .annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
-    .annotation strong { color: #3273dc; }
-    .screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
-    .screenshot img { display: block; }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>01 — Hello World - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <a class="navbar-item has-text-weight-bold" href="../index.html">Lofigui</a>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <a href="demo.html" class="button is-small is-light">Launch Demo</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Breadcrumbs -->
-  <section class="section py-3">
-    <div class="container">
-      <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-          <li><a href="../index.html">Docs</a></li>
-          <li class="is-active"><a href="#" aria-current="page">01 — Hello World</a></li>
-        </ul>
-      </nav>
-    </div>
-  </section>
-
-  <section class="section pt-0">
-    <div class="container">
-      <div class="content">
-        <h1 class="title">01 — Hello World</h1>
-
-        <p>If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — <code>Print()</code>, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.</p>
-
-        <div class="columns">
-          <div class="column is-5">
-            <figure class="image screenshot">
-              <img src="../01_polling.svg" alt="During polling — partial output">
-              <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling — partial output</figcaption>
-            </figure>
-            <figure class="image mt-4">
-              <img src="../01_complete.svg" alt="After completion — full output">
-              <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">After completion — full output</figcaption>
-            </figure>
-          </div>
-          <div class="column">
-            <div class="buttons">
-              <a href="demo.html" class="button is-primary">Launch Demo</a>
-              <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
-            </div>
-          </div>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
         </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li class="is-active"><a href="../index.html">Docs</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">01 — Hello World</a></li>
+                </ul>
+            </nav>
 
-        <hr>
-
-        <h2 class="title is-4">The model — your application logic</h2>
-
-        <p>A lofigui app has two parts: a <strong>model</strong> that does the work and a <strong>server</strong> that wires it to the web. This is the model:</p>
-
-        <div class="code-block"><pre><code><span class="has-text-grey">// Model function - this is your application logic.</span>
-<span class="has-text-grey">// Just like a terminal program: print output and sleep between steps.</span>
+            <div class="content">
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; }
+</style>
+<h1 id="01--hello-world">01 — Hello World</h1>
+<p>If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — <code>Print()</code>, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.</p>
+<div class="columns">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../01_polling.svg" alt="During polling — partial output">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling — partial output</figcaption>
+</figure>
+<figure class="image mt-4">
+<img src="../01_complete.svg" alt="After completion — full output">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">After completion — full output</figcaption>
+</figure>
+</div>
+<div class="column">
+<div class="buttons">
+<a href="demo.html" class="button is-primary">Launch Demo</a>
+<a href="demo-tinygo.html" class="button is-info is-light">Launch Demo (TinyGo)</a>
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
+</div>
+</div>
+</div>
+<hr>
+<h2 id="the-model--your-application-logic">The model — your application logic</h2>
+<p>A lofigui app has two parts: a <strong>model</strong> that does the work and a <strong>server</strong> that wires it to the web. This is the model:</p>
+<pre><code class="language-go">// Model function - this is your application logic.
+// Just like a terminal program: print output and sleep between steps.
 func model(app *lofigui.App) {
-    lofigui.Print("Hello world.")
+    lofigui.Print(&quot;Hello world.&quot;)
     for i := 0; i &lt; 5; i++ {
         app.Sleep(1 * time.Second)
-        lofigui.Printf("Count %d", i)
+        lofigui.Printf(&quot;Count %d&quot;, i)
     }
-    lofigui.Markdown("&lt;a href='/'&gt;Restart&lt;/a&gt;")
-    lofigui.Print("Done.")
-    app.EndAction()
-}</code></pre></div>
-
-        <div class="annotation">
-          <strong>lofigui.Print()</strong> works like <code>fmt.Println()</code> — each call adds a line of output. The difference: instead of writing to the terminal, it appends HTML to a buffer that the browser displays.
-        </div>
-
-        <div class="annotation">
-          <strong>The loop and app.Sleep()</strong> are just a facsimile of a long-running task — standing in for real work like processing files, running a simulation, or querying an API. The model runs in a background goroutine; while it works, the browser keeps refreshing to show new output. Cancellation is transparent — if the user restarts, the framework terminates the old goroutine automatically.
-        </div>
-
-        <div class="annotation">
-          <strong>StartAction / EndAction</strong> — <code>Handle</code> calls <code>StartAction()</code> before launching the model goroutine, which enables auto-refresh polling. The model calls <code>EndAction()</code> when it's done — the browser stops refreshing and the output stays put.
-        </div>
-
-        <p><a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go source on Codeberg</a></p>
-
-        <hr>
-
-        <h2 class="title is-4">The server — wiring it up</h2>
-
-        <p>Three lines: create an app, register the model, start the server.</p>
-
-        <div class="code-block"><pre><code>func main() {
+    lofigui.Print(&quot;Done.&quot;)
+}
+</code></pre>
+<div class="annotation">
+<strong>lofigui.Print()</strong> works like <code>fmt.Println()</code> — each call adds a line of output. The difference: instead of writing to the terminal, it appends HTML to a buffer that the browser displays.
+</div>
+<div class="annotation">
+<strong>The loop and app.Sleep()</strong> are just a facsimile of a long-running task — standing in for real work like processing files, running a simulation, or querying an API. The model runs in a background goroutine; while it works, the browser keeps refreshing to show new output. Cancellation is transparent — if the user restarts, the framework terminates the old goroutine automatically.
+</div>
+<div class="annotation">
+<strong>StartAction / EndAction</strong> — <code>Handle</code> calls <code>StartAction()</code> before launching the model goroutine, which enables auto-refresh polling. When the model function returns, <code>Handle</code> calls <code>EndAction()</code> automatically — the browser stops refreshing and the output stays put.
+</div>
+<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go source on Codeberg</a></p>
+<hr>
+<h2 id="the-server--wiring-it-up">The server — wiring it up</h2>
+<p>Two lines: create an app, run the model.</p>
+<pre><code class="language-go">func main() {
     app := lofigui.NewApp()
-    http.HandleFunc("/", app.Handle(model))
-    http.HandleFunc("/cancel", app.HandleCancel("/"))
-    log.Fatal(lofigui.ListenAndServe(":1340", nil))
-}</code></pre></div>
+    app.Run(&quot;:1340&quot;, model)
+}
+</code></pre>
+<div class="annotation">
+<strong>app.Run()</strong> registers the model on <code>/</code>, a cancel handler on <code>/cancel</code>, and starts the server with graceful shutdown. When the model completes, the server exits. This is the HTTP equivalent of <code>RunWASM</code> — one call does everything.
+</div>
+<div class="annotation">
+<strong>Defaults</strong> — <code>NewApp()</code> provides a built-in template (Bulma-styled navbar with cancel button), 1-second refresh, and a <code>/favicon.ico</code> handler. Later examples unbundle <code>Run</code> into <code>Handle</code>, <code>HandleCancel</code>, and <code>ListenAndServe</code> when they need custom routes or multiple endpoints.
+</div>
+<p>The full source is split across two files: <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">main.go</a> (the server) and <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go</a> (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single <code>main.go</code> is all you need.</p>
+<hr>
+<h2 id="how-it-works">How it works</h2>
+<p>The browser hits <code>/</code>, the server starts the model and returns a page with a Refresh header. The browser reloads every second, showing new output as the model prints. When the model returns, polling stops and the server exits cleanly.</p>
+<p>See <a href="technical.html">technical details</a> for a full sequence diagram and internals.</p>
+<hr>
+<h2 id="cancellation">Cancellation</h2>
+<p>Both the server and WASM builds support cancelling a running model mid-flow. The navbar shows a <strong>Cancel</strong> button while the model is running. <code>app.Run()</code> handles this automatically; when unbundled, register the cancel endpoint explicitly:</p>
+<pre><code class="language-go">// Unbundled form (used in later examples with custom routes):
+http.HandleFunc(&quot;/cancel&quot;, app.HandleCancel(&quot;/&quot;))
 
-        <div class="annotation">
-          <strong>app.Handle(model)</strong> — on the first request, resets the buffer, starts the model in a goroutine, and renders the page with auto-refresh. While the model runs, the browser reloads every second to show new output. When the model calls <code>EndAction()</code>, polling stops.
-        </div>
-
-        <div class="annotation">
-          <strong>Defaults</strong> — <code>NewApp()</code> provides a built-in template (Bulma-styled), 1-second refresh, and a <code>/favicon.ico</code> handler. Later examples show how to override each of these with custom controllers, templates, and separate start/display endpoints.
-        </div>
-
-        <p>The full source is split across two files: <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">main.go</a> (the server) and <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go</a> (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single <code>main.go</code> is all you need.</p>
-
-        <hr>
-
-        <h2 class="title is-4">How it works</h2>
-
-        <p>The browser hits <code>/</code>, the server starts the model and returns a page with a Refresh header. The browser reloads every second, showing new output as the model prints. When the model returns, polling stops and the server exits cleanly.</p>
-
-        <p>See <a href="technical.html">technical details</a> for a full sequence diagram and internals.</p>
-
-        <hr>
-
-        <h2 class="title is-4">Cancellation</h2>
-
-        <p>Both the server and WASM builds support cancelling a running model mid-flow. The navbar shows a <strong>Cancel</strong> button while the model is running.</p>
-
-        <div class="code-block"><pre><code><span class="has-text-grey">// Server: register a cancel endpoint</span>
-http.HandleFunc("/cancel", app.HandleCancel("/"))
-
-<span class="has-text-grey">// WASM: goCancel() is exported automatically by RunWASM</span></code></pre></div>
-
-        <div class="annotation">
-          <strong>Transparent cancellation</strong> — when cancel is triggered, <code>EndAction()</code> cancels the context. The next call to <code>Print</code>, <code>Sleep</code>, or <code>Yield</code> in the model goroutine panics with an internal sentinel. <code>Handle</code>'s recover wrapper catches it, and the goroutine exits cleanly. The buffer retains its partial output. The model doesn't need any explicit cancellation code.
-        </div>
-
-        <div class="annotation">
-          <strong>Server shutdown</strong> — when using <code>app.ListenAndServe</code>, <code>HandleCancel</code> also triggers graceful server shutdown (same as normal model completion). For long-running servers that should keep running after cancel, write a custom handler that calls <code>app.EndAction()</code> directly instead of using <code>HandleCancel</code>.
-        </div>
-
-        <p>See <a href="../research-technical.html">technical details</a> for the full cancel flow.</p>
-
-        <hr>
-
-        <h2 class="title is-4">WASM: running in the browser</h2>
-
-        <p>The <a href="demo.html">live demo</a> runs the same <code>model()</code> function compiled to WebAssembly — entirely in your browser, no server required. Because the model lives in its own file (<code>model.go</code>), both the server and WASM builds share it unchanged.</p>
-
-        <p>A separate <code>main_wasm.go</code> file (build-tagged <code>js && wasm</code>) replaces the server with a single call:</p>
-
-        <div class="code-block"><pre><code><span class="has-text-grey">//go:build js && wasm</span>
+// WASM: goCancel() is exported automatically by RunWASM
+</code></pre>
+<div class="annotation">
+<strong>Transparent cancellation</strong> — when cancel is triggered, <code>EndAction()</code> cancels the context. The next call to <code>Print</code>, <code>Sleep</code>, or <code>Yield</code> in the model goroutine panics with an internal sentinel. <code>Handle</code>'s recover wrapper catches it, and the goroutine exits cleanly. The buffer retains its partial output. The model doesn't need any explicit cancellation code.
+</div>
+<p>See <a href="../research-technical.html">technical details</a> for the full cancel flow.</p>
+<hr>
+<h2 id="wasm-running-in-the-browser">WASM: running in the browser</h2>
+<p>The <a href="demo.html">live demo</a> runs the same <code>model()</code> function compiled to WebAssembly — entirely in your browser, no server required. Because the model lives in its own file (<code>model.go</code>), both the server and WASM builds share it unchanged.</p>
+<p>A separate <code>main_wasm.go</code> file (build-tagged <code>js &amp;&amp; wasm</code>) replaces the server with a single call:</p>
+<pre><code class="language-go">//go:build js &amp;&amp; wasm
 
 package main
 
-import "codeberg.org/hum3/lofigui"
+import &quot;codeberg.org/hum3/lofigui&quot;
 
-func main() { lofigui.RunWASM(model) }</code></pre></div>
+func main() { lofigui.RunWASM(model) }
+</code></pre>
+<div class="annotation">
+<strong>RunWASM</strong> exports four functions to JavaScript — <code>goStart()</code>, <code>goCancel()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07-12.
+</div>
+<div class="annotation">
+<strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
+</div>
+<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
+<h3 id="tinygo-wasm">TinyGo WASM</h3>
+<p>The same code also compiles with <a href="https://tinygo.org/">TinyGo</a> for a smaller binary — no source changes needed:</p>
+<pre><code class="language-bash">tinygo build -o main-tinygo.wasm -target wasm .
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Build</th>
+<th>Binary size</th>
+<th>Loader</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Go WASM</td>
+<td>~8 MB</td>
+<td><code>wasm_exec.js</code> (from Go)</td>
+</tr>
+<tr>
+<td>TinyGo WASM</td>
+<td>~2.4 MB</td>
+<td><code>wasm_exec.js</code> (from TinyGo)</td>
+</tr>
+</tbody>
+</table>
+<div class="annotation">
+<strong>Different loaders</strong> — Go and TinyGo each ship their own <code>wasm_exec.js</code>. They are not interchangeable. The <code>docs:build-wasm</code> task builds both and generates separate demo pages: <a href="demo.html">Go WASM demo</a> and <a href="demo-tinygo.html">TinyGo WASM demo</a>.
+</div>
+<p>Every lofigui example builds with both Go and TinyGo. The <code>model.go</code> is identical — only the compiler and loader differ.</p>
+<h3 id="server-vs-wasm-lifecycle">Server vs WASM lifecycle</h3>
+<p>The server app and WASM app run the same model, but their lifecycles differ:</p>
+<ul>
+<li><strong>Server</strong> — the model starts automatically on the first HTTP request to <code>/</code>. While the model runs, the browser polls for updates via the Refresh header. When the model completes, the server exits (unless <code>LOFIGUI_HOLD=1</code> is set).</li>
+<li><strong>WASM</strong> — the page loads with a <strong>Start</strong> button. The user clicks to begin, and JavaScript polls <code>goRender()</code> every 500ms to update the output. After the model completes, clicking Start again restarts it.</li>
+</ul>
+<div class="annotation">
+<strong>Why the difference?</strong> The server uses <code>Handle()</code> which auto-starts on an empty buffer — request-driven. WASM uses <code>RunWASM()</code> which exports <code>goStart()</code> behind a button — user-driven. The model code itself is identical in both cases.
+</div>
 
-        <div class="annotation">
-          <strong>RunWASM</strong> exports four functions to JavaScript — <code>goStart()</code>, <code>goCancel()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07–12.
+            </div>
         </div>
-
-        <div class="annotation">
-          <strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
-        </div>
-
-        <p><a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
-
-        <h3 class="title is-5">Server vs WASM lifecycle</h3>
-
-        <p>The server app and WASM app run the same model, but their lifecycles differ:</p>
-
-        <ul>
-          <li><strong>Server</strong> — the model starts automatically on the first HTTP request to <code>/</code>. While the model runs, the browser polls for updates via the Refresh header. When the model completes, the server exits (unless <code>LOFIGUI_HOLD=1</code> is set).</li>
-          <li><strong>WASM</strong> — the page loads with a <strong>Start</strong> button. The user clicks to begin, and JavaScript polls <code>goRender()</code> every 500ms to update the output. After the model completes, clicking Start again restarts it.</li>
-        </ul>
-
-        <div class="annotation">
-          <strong>Why the difference?</strong> The server uses <code>Handle()</code> which auto-starts on an empty buffer — request-driven. WASM uses <code>RunWASM()</code> which exports <code>goStart()</code> behind a button — user-driven. The model code itself is identical in both cases.
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer py-4">
-    <div class="content has-text-centered">
-      <a href="../index.html">&larr; Back to docs</a>
-      &nbsp;&middot;&nbsp;
-      <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world">Source on Codeberg</a>
-      &nbsp;&middot;&nbsp;
-      <a target="_blank" href="https://pkg.go.dev/codeberg.org/hum3/lofigui">pkg.go.dev</a>
-    </div>
-  </footer>
+    </section>
 </body>
 </html>
