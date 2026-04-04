@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 02 — Output Showcase</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">02 — Output Showcase</span>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span id="status-tag" class="tag is-success">Ready</span>
+        <span id="cancel-btn" class="tag is-danger is-light ml-1" style="cursor:pointer;display:none">Cancel</span>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+      <div id="output" class="content">
+        <progress class="progress is-primary" max="100">Loading WASM...</progress>
+      </div>
+      <div class="buttons mt-4">
+        <button id="startBtn" class="button is-success" disabled>Start</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="tinygo_wasm_exec.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

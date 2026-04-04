@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -405,6 +406,30 @@ func (app *App) RunModel(modelFunc func(*App)) {
 		modelFunc(app)
 		app.EndAction()
 	}()
+}
+
+// Run is the simplest way to serve a model over HTTP. It registers the model
+// on "/", a cancel handler on "/cancel", and starts the server with graceful
+// shutdown. When the model completes, the server exits.
+//
+// This is the HTTP equivalent of [RunWASM] — one call does everything.
+// For custom routes, multiple endpoints, or long-running servers, use
+// [App.Handle], [App.HandleCancel], and [App.ListenAndServe] directly.
+//
+// Example:
+//
+//	app := lofigui.NewApp()
+//	app.Run(":1340", model)
+func (app *App) Run(addr string, modelFunc func(*App)) {
+	http.HandleFunc("/", app.Handle(modelFunc))
+	http.HandleFunc("/cancel", app.HandleCancel("/"))
+	if err := app.ListenAndServe(addr, nil); err != nil {
+		if errors.Is(err, ErrCancelled) {
+			log.Printf("%v", err)
+			os.Exit(1)
+		}
+		log.Fatal(err)
+	}
 }
 
 // Sleep pauses for the given duration, or until the action is cancelled.

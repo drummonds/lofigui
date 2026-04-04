@@ -266,88 +266,155 @@ tasks:
       - task-plus md2html --file docs/research-bugs.md --dst docs
       - task-plus md2html --file docs/research-python.md --dst docs
       - task-plus md2html --file docs/recipes.md --dst docs
+      - task-plus md2html --file docs/examples.md --dst docs
       - task-plus md2html --file docs/index.md --dst docs
+      # Example documentation pages (from examples/NN_name/docs.md)
+      - task-plus md2html --file examples/01_hello_world/index.md --dst docs/01_hello_world
+      - task-plus md2html --file examples/02_svg_graph/index.md --dst docs/02_svg_graph
+      - task-plus md2html --file examples/03_hello_world_wasm/index.md --dst docs/03_hello_world_wasm
+      - task-plus md2html --file examples/04_tinygo_wasm/index.md --dst docs/04_tinygo_wasm
+      - task-plus md2html --file examples/05_demo_app/index.md --dst docs/05_demo_app
+      - task-plus md2html --file examples/06_notes_crud/index.md --dst docs/06_notes_crud
+      - task-plus md2html --file examples/07_water_tank/index.md --dst docs/07_water_tank
+      - task-plus md2html --file examples/08_water_tank_multi/index.md --dst docs/08_water_tank_multi
+      - task-plus md2html --file examples/09_water_tank_htmx/index.md --dst docs/09_water_tank_htmx
+      - task-plus md2html --file examples/10_water_tank_maintenance/index.md --dst docs/10_water_tank_maintenance
+      - task-plus md2html --file examples/11_water_tank_storage/index.md --dst docs/11_water_tank_storage
+      - task-plus md2html --file examples/12_batch_yield/index.md --dst docs/12_batch_yield
+      # Fix breadcrumb/navbar links for nested example pages (md2html generates same-dir links)
+      - |
+        for f in docs/*/index.html; do
+          [ -f "$f" ] || continue
+          sed -i 's|href="index.html">lofigui|href="../index.html">lofigui|' "$f"
+          sed -i 's|<a href="#" aria-current="page">Internal Docs</a>|<a href="../index.html">Docs</a>|' "$f"
+        done
       - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 
   docs:build-wasm:
-    desc: Build WASM examples for docs/ folder
+    desc: Build Go + TinyGo WASM examples for docs/ folder
     vars:
       WASM_EXEC_JS:
         sh: find $(go env GOROOT) -name wasm_exec.js -print -quit
+      TINYGO_WASM_EXEC_JS:
+        sh: echo "$(tinygo env TINYGOROOT)/targets/wasm_exec.js"
     cmds:
       # 01 Hello World
       - mkdir -p docs/01_hello_world
       - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/01_hello_world/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/01_hello_world/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/01_hello_world/tinygo_wasm_exec.js
       - cp examples/01_hello_world/go/main.wasm docs/01_hello_world/
-      - cp examples/01_hello_world/templates/index.html docs/01_hello_world/
+      - cp examples/01_hello_world/go/main-tinygo.wasm docs/01_hello_world/
+      - cp examples/01_hello_world/templates/index.html docs/01_hello_world/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/01_hello_world/demo.html > docs/01_hello_world/demo-tinygo.html
       - cp examples/01_hello_world/templates/app.js docs/01_hello_world/
-      - rm examples/01_hello_world/go/main.wasm
+      - rm examples/01_hello_world/go/main.wasm examples/01_hello_world/go/main-tinygo.wasm
+      # 02 Output Showcase
+      - mkdir -p docs/02_svg_graph
+      - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/02_svg_graph/go && tinygo build -o main-tinygo.wasm -target wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/02_svg_graph/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/02_svg_graph/tinygo_wasm_exec.js
+      - cp examples/02_svg_graph/go/main.wasm docs/02_svg_graph/
+      - cp examples/02_svg_graph/go/main-tinygo.wasm docs/02_svg_graph/
+      - cp examples/02_svg_graph/templates/index.html docs/02_svg_graph/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/02_svg_graph/demo.html > docs/02_svg_graph/demo-tinygo.html
+      - cp examples/02_svg_graph/templates/app.js docs/02_svg_graph/
+      - rm examples/02_svg_graph/go/main.wasm examples/02_svg_graph/go/main-tinygo.wasm
       # 03 Hello World WASM
       - mkdir -p docs/03_hello_world_wasm
       - cd examples/03_hello_world_wasm/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/03_hello_world_wasm/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/03_hello_world_wasm/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/03_hello_world_wasm/tinygo_wasm_exec.js
       - cp examples/03_hello_world_wasm/go/main.wasm docs/03_hello_world_wasm/
-      - cp examples/03_hello_world_wasm/templates/index.html docs/03_hello_world_wasm/
+      - cp examples/03_hello_world_wasm/go/main-tinygo.wasm docs/03_hello_world_wasm/
+      - cp examples/03_hello_world_wasm/templates/index.html docs/03_hello_world_wasm/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/03_hello_world_wasm/demo.html > docs/03_hello_world_wasm/demo-tinygo.html
       - cp examples/03_hello_world_wasm/templates/app.js docs/03_hello_world_wasm/
-      - rm examples/03_hello_world_wasm/go/main.wasm
-      # 04 TinyGo WASM
+      - rm examples/03_hello_world_wasm/go/main.wasm examples/03_hello_world_wasm/go/main-tinygo.wasm
+      # 04 TinyGo WASM (standalone — uses raw syscall/js, no RunWASM)
       - mkdir -p docs/04_tinygo_wasm
       - cd examples/04_tinygo_wasm/go && tinygo build -o main.wasm -target wasm main.go
       - cd examples/04_tinygo_wasm/go && cp "$(tinygo env TINYGOROOT)/targets/wasm_exec.js" .
       - cp examples/04_tinygo_wasm/go/main.wasm docs/04_tinygo_wasm/
       - cp examples/04_tinygo_wasm/go/wasm_exec.js docs/04_tinygo_wasm/
-      - cp examples/04_tinygo_wasm/templates/index.html docs/04_tinygo_wasm/
+      - cp examples/04_tinygo_wasm/templates/index.html docs/04_tinygo_wasm/demo.html
       - cp examples/04_tinygo_wasm/templates/app.js docs/04_tinygo_wasm/
       - rm examples/04_tinygo_wasm/go/main.wasm examples/04_tinygo_wasm/go/wasm_exec.js
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/07_water_tank/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/07_water_tank/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/07_water_tank/tinygo_wasm_exec.js
       - cp examples/07_water_tank/go/main.wasm docs/07_water_tank/
-      - cp examples/07_water_tank/templates/index.html docs/07_water_tank/
+      - cp examples/07_water_tank/go/main-tinygo.wasm docs/07_water_tank/
+      - cp examples/07_water_tank/templates/index.html docs/07_water_tank/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/07_water_tank/demo.html > docs/07_water_tank/demo-tinygo.html
       - cp examples/07_water_tank/templates/app.js docs/07_water_tank/
-      - rm examples/07_water_tank/go/main.wasm
+      - rm examples/07_water_tank/go/main.wasm examples/07_water_tank/go/main-tinygo.wasm
       # 08 Water Tank Multi-Page
       - mkdir -p docs/08_water_tank_multi
       - cd examples/08_water_tank_multi/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/08_water_tank_multi/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/08_water_tank_multi/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/08_water_tank_multi/tinygo_wasm_exec.js
       - cp examples/08_water_tank_multi/go/main.wasm docs/08_water_tank_multi/
-      - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/go/main-tinygo.wasm docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/08_water_tank_multi/demo.html > docs/08_water_tank_multi/demo-tinygo.html
       - cp examples/08_water_tank_multi/templates/app.js docs/08_water_tank_multi/
-      - rm examples/08_water_tank_multi/go/main.wasm
+      - rm examples/08_water_tank_multi/go/main.wasm examples/08_water_tank_multi/go/main-tinygo.wasm
       # 09 Water Tank HTMX
       - mkdir -p docs/09_water_tank_htmx
       - cd examples/09_water_tank_htmx/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/09_water_tank_htmx/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/09_water_tank_htmx/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/09_water_tank_htmx/tinygo_wasm_exec.js
       - cp examples/09_water_tank_htmx/go/main.wasm docs/09_water_tank_htmx/
-      - cp examples/09_water_tank_htmx/templates/index.html docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/go/main-tinygo.wasm docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/templates/index.html docs/09_water_tank_htmx/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/09_water_tank_htmx/demo.html > docs/09_water_tank_htmx/demo-tinygo.html
       - cp examples/09_water_tank_htmx/templates/app.js docs/09_water_tank_htmx/
-      - rm examples/09_water_tank_htmx/go/main.wasm
+      - rm examples/09_water_tank_htmx/go/main.wasm examples/09_water_tank_htmx/go/main-tinygo.wasm
       # 10 Water Tank Maintenance
       - mkdir -p docs/10_water_tank_maintenance
       - cd examples/10_water_tank_maintenance/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/10_water_tank_maintenance/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/10_water_tank_maintenance/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/10_water_tank_maintenance/tinygo_wasm_exec.js
       - cp examples/10_water_tank_maintenance/go/main.wasm docs/10_water_tank_maintenance/
-      - cp examples/10_water_tank_maintenance/templates/index.html docs/10_water_tank_maintenance/
+      - cp examples/10_water_tank_maintenance/go/main-tinygo.wasm docs/10_water_tank_maintenance/
+      - cp examples/10_water_tank_maintenance/templates/index.html docs/10_water_tank_maintenance/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/10_water_tank_maintenance/demo.html > docs/10_water_tank_maintenance/demo-tinygo.html
       - cp examples/10_water_tank_maintenance/templates/app.js docs/10_water_tank_maintenance/
-      - rm examples/10_water_tank_maintenance/go/main.wasm
+      - rm examples/10_water_tank_maintenance/go/main.wasm examples/10_water_tank_maintenance/go/main-tinygo.wasm
       # 11 Water Tank Storage
       - mkdir -p docs/11_water_tank_storage
       - cd examples/11_water_tank_storage/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/11_water_tank_storage/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/11_water_tank_storage/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/11_water_tank_storage/tinygo_wasm_exec.js
       - cp examples/11_water_tank_storage/go/main.wasm docs/11_water_tank_storage/
-      - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/go/main-tinygo.wasm docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/11_water_tank_storage/demo.html > docs/11_water_tank_storage/demo-tinygo.html
       - cp examples/11_water_tank_storage/templates/app.js docs/11_water_tank_storage/
-      - rm examples/11_water_tank_storage/go/main.wasm
+      - rm examples/11_water_tank_storage/go/main.wasm examples/11_water_tank_storage/go/main-tinygo.wasm
       # 12 Batch Yield
       - mkdir -p docs/12_batch_yield
       - cd examples/12_batch_yield/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/12_batch_yield/go && tinygo build -o main-tinygo.wasm -target wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/12_batch_yield/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/12_batch_yield/tinygo_wasm_exec.js
       - cp examples/12_batch_yield/go/main.wasm docs/12_batch_yield/
-      - cp examples/12_batch_yield/templates/index.html docs/12_batch_yield/
+      - cp examples/12_batch_yield/go/main-tinygo.wasm docs/12_batch_yield/
+      - cp examples/12_batch_yield/templates/index.html docs/12_batch_yield/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/12_batch_yield/demo.html > docs/12_batch_yield/demo-tinygo.html
       - cp examples/12_batch_yield/templates/app.js docs/12_batch_yield/
-      - rm examples/12_batch_yield/go/main.wasm
+      - rm examples/12_batch_yield/go/main.wasm examples/12_batch_yield/go/main-tinygo.wasm
 
   go-example:11:
     desc: 'Run SeaweedFS demo (starts weed server in background)'

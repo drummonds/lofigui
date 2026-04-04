@@ -21,6 +21,7 @@
 </li>
 <li><a href="CHANGELOG.html">Changelog</a></li>
 <li><a href="recipes.html">Recipes</a></li>
+<li><a href="examples.html">Examples Guide</a></li>
 </ul>
 </aside>
 
@@ -34,7 +35,7 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 | # | Name | Description |
 |---|------|-------------|
 | [01](01_hello_world/) | Hello World | Async with polling |
-| [02](02_chart.svg) | SVG Graph | Synchronous render |
+| [02](02_svg_graph/) | Output Showcase | All output types: Print, Markdown, HTML, Table, SVG |
 | [03](03_hello_world_wasm/) | WASM Hello World | Go compiled to WASM |
 | [04](04_tinygo_wasm/) | TinyGo WASM | Smaller WASM binaries |
 | [06](06_notes.svg) | Notes CRUD | Form POST handlers |
