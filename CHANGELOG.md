@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.29] - 2026-04-05
+
+ - Release prep
+
 ## [0.17.28] - 2026-04-04
 
  - New exxmaple 02
