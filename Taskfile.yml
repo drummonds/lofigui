@@ -334,15 +334,18 @@ tasks:
       - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/03_hello_world_wasm/demo.html > docs/03_hello_world_wasm/demo-tinygo.html
       - cp examples/03_hello_world_wasm/templates/app.js docs/03_hello_world_wasm/
       - rm examples/03_hello_world_wasm/go/main.wasm examples/03_hello_world_wasm/go/main-tinygo.wasm
-      # 04 TinyGo WASM (standalone — uses raw syscall/js, no RunWASM)
+      # 04 TinyGo WASM
       - mkdir -p docs/04_tinygo_wasm
-      - cd examples/04_tinygo_wasm/go && tinygo build -o main.wasm -target wasm main.go
-      - cd examples/04_tinygo_wasm/go && cp "$(tinygo env TINYGOROOT)/targets/wasm_exec.js" .
+      - cd examples/04_tinygo_wasm/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/04_tinygo_wasm/go && tinygo build -o main-tinygo.wasm -target wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/04_tinygo_wasm/
+      - cp "{{.TINYGO_WASM_EXEC_JS}}" docs/04_tinygo_wasm/tinygo_wasm_exec.js
       - cp examples/04_tinygo_wasm/go/main.wasm docs/04_tinygo_wasm/
-      - cp examples/04_tinygo_wasm/go/wasm_exec.js docs/04_tinygo_wasm/
+      - cp examples/04_tinygo_wasm/go/main-tinygo.wasm docs/04_tinygo_wasm/
       - cp examples/04_tinygo_wasm/templates/index.html docs/04_tinygo_wasm/demo.html
+      - sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/04_tinygo_wasm/demo.html > docs/04_tinygo_wasm/demo-tinygo.html
       - cp examples/04_tinygo_wasm/templates/app.js docs/04_tinygo_wasm/
-      - rm examples/04_tinygo_wasm/go/main.wasm examples/04_tinygo_wasm/go/wasm_exec.js
+      - rm examples/04_tinygo_wasm/go/main.wasm examples/04_tinygo_wasm/go/main-tinygo.wasm
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .

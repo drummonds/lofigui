@@ -53,7 +53,7 @@ async function loadWASM() {
     try {
         const go = new Go();
         const result = await WebAssembly.instantiateStreaming(
-            fetch('main.wasm'), go.importObject
+            fetch(window.WASM_BINARY || 'main.wasm'), go.importObject
         );
         go.run(result.instance);
     } catch (err) {

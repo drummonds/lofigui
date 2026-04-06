@@ -9,23 +9,27 @@
 
 If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — `Print()`, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.
 
-<div class="columns">
-<div class="column is-5">
-<figure class="image screenshot">
-<img src="../01_polling.svg" alt="During polling — partial output">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling — partial output</figcaption>
-</figure>
-<figure class="image mt-4">
-<img src="../01_complete.svg" alt="After completion — full output">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">After completion — full output</figcaption>
-</figure>
-</div>
-<div class="column">
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
 <a href="demo-tinygo.html" class="button is-info is-light">Launch Demo (TinyGo)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
+
+<div class="columns is-vcentered">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../01_polling.svg" alt="During polling — partial output">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling</figcaption>
+</figure>
+</div>
+<div class="column is-narrow has-text-centered">
+<span style="font-size: 2rem; color: #999;">&rarr;</span>
+</div>
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../01_complete.svg" alt="After completion — full output">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Complete</figcaption>
+</figure>
 </div>
 </div>
 
