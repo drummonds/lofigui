@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.30] - 2026-04-06
+
+ - Simplify WASM examples to use RunWASM and unify demo templates
+
 ## [0.17.29] - 2026-04-05
 
  - Release prep
