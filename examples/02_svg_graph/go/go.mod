@@ -1,8 +1,11 @@
 module codeberg.org/hum3/lofigui/examples/02_svg_graph
 
-go 1.24.0
+go 1.25
 
-require codeberg.org/hum3/lofigui v0.0.0
+require (
+	codeberg.org/hum3/gogal v0.1.2
+	codeberg.org/hum3/lofigui v0.0.0
+)
 
 require (
 	github.com/flosch/pongo2/v6 v6.0.0 // indirect
