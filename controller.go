@@ -2,6 +2,7 @@ package lofigui
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 	"path/filepath"
 
@@ -141,6 +142,36 @@ func NewControllerFromString(templateString string) (*Controller, error) {
 	return NewController(ControllerConfig{
 		TemplateString: templateString,
 	})
+}
+
+// NewControllerFromFS creates a Controller from an fs.FS (e.g. embed.FS).
+//
+// This enables template inheritance ({% extends %}) to work with embedded
+// filesystems, including in WASM builds where there is no local filesystem.
+// The fsys is used to resolve all template references (extends, include).
+//
+// Example:
+//
+//	//go:embed templates
+//	var templateFS embed.FS
+//
+//	ctrl, err := lofigui.NewControllerFromFS(templateFS, "templates", "page.html")
+func NewControllerFromFS(fsys fs.FS, dir string, templateName string) (*Controller, error) {
+	subFS, err := fs.Sub(fsys, dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open subdirectory %s: %w", dir, err)
+	}
+	loader := pongo2.NewFSLoader(subFS)
+	set := pongo2.NewSet("", loader)
+	tmpl, err := set.FromFile(templateName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load template %s from FS: %w", templateName, err)
+	}
+	return &Controller{
+		Name:     "Lofigui Controller",
+		template: tmpl,
+		context:  defaultContext,
+	}, nil
 }
 
 // NOTE: Action state management (StartAction, EndAction, IsActionRunning)

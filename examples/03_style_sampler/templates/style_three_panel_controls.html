@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Three-Panel Controls{% endblock %}
+
+{% block navbar %}
+<nav class="navbar is-link">
+  <div class="navbar-brand">
+    <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span class="tag is-light">Controls Panel</span>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container is-fluid">
+    <div class="columns">
+      <!-- Left sidebar: controls -->
+      <div class="column is-3">
+        <div class="box">
+          <h2 class="title is-5">Parameters</h2>
+
+          <div class="field">
+            <label class="label is-small">Name</label>
+            <div class="control">
+              <input class="input is-small" type="text" value="My Process">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label is-small">Iterations</label>
+            <div class="control">
+              <input class="input is-small" type="number" value="10">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label is-small">Mode</label>
+            <div class="control">
+              <div class="select is-small is-fullwidth">
+                <select>
+                  <option>Automatic</option>
+                  <option>Manual</option>
+                  <option>Dry Run</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label is-small">Options</label>
+            <div class="control">
+              <label class="checkbox is-size-7">
+                <input type="checkbox" checked> Verbose output
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox is-size-7">
+                <input type="checkbox"> Log to file
+              </label>
+            </div>
+          </div>
+
+          <hr>
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-success is-small">Start</button>
+            </div>
+            <div class="control">
+              <button class="button is-danger is-small is-outlined">Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h2 class="title is-6">Navigation</h2>
+          <aside class="menu">
+            <ul class="menu-list">
+              <li><a href="/">Home</a></li>
+              <li><a href="/style/three-panel-nav">Nav Sidebar</a></li>
+              <li><a class="is-active" href="/style/three-panel-controls">Controls</a></li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Right panel: teletype output -->
+      <div class="column">
+        <h1 class="title">Three-Panel: Controls Sidebar</h1>
+        <p class="subtitle">Left panel holds form controls that configure the teletype process. Like wrapping a CLI tool in a web dialog.</p>
+        <div class="notification is-link is-light">
+          <strong>Pattern:</strong> The left sidebar is a parameter form — text inputs, dropdowns, checkboxes, buttons. Submitting the form starts the teletype model with those parameters. Blue navbar this time.
+        </div>
+        <hr>
+        <div class="content">
+          {{ results | safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

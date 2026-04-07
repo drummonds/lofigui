@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 580" width="440" height="580">
+  <defs>
+    <filter id="paper-shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="2" dy="1" stdDeviation="1.5" flood-opacity="0.12"/>
+    </filter>
+    <!-- Fixed window above the machine — paper scrolls through it -->
+    <clipPath id="paper-clip">
+      <rect x="130" y="30" width="180" height="268"/>
+    </clipPath>
+  </defs>
+
+  <style>
+    .paper-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      fill: #2c2c2c;
+      opacity: 0;
+    }
+    .sep { fill: #888; }
+    @keyframes typed { to { opacity: 1; } }
+    /* Each line appears when it reaches the print head (screen y≈280) */
+    .l1  { animation: typed 0.05s 0.5s forwards; }
+    .l2  { animation: typed 0.05s 1.5s forwards; }
+    .l3  { animation: typed 0.05s 2.5s forwards; }
+    .l4  { animation: typed 0.05s 3.5s forwards; }
+    .l5  { animation: typed 0.05s 4.5s forwards; }
+    .l6  { animation: typed 0.05s 5.5s forwards; }
+    .l7  { animation: typed 0.05s 6.5s forwards; }
+    .l8  { animation: typed 0.05s 7.5s forwards; }
+    .l9  { animation: typed 0.05s 8.5s forwards; }
+    .l10 { animation: typed 0.05s 9.5s forwards; }
+    .l11 { animation: typed 0.05s 10.5s forwards; }
+  </style>
+
+  <!-- ===== PAPER (clipped window, paper scrolls upward) ===== -->
+  <g clip-path="url(#paper-clip)" filter="url(#paper-shadow)">
+    <!-- Scrolling group: paper feeds upward through the print head.
+         translate(0,272) at start → text L1 at screen y=280 (print head).
+         translate(0,72) at end   → text L11 at screen y=280.
+         Each line appears at the print head, then scrolls up. -->
+    <g transform="translate(0,272)">
+      <animateTransform attributeName="transform" type="translate"
+        from="0,272" to="0,72" dur="10s" begin="0.5s" fill="freeze"/>
+
+      <!-- Paper strip (tall enough to fill the clip window throughout the scroll) -->
+      <rect x="140" y="-20" width="160" height="250" fill="#fefcf4"/>
+
+      <!-- Tractor feed holes — left column -->
+      <g fill="#f0ece0" stroke="#e4e0d4" stroke-width="0.5">
+        <circle cx="149" cy="-10" r="2.5"/>
+        <circle cx="149" cy="10"  r="2.5"/>
+        <circle cx="149" cy="30"  r="2.5"/>
+        <circle cx="149" cy="50"  r="2.5"/>
+        <circle cx="149" cy="70"  r="2.5"/>
+        <circle cx="149" cy="90"  r="2.5"/>
+        <circle cx="149" cy="110" r="2.5"/>
+        <circle cx="149" cy="130" r="2.5"/>
+        <circle cx="149" cy="150" r="2.5"/>
+        <circle cx="149" cy="170" r="2.5"/>
+        <circle cx="149" cy="190" r="2.5"/>
+        <circle cx="149" cy="210" r="2.5"/>
+        <circle cx="149" cy="230" r="2.5"/>
+      </g>
+
+      <!-- Tractor feed holes — right column -->
+      <g fill="#f0ece0" stroke="#e4e0d4" stroke-width="0.5">
+        <circle cx="291" cy="-10" r="2.5"/>
+        <circle cx="291" cy="10"  r="2.5"/>
+        <circle cx="291" cy="30"  r="2.5"/>
+        <circle cx="291" cy="50"  r="2.5"/>
+        <circle cx="291" cy="70"  r="2.5"/>
+        <circle cx="291" cy="90"  r="2.5"/>
+        <circle cx="291" cy="110" r="2.5"/>
+        <circle cx="291" cy="130" r="2.5"/>
+        <circle cx="291" cy="150" r="2.5"/>
+        <circle cx="291" cy="170" r="2.5"/>
+        <circle cx="291" cy="190" r="2.5"/>
+        <circle cx="291" cy="210" r="2.5"/>
+        <circle cx="291" cy="230" r="2.5"/>
+      </g>
+
+      <!-- Printed text — each line at 20px intervals in group space.
+           Line N appears at t = 0.5 + (N-1) seconds, when its
+           screen y = group_y + translateY = 280 (the print head). -->
+      <text x="158" y="8"   class="paper-text l1">&gt; RUN LOFIGUI</text>
+      <text x="158" y="28"  class="paper-text l2">TELETYPE MODE</text>
+      <text x="158" y="48"  class="paper-text l3 sep">==============</text>
+      <text x="158" y="68"  class="paper-text l4">HELLO, WORLD</text>
+      <text x="158" y="88"  class="paper-text l5">OUTPUT STREAMS</text>
+      <text x="158" y="108" class="paper-text l6">LIKE PAPER</text>
+      <text x="158" y="128" class="paper-text l7">FROM A ROLL</text>
+      <text x="158" y="148" class="paper-text l8 sep">--------------</text>
+      <text x="158" y="168" class="paper-text l9">START.</text>
+      <text x="158" y="188" class="paper-text l10">WATCH.</text>
+      <text x="158" y="208" class="paper-text l11">&gt; DONE_</text>
+    </g>
+  </g>
+
+  <!-- ===== MACHINE ===== -->
+
+  <!-- Main body -->
+  <rect x="50" y="308" width="340" height="230" rx="12" fill="#5a5a5a"/>
+
+  <!-- Top bezel -->
+  <rect x="55" y="312" width="330" height="25" rx="6" fill="#666"/>
+
+  <!-- Platen / paper guide -->
+  <rect x="120" y="295" width="200" height="22" rx="6" fill="#484848" stroke="#3a3a3a" stroke-width="1"/>
+  <!-- Platen roller -->
+  <rect x="135" y="299" width="170" height="7" rx="3.5" fill="#333"/>
+  <!-- Paper slot -->
+  <rect x="155" y="293" width="130" height="8" rx="2" fill="#1a1a1a"/>
+
+  <!-- Keyboard well -->
+  <rect x="75" y="350" width="290" height="148" rx="8" fill="#4a4a4a"/>
+
+  <!-- Key row 1 (numbers) -->
+  <g fill="#d4cfc4" stroke="#b8b4aa" stroke-width="0.5">
+    <rect x="90"  y="360" width="22" height="16" rx="3"/>
+    <rect x="116" y="360" width="22" height="16" rx="3"/>
+    <rect x="142" y="360" width="22" height="16" rx="3"/>
+    <rect x="168" y="360" width="22" height="16" rx="3"/>
+    <rect x="194" y="360" width="22" height="16" rx="3"/>
+    <rect x="220" y="360" width="22" height="16" rx="3"/>
+    <rect x="246" y="360" width="22" height="16" rx="3"/>
+    <rect x="272" y="360" width="22" height="16" rx="3"/>
+    <rect x="298" y="360" width="22" height="16" rx="3"/>
+    <rect x="324" y="360" width="22" height="16" rx="3"/>
+  </g>
+
+  <!-- Key row 2 -->
+  <g fill="#d4cfc4" stroke="#b8b4aa" stroke-width="0.5">
+    <rect x="96"  y="384" width="22" height="16" rx="3"/>
+    <rect x="122" y="384" width="22" height="16" rx="3"/>
+    <rect x="148" y="384" width="22" height="16" rx="3"/>
+    <rect x="174" y="384" width="22" height="16" rx="3"/>
+    <rect x="200" y="384" width="22" height="16" rx="3"/>
+    <rect x="226" y="384" width="22" height="16" rx="3"/>
+    <rect x="252" y="384" width="22" height="16" rx="3"/>
+    <rect x="278" y="384" width="22" height="16" rx="3"/>
+    <rect x="304" y="384" width="22" height="16" rx="3"/>
+    <rect x="330" y="384" width="22" height="16" rx="3"/>
+  </g>
+
+  <!-- Key row 3 -->
+  <g fill="#d4cfc4" stroke="#b8b4aa" stroke-width="0.5">
+    <rect x="103" y="408" width="22" height="16" rx="3"/>
+    <rect x="129" y="408" width="22" height="16" rx="3"/>
+    <rect x="155" y="408" width="22" height="16" rx="3"/>
+    <rect x="181" y="408" width="22" height="16" rx="3"/>
+    <rect x="207" y="408" width="22" height="16" rx="3"/>
+    <rect x="233" y="408" width="22" height="16" rx="3"/>
+    <rect x="259" y="408" width="22" height="16" rx="3"/>
+    <rect x="285" y="408" width="22" height="16" rx="3"/>
+    <rect x="311" y="408" width="22" height="16" rx="3"/>
+  </g>
+
+  <!-- Key row 4 -->
+  <g fill="#d4cfc4" stroke="#b8b4aa" stroke-width="0.5">
+    <rect x="116" y="432" width="22" height="16" rx="3"/>
+    <rect x="142" y="432" width="22" height="16" rx="3"/>
+    <rect x="168" y="432" width="22" height="16" rx="3"/>
+    <rect x="194" y="432" width="22" height="16" rx="3"/>
+    <rect x="220" y="432" width="22" height="16" rx="3"/>
+    <rect x="246" y="432" width="22" height="16" rx="3"/>
+    <rect x="272" y="432" width="22" height="16" rx="3"/>
+    <rect x="298" y="432" width="22" height="16" rx="3"/>
+  </g>
+
+  <!-- Space bar -->
+  <rect x="142" y="456" width="156" height="16" rx="3" fill="#d4cfc4" stroke="#b8b4aa" stroke-width="0.5"/>
+
+  <!-- Status light -->
+  <circle cx="85" cy="482" r="4" fill="#5a8a5a">
+    <animate attributeName="fill" values="#5a8a5a;#7dcc7d;#5a8a5a" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Ventilation slots — left -->
+  <g stroke="#4e4e4e" stroke-width="1.5" stroke-linecap="round">
+    <line x1="60" y1="482" x2="60" y2="494"/>
+    <line x1="66" y1="482" x2="66" y2="494"/>
+    <line x1="72" y1="482" x2="72" y2="494"/>
+  </g>
+
+  <!-- Ventilation slots — right -->
+  <g stroke="#4e4e4e" stroke-width="1.5" stroke-linecap="round">
+    <line x1="368" y1="482" x2="368" y2="494"/>
+    <line x1="374" y1="482" x2="374" y2="494"/>
+    <line x1="380" y1="482" x2="380" y2="494"/>
+  </g>
+
+  <!-- TELETYPE label -->
+  <text x="220" y="514" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888" letter-spacing="4" font-weight="bold">TELETYPE</text>
+
+  <!-- Machine feet -->
+  <rect x="70" y="538" width="40" height="8" rx="4" fill="#444"/>
+  <rect x="330" y="538" width="40" height="8" rx="4" fill="#444"/>
+</svg>

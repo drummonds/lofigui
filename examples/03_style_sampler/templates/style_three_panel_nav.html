@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Three-Panel Nav{% endblock %}
+
+{% block navbar %}
+<nav class="navbar is-warning">
+  <div class="navbar-brand">
+    <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span class="tag is-dark">Three-Panel Layout</span>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container is-fluid">
+    <div class="columns">
+      <!-- Left sidebar: navigation -->
+      <div class="column is-3">
+        <aside class="menu">
+          <p class="menu-label">Pages</p>
+          <ul class="menu-list">
+            <li><a href="/">Home</a></li>
+            <li><a class="is-active" href="/style/three-panel-nav">Navigation Sidebar</a></li>
+            <li><a href="/style/three-panel-controls">Controls Sidebar</a></li>
+            <li><a href="/style/scrolling">Scrolling Navbar</a></li>
+            <li><a href="/style/fixed">Fixed Navbar</a></li>
+            <li><a href="/style/fullwidth">Full Width</a></li>
+          </ul>
+          <p class="menu-label">Status</p>
+          <ul class="menu-list">
+            <li><a><span class="tag is-success is-light mr-2">●</span> Server</a></li>
+            <li><a><span class="tag is-success is-light mr-2">●</span> Database</a></li>
+            <li><a><span class="tag is-warning is-light mr-2">●</span> Queue</a></li>
+          </ul>
+        </aside>
+      </div>
+
+      <!-- Right panel: main content -->
+      <div class="column">
+        <h1 class="title">Three-Panel: Navigation Sidebar</h1>
+        <p class="subtitle">Left panel holds page navigation and status. Right panel is the active content area.</p>
+        <div class="notification is-warning is-light">
+          <strong>Pattern:</strong> Bulma <code>columns</code> with <code>is-3</code> sidebar + <code>is-9</code> content. The <code>menu</code> component provides the sidebar navigation. Yellow navbar to clash deliberately.
+        </div>
+        <hr>
+        <div class="content">
+          {{ results | safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

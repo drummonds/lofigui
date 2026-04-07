@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="768" viewBox="0 0 1024 768">
+  <!-- Background -->
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+
+  <!-- Navbar -->
+  <rect x="0" y="0" width="1009" height="52" fill="rgb(0,209,178)"/>
+  <text x="12" y="31.4" fill="rgb(0,31,26)" font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Lofigui</text>
+  <rect x="864.6" y="14" width="62.7" height="24" rx="6" fill="rgb(255,183,15)"/>
+  <text x="873.6" y="29.4" fill="rgb(41,29,0)" font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12">Running</text>
+  <rect x="943.3" y="14" width="53.7" height="24" rx="6" fill="rgb(255,235,239)"/>
+  <text x="952.3" y="29.4" fill="rgb(128,0,26)" font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12">Cancel</text>
+
+  <!-- Content area -->
+  <g font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="rgb(64,70,84)">
+    <!-- H1 -->
+    <text x="48" y="105" font-size="28" font-weight="700" fill="rgb(36,41,47)">Output Showcase</text>
+    <text x="48" y="135" font-size="16">Walking through every output type lofigui supports.</text>
+
+    <!-- HR -->
+    <line x1="48" y1="155" x2="960" y2="155" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Heading Levels -->
+    <text x="48" y="190" font-size="22" font-weight="700" fill="rgb(36,41,47)">Heading Levels</text>
+    <text x="48" y="225" font-size="28" font-weight="700" fill="rgb(36,41,47)">Heading 1</text>
+    <text x="48" y="255" font-size="22" font-weight="700" fill="rgb(36,41,47)">Heading 2</text>
+    <text x="48" y="280" font-size="18" font-weight="700" fill="rgb(36,41,47)">Heading 3</text>
+    <text x="48" y="302" font-size="16" font-weight="700" fill="rgb(36,41,47)">Heading 4</text>
+    <text x="48" y="321" font-size="14" font-weight="700" fill="rgb(36,41,47)">Heading 5</text>
+    <text x="48" y="338" font-size="12" font-weight="700" fill="rgb(36,41,47)">Heading 6</text>
+
+    <!-- HR -->
+    <line x1="48" y1="358" x2="960" y2="358" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Text Formatting -->
+    <text x="48" y="393" font-size="22" font-weight="700" fill="rgb(36,41,47)">Text Formatting</text>
+    <!-- Bold, italic, strikethrough, code -->
+    <text x="48" y="423" font-size="16"><tspan font-weight="700">Bold</tspan>, <tspan font-style="italic">italic</tspan>, <tspan text-decoration="line-through">strikethrough</tspan>, and <tspan font-family="'Courier New', monospace" font-size="14" fill="#e83e8c">inline code</tspan>.</text>
+    <text x="48" y="453" font-size="16"><tspan fill="#3273dc" text-decoration="underline">A hyperlink</tspan> rendered via Markdown.</text>
+
+    <!-- H3: Superscript & Subscript -->
+    <text x="48" y="488" font-size="16" font-weight="700" fill="rgb(36,41,47)">Superscript &amp; Subscript</text>
+    <text x="48" y="518" font-size="16">Einstein: E = mc<tspan baseline-shift="super" font-size="11">2</tspan></text>
+    <text x="48" y="548" font-size="16">Water: H<tspan baseline-shift="sub" font-size="11">2</tspan>O</text>
+    <text x="48" y="578" font-size="16">Quadratic: ax<tspan baseline-shift="super" font-size="11">2</tspan> + bx + c = 0</text>
+
+    <!-- HR -->
+    <line x1="48" y1="608" x2="960" y2="608" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Print Variations (partially visible) -->
+    <text x="48" y="643" font-size="22" font-weight="700" fill="rgb(36,41,47)">Print Variations</text>
+    <text x="48" y="673" font-size="16">Standard paragraph via Print()</text>
+    <text x="48" y="703" font-size="16">Formatted via Printf(): π ≈ 3.141593</text>
+    <text x="48" y="733" font-size="16">&amp;nbsp;Inline&amp;nbsp;&amp;nbsp;text&amp;nbsp;&amp;nbsp;joined with WithEnd("")&amp;nbsp;</text>
+  </g>
+
+  <!-- Border -->
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
+</svg>

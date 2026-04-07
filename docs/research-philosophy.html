@@ -42,7 +42,7 @@
         <div class="container">
             <nav class="breadcrumb" aria-label="breadcrumbs">
                 <ul>
-                    <li class="is-active"><a href="#" aria-current="page">Internal Docs</a></li>
+                    <li><a href="index.html">Home</a></li>
                     <li class="is-active"><a href="#" aria-current="page">Research: Philosophy</a></li>
                 </ul>
             </nav>
@@ -124,24 +124,24 @@
 <tbody>
 <tr>
 <td>1</td>
-<td>Static sites</td>
-<td>Docs only</td>
-<td>None</td>
-<td>—</td>
+<td>Teletype</td>
+<td>Full (App + polling)</td>
+<td>None/WASM low</td>
+<td><a href="01_hello_world/">01</a> (Hello World), <a href="02_chart.svg">02</a> (Output Showcase)</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Static + forms</td>
-<td>Full (CRUD pattern)</td>
+<td>Teletype+ web</td>
+<td>Full (templates + forms)</td>
 <td>None</td>
-<td><a href="06_notes.svg">06</a> (Notes CRUD)</td>
+<td><a href="06_notes.svg">06</a> (Notes CRUD), <a href="07_water_tank/">07</a> (Water Tank), <a href="08_water_tank_multi/">08</a> (Multi-Page)</td>
 </tr>
 <tr>
 <td>3</td>
 <td>Polling (whole page)</td>
 <td>Full (App + Refresh)</td>
 <td>None</td>
-<td><a href="01_hello_world/">01</a> (Hello World), <a href="02_chart.svg">02</a> (SVG Graph), <a href="07_water_tank/">07</a> (Water Tank), <a href="08_water_tank_multi/">08</a> (Multi-Page)</td>
+<td>—</td>
 </tr>
 <tr>
 <td>4</td>
@@ -160,16 +160,25 @@
 </tbody>
 </table>
 <p>Most internal tools and dashboards live at levels 2-4. lofigui covers that range with a <code>print()</code>-based API and zero-to-minimal JavaScript.</p>
-<h3 id="1-static-sites">1. Static sites</h3>
-<p>Pure HTML + CSS. No server, no forms, no JavaScript. Documentation, landing pages, blogs. Generated once, served from a CDN or file server.</p>
-<p><em>Examples: GitHub Pages, statichost.eu docs, this documentation site.</em></p>
-<h3 id="2-static--static-forms">2. Static + static forms</h3>
-<p>HTML + CSS + traditional HTML form submissions. The form POSTs to the server, the server processes it and returns a new page. Each interaction is a full page load. No JavaScript needed — the browser handles form encoding and submission natively.</p>
-<p><em>lofigui examples: 06 (Notes CRUD) — form POST, redirect, re-render.</em></p>
+<h3 id="1-teletype">1. Teletype</h3>
+<p><img src="teletype.svg" alt="Animated teletype"></p>
+<p>Named after old-fashioned teletypes that print on continuous rolls of paper. You start a process, it prints output until it finishes — there is no interactivity until the end. You can stop it, but you cannot steer it. The server renders the complete page and the browser reloads via polling, but the user is purely a spectator.</p>
+<p><em>lofigui examples: 01 (Hello World), 02 (SVG Graph output showcase).</em></p>
+<h3 id="2-teletype-web">2. Teletype+ web</h3>
+<p><img src="teletype-web.svg" alt="Teletype in a web page"></p>
+<p>Where Level 1 is like running a CLI program, Level 2 embeds that teletype in a web application. The command line gets a configurable UI — dialog forms for parameters, navigation between pages, and the full range of HTML form elements. Think of it as wrapping a CLI tool in a web-based front end.</p>
+<p><strong>Templates</strong>: pongo2 (Go) and Jinja2 (Python) provide server-side rendering with template inheritance (<code>{% extends %}</code>, <code>{% block %}</code>). A base template defines the layout — navbar, footer, CSS — and each page extends it. This is the same pattern as Django templates, with no client-side rendering.</p>
+<p><strong>Navigation</strong>: Bulma navbar with links between pages. Each page is a full HTTP request/response cycle — no client-side routing. The navbar is defined once in the base template and inherited by all pages.</p>
+<p><strong>Static pages</strong>: About pages, help pages, configuration views — anything that renders once without polling. These use <code>Controller.RenderTemplate()</code> directly, with no <code>App</code> or background model needed.</p>
+<p><strong>Dialog forms</strong>: Full-page HTML forms for parameter input. The form POSTs to the server, the server processes it and redirects back (POST/redirect/GET pattern). No JavaScript, no popups — just native HTML <code>&lt;form&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>. The browser handles encoding and submission.</p>
+<p><strong>Interactive elements</strong>: The full range of HTML form controls — text inputs, dropdowns, checkboxes, radio buttons, number inputs, date pickers, file uploads — all work natively. Bulma provides styling. Each form submission is a full page load.</p>
+<p><strong>Multiple teletypes</strong>: Different pages can each run their own background model. A water tank simulation on one page, diagnostics on another, each with independent polling. The navbar lets the user switch between them. HTTP Refresh reloads the <em>current</em> page, so each teletype refreshes independently.</p>
+<p>The scope here is broad — from a single form that configures and launches a teletype, up to a multi-page application with navigation, CRUD operations, and several independent teletypes. The unifying principle is that every interaction is a full page load, every page is server-rendered HTML, and no JavaScript is required.</p>
+<p><em>lofigui examples: 06 (Notes CRUD), 07 (Water Tank), 08 (Water Tank Multi-Page).</em></p>
 <h3 id="3-refreshing-whole-page-polling">3. Refreshing whole page (polling)</h3>
 <p>The server renders the complete page. The browser periodically reloads it via <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code>. Good for dashboards and status pages where the user watches but doesn't interact. The entire page is replaced on each refresh cycle.</p>
 <p><strong>Limitation</strong>: you cannot interact with the page while it refreshes. Clicking a button, filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring user input during live updates.</p>
-<p><em>lofigui examples: 01 (Hello World polling), 07-08 (Water Tank dashboards).</em></p>
+<p><em>lofigui examples: polling is the mechanism used by Level 1 (Teletype) and Level 2 (Teletype+ web). Level 3 exists as an architectural description — it is the point where polling becomes a limitation rather than a feature.</em></p>
 <h3 id="4-htmx-partial-updates-dynamic-pages">4. HTMX partial updates (dynamic pages)</h3>
 <p>Only parts of the page update — the rest stays stable. Forms, text inputs, and buttons remain functional while live data refreshes around them. HTMX makes this possible with <code>hx-get</code> and <code>hx-trigger</code> attributes — the server still renders HTML, but the browser swaps only the targeted <code>&lt;div&gt;</code>.</p>
 <p>This is the sweet spot for lofigui: server-rendered HTML with just enough client-side behaviour to make forms and controls usable alongside live data. A text box on a dynamic form — impossible with full-page polling — works naturally with HTMX partial updates.</p>
