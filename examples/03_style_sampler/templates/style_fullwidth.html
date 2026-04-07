@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Full Width{% endblock %}
+
+{% block navbar %}
+<nav class="navbar is-success">
+  <div class="navbar-brand">
+    <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="/">Home</a>
+      <a class="navbar-item" href="/style/scrolling">Scrolling</a>
+      <a class="navbar-item" href="/style/fixed">Fixed</a>
+      <a class="navbar-item" href="/style/three-panel-nav">Three-Panel</a>
+      <a class="navbar-item is-active" href="/style/fullwidth">Full Width</a>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Full Width</h1>
+    <p class="subtitle">No sidebar — the teletype output gets the entire page width. The simplest layout, closest to the Level 1 teletype. Green navbar for maximum clash.</p>
+    <div class="notification is-success is-light">
+      <strong>Pattern:</strong> Just a navbar and a single content column. This is what examples 01 and 02 use. The teletype output fills the available width.
+    </div>
+    <hr>
+    <div class="content">
+      {{ results | safe }}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>03 — Style Sampler - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">03 — Style Sampler</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="03--style-sampler">03 — Style Sampler</h1>
+<p>The first Teletype+ web example. Demonstrates layout patterns, template inheritance, and navbar styles — the building blocks for Level 2 applications. Each menu option shows a different layout style with the same teletype output.</p>
+<p><strong>Interactivity level:</strong> 2 — Teletype+ web (templates, navbars, forms)</p>
+<hr>
+<h2 id="layout-styles">Layout styles</h2>
+<table>
+<thead>
+<tr>
+<th>Style</th>
+<th>Navbar</th>
+<th>Layout</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scrolling</td>
+<td>Default, scrolls with page</td>
+<td>Single column</td>
+<td>Simple tools (examples 01, 02)</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>Pinned to top</td>
+<td>Single column</td>
+<td>Dashboards needing persistent nav</td>
+</tr>
+<tr>
+<td>Three-Panel Nav</td>
+<td>Top + left sidebar</td>
+<td>Left nav, right content</td>
+<td>Multi-page apps with page tree</td>
+</tr>
+<tr>
+<td>Three-Panel Controls</td>
+<td>Top + left sidebar</td>
+<td>Left form, right output</td>
+<td>CLI tools with parameter dialogs</td>
+</tr>
+<tr>
+<td>Full Width</td>
+<td>Minimal top bar</td>
+<td>Single wide column</td>
+<td>Maximum output area</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="template-inheritance">Template inheritance</h2>
+<p>All styles share a base template via pongo2 <code>{% extends &quot;base.html&quot; %}</code>:</p>
+<pre><code>base.html           → &lt;html&gt;, &lt;head&gt;, Bulma CSS, {% block navbar %}, {% block content %}
+style_scrolling.html → extends base: teal scrolling navbar + content
+style_fixed.html     → extends base: red fixed navbar + padded content
+style_three_panel_nav.html → extends base: yellow navbar + columns layout
+...
+</code></pre>
+<p>Each page overrides <code>{% block navbar %}</code> and <code>{% block content %}</code> to produce a completely different layout from the same base. The Go server creates one controller per template:</p>
+<pre><code class="language-go">ctrl, err := lofigui.NewControllerFromDir(&quot;templates&quot;, &quot;style_scrolling.html&quot;)
+</code></pre>
+<hr>
+<h2 id="technical-wasm--pongo2-templates">Technical: WASM + pongo2 templates</h2>
+<p><strong>The key insight: pongo2 is pure Go and compiles to WASM.</strong> Template inheritance — <code>{% extends %}</code>, <code>{% block %}</code>, <code>{% include %}</code> — works identically in the browser.</p>
+<h3 id="the-problem">The problem</h3>
+<p><code>go:embed</code> cannot use <code>..</code> paths. The templates live in <code>../templates/</code> relative to the Go source, but embed only looks within or below the source directory.</p>
+<h3 id="the-solution">The solution</h3>
+<p>The build script copies templates into <code>go/templates/</code> before compilation:</p>
+<pre><code class="language-bash">cp -r ../templates .
+GOOS=js GOARCH=wasm go build -o main.wasm .
+rm -rf templates
+</code></pre>
+<p>The embedded filesystem is then available at runtime:</p>
+<pre><code class="language-go">//go:embed templates
+var templateFS embed.FS
+</code></pre>
+<h3 id="loading-templates-from-embedfs">Loading templates from embed.FS</h3>
+<p>lofigui provides <code>NewControllerFromFS</code> which wraps pongo2's <code>FSLoader</code>:</p>
+<pre><code class="language-go">ctrl, err := lofigui.NewControllerFromFS(templateFS, &quot;templates&quot;, &quot;page.html&quot;)
+</code></pre>
+<p>This creates a pongo2 <code>TemplateSet</code> with an <code>fs.FS</code>-backed loader. When pongo2 encounters <code>{% extends &quot;base.html&quot; %}</code>, it resolves <code>base.html</code> from the embedded filesystem — no disk access, no server.</p>
+<h3 id="rendering-in-wasm">Rendering in WASM</h3>
+<p>The server uses <code>ctrl.RenderTemplate(w, context)</code> which writes to an <code>http.ResponseWriter</code>. In WASM there is no HTTP — instead, render to a string via pongo2 directly:</p>
+<pre><code class="language-go">html, err := ctrl.GetTemplate().Execute(pongo2.Context{
+    &quot;results&quot;:      content,
+    &quot;current_path&quot;: currentPath,
+})
+</code></pre>
+<p>JavaScript calls <code>goRenderPage(&quot;style_scrolling.html&quot;, &quot;/style/scrolling&quot;)</code> and replaces the page content with the returned HTML. Navigation between styles is instant — no server round-trip, no page reload.</p>
+<h3 id="same-code-two-targets">Same code, two targets</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Server</th>
+<th>WASM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Template source</td>
+<td>Filesystem (<code>NewControllerFromDir</code>)</td>
+<td>Embedded (<code>NewControllerFromFS</code>)</td>
+</tr>
+<tr>
+<td>Render target</td>
+<td><code>http.ResponseWriter</code></td>
+<td><code>string</code> via <code>Execute()</code></td>
+</tr>
+<tr>
+<td>Navigation</td>
+<td>HTTP request per page</td>
+<td>JS calls <code>goRenderPage()</code></td>
+</tr>
+<tr>
+<td>Template engine</td>
+<td>pongo2 (server-side)</td>
+<td>pongo2 (client-side, same binary)</td>
+</tr>
+<tr>
+<td><code>{% extends %}</code></td>
+<td>Works</td>
+<td>Works identically</td>
+</tr>
+</tbody>
+</table>
+<p>The model code (<code>model.go</code>) is shared between both builds with no changes.</p>
+<h3 id="binary-size">Binary size</h3>
+<p>The WASM binary includes pongo2 and the embedded templates. Expect ~3-4MB for standard Go WASM, ~200-500KB for TinyGo (if pongo2 is compatible).</p>
+<hr>
+<h2 id="links">Links</h2>
+<ul>
+<li><a href="demo.html">Launch Demo</a></li>
+<li><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler">Source on Codeberg</a></li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

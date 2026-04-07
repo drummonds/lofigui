@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"codeberg.org/hum3/gogal"
 	"codeberg.org/hum3/lofigui"
 )
 
@@ -184,10 +185,21 @@ func sectionStaticCharts(app *lofigui.App) {
 		"Language Popularity",
 	))
 
-	lofigui.HTML(sparklineSVG(
-		[]float64{3, 7, 5, 12, 8, 15, 11, 20, 17, 25, 22, 30, 28, 35, 32, 40},
-		"Growth Trend",
-	))
+	// Line chart via gogal (replaces hand-built sparkline)
+	values := []float64{3, 7, 5, 12, 8, 15, 11, 20, 17, 25, 22, 30, 28, 35, 32, 40}
+	xValues := make([]float64, len(values))
+	for i := range values {
+		xValues[i] = float64(i + 1)
+	}
+	lineChart := gogal.NewLineChart(
+		gogal.WithTitle("Growth Trend"),
+		gogal.WithSize(400, 150),
+		gogal.WithGrid(true),
+		gogal.WithSmooth(true),
+	)
+	lineChart.AddXY("Growth", xValues, values)
+	svg, _ := lineChart.RenderString()
+	lofigui.HTML(svg)
 	app.Sleep(1 * time.Second)
 }
 

@@ -58,33 +58,51 @@ Web applications sit on a spectrum of interactivity. lofigui deliberately target
 
 | Level | Approach | lofigui support | JS required | Examples |
 |-------|----------|-----------------|-------------|----------|
-| 1 | Static sites | Docs only | None | — |
-| 2 | Static + forms | Full (CRUD pattern) | None | [06](06_notes.svg) (Notes CRUD) |
-| 3 | Polling (whole page) | Full (App + Refresh) | None | [01](01_hello_world/) (Hello World), [02](02_chart.svg) (SVG Graph), [07](07_water_tank/) (Water Tank), [08](08_water_tank_multi/) (Multi-Page) |
+| 1 | Teletype | Full (App + polling) | None/WASM low | [01](01_hello_world/) (Hello World), [02](02_chart.svg) (Output Showcase) |
+| 2 | Teletype+ web | Full (templates + forms) | None | [06](06_notes.svg) (Notes CRUD), [07](07_water_tank/) (Water Tank), [08](08_water_tank_multi/) (Multi-Page) |
+| 3 | Polling (whole page) | Full (App + Refresh) | None | — |
 | 4 | HTMX (partial updates) | Full (Controller + HTMX) | ~14KB | [09](09_water_tank_htmx/) (Water Tank HTMX), [10](10_water_tank_maintenance/) (Maintenance), [12](12_batch_yield/) (Batch Yield) |
 | 5 | SPA (full Ajax) | Out of scope | Framework | — |
 
 Most internal tools and dashboards live at levels 2-4. lofigui covers that range with a `print()`-based API and zero-to-minimal JavaScript.
 
-### 1. Static sites
+### 1. Teletype
 
-Pure HTML + CSS. No server, no forms, no JavaScript. Documentation, landing pages, blogs. Generated once, served from a CDN or file server.
+![Animated teletype](teletype.svg)
 
-*Examples: GitHub Pages, statichost.eu docs, this documentation site.*
+Named after old-fashioned teletypes that print on continuous rolls of paper. You start a process, it prints output until it finishes — there is no interactivity until the end. You can stop it, but you cannot steer it. The server renders the complete page and the browser reloads via polling, but the user is purely a spectator.
 
-### 2. Static + static forms
+*lofigui examples: 01 (Hello World), 02 (SVG Graph output showcase).*
 
-HTML + CSS + traditional HTML form submissions. The form POSTs to the server, the server processes it and returns a new page. Each interaction is a full page load. No JavaScript needed — the browser handles form encoding and submission natively.
+### 2. Teletype+ web
 
-*lofigui examples: 06 (Notes CRUD) — form POST, redirect, re-render.*
+![Teletype in a web page](teletype-web.svg)
+
+Where Level 1 is like running a CLI program, Level 2 embeds that teletype in a web application. The command line gets a configurable UI — dialog forms for parameters, navigation between pages, and the full range of HTML form elements. Think of it as wrapping a CLI tool in a web-based front end.
+
+**Templates**: pongo2 (Go) and Jinja2 (Python) provide server-side rendering with template inheritance (`{% extends %}`, `{% block %}`). A base template defines the layout — navbar, footer, CSS — and each page extends it. This is the same pattern as Django templates, with no client-side rendering.
+
+**Navigation**: Bulma navbar with links between pages. Each page is a full HTTP request/response cycle — no client-side routing. The navbar is defined once in the base template and inherited by all pages.
+
+**Static pages**: About pages, help pages, configuration views — anything that renders once without polling. These use `Controller.RenderTemplate()` directly, with no `App` or background model needed.
+
+**Dialog forms**: Full-page HTML forms for parameter input. The form POSTs to the server, the server processes it and redirects back (POST/redirect/GET pattern). No JavaScript, no popups — just native HTML `<form>`, `<input>`, `<select>`, `<textarea>`. The browser handles encoding and submission.
+
+**Interactive elements**: The full range of HTML form controls — text inputs, dropdowns, checkboxes, radio buttons, number inputs, date pickers, file uploads — all work natively. Bulma provides styling. Each form submission is a full page load.
+
+**Multiple teletypes**: Different pages can each run their own background model. A water tank simulation on one page, diagnostics on another, each with independent polling. The navbar lets the user switch between them. HTTP Refresh reloads the *current* page, so each teletype refreshes independently.
+
+The scope here is broad — from a single form that configures and launches a teletype, up to a multi-page application with navigation, CRUD operations, and several independent teletypes. The unifying principle is that every interaction is a full page load, every page is server-rendered HTML, and no JavaScript is required.
+
+*lofigui examples: 06 (Notes CRUD), 07 (Water Tank), 08 (Water Tank Multi-Page).*
 
 ### 3. Refreshing whole page (polling)
 
 The server renders the complete page. The browser periodically reloads it via `<meta http-equiv="Refresh">`. Good for dashboards and status pages where the user watches but doesn't interact. The entire page is replaced on each refresh cycle.
 
-**Limitation**: you cannot interact with the page while it refreshes. Clicking a button, filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring user input during live updates.
+**Limitation**: you cannot interact with the page while it refreshes. Clicking a button is ok but filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring complex user input during live updates.
 
-*lofigui examples: 01 (Hello World polling), 07-08 (Water Tank dashboards).*
+*lofigui examples: polling is the mechanism used by Level 1 (Teletype) and Level 2 (Teletype+ web). Level 3 exists as an architectural description — it is the point where polling becomes a limitation rather than a feature.*
 
 ### 4. HTMX partial updates (dynamic pages)
 
