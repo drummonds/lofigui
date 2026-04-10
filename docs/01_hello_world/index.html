@@ -58,7 +58,6 @@
 <p>If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — <code>Print()</code>, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.</p>
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a href="demo-tinygo.html" class="button is-info is-light">Launch Demo (TinyGo)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
@@ -152,35 +151,6 @@ func main() { lofigui.RunWASM(model) }
 <strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
 </div>
 <p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
-<h3 id="tinygo-wasm">TinyGo WASM</h3>
-<p>The same code also compiles with <a href="https://tinygo.org/">TinyGo</a> for a smaller binary — no source changes needed:</p>
-<pre><code class="language-bash">tinygo build -o main-tinygo.wasm -target wasm .
-</code></pre>
-<table>
-<thead>
-<tr>
-<th>Build</th>
-<th>Binary size</th>
-<th>Loader</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Go WASM</td>
-<td>~8 MB</td>
-<td><code>wasm_exec.js</code> (from Go)</td>
-</tr>
-<tr>
-<td>TinyGo WASM</td>
-<td>~2.4 MB</td>
-<td><code>wasm_exec.js</code> (from TinyGo)</td>
-</tr>
-</tbody>
-</table>
-<div class="annotation">
-<strong>Different loaders</strong> — Go and TinyGo each ship their own <code>wasm_exec.js</code>. They are not interchangeable. The <code>docs:build-wasm</code> task builds both and generates separate demo pages: <a href="demo.html">Go WASM demo</a> and <a href="demo-tinygo.html">TinyGo WASM demo</a>.
-</div>
-<p>Every lofigui example builds with both Go and TinyGo. The <code>model.go</code> is identical — only the compiler and loader differ.</p>
 <h3 id="server-vs-wasm-lifecycle">Server vs WASM lifecycle</h3>
 <p>The server app and WASM app run the same model, but their lifecycles differ:</p>
 <ul>

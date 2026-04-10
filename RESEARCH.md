@@ -12,6 +12,7 @@ Design philosophy, trade-offs, and technical deep-dives.
 | [Technical](research-technical.html) | Architecture overview, polling mechanism, task scheduling |
 | [Bugs](research-bugs.html) | Known bugs, interaction analysis, and root causes |
 | [Python](research-python.html) | Python implementation — API reference, installation, development |
+| [WASM Service Workers](research-wasm-service-workers.html) | Go/TinyGo WASM in service workers — routing, HTMX, static hosting |
 
 ## Overview
 

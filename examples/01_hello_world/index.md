@@ -11,7 +11,6 @@ If you can write a Go program that prints to stdout, you can write a lofigui app
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a href="demo-tinygo.html" class="button is-info is-light">Launch Demo (TinyGo)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
 
@@ -143,25 +142,6 @@ func main() { lofigui.RunWASM(model) }
 </div>
 
 [WASM source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go)
-
-### TinyGo WASM
-
-The same code also compiles with [TinyGo](https://tinygo.org/) for a smaller binary — no source changes needed:
-
-```bash
-tinygo build -o main-tinygo.wasm -target wasm .
-```
-
-| Build | Binary size | Loader |
-|-------|------------|--------|
-| Go WASM | ~8 MB | `wasm_exec.js` (from Go) |
-| TinyGo WASM | ~2.4 MB | `wasm_exec.js` (from TinyGo) |
-
-<div class="annotation">
-<strong>Different loaders</strong> — Go and TinyGo each ship their own <code>wasm_exec.js</code>. They are not interchangeable. The <code>docs:build-wasm</code> task builds both and generates separate demo pages: <a href="demo.html">Go WASM demo</a> and <a href="demo-tinygo.html">TinyGo WASM demo</a>.
-</div>
-
-Every lofigui example builds with both Go and TinyGo. The `model.go` is identical — only the compiler and loader differ.
 
 ### Server vs WASM lifecycle
 

@@ -100,7 +100,7 @@ The model code (`model.go`) is shared between both builds with no changes.
 
 ### Binary size
 
-The WASM binary includes pongo2 and the embedded templates. Expect ~3-4MB for standard Go WASM, ~200-500KB for TinyGo (if pongo2 is compatible).
+The WASM binary includes pongo2 and the embedded templates. Expect ~3-4MB for standard Go WASM.
 
 ---
 
