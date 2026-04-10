@@ -13,7 +13,7 @@ Examples map to the [interactivity spectrum](research-philosophy.html#the-intera
 | 3 | Polling (whole page refresh) | 01 (Hello World), 07 (Water Tank), 08 (Multi-Page) |
 | 4 | Static + forms (CRUD) | 06 (Notes CRUD) |
 | 5 | HTMX partial updates | 09 (Water Tank HTMX), 10 (Maintenance), 12 (Batch Yield) |
-| 6 | WASM (browser-only) | 03 (WASM Hello World), 04 (TinyGo WASM) |
+| 6 | WASM (browser-only) | 03 (Style Sampler) |
 | 7 | WASM + API server | 11 (Water Tank Storage) |
 
 The progression is deliberate — each level adds one concept. Users stop at the level of complexity their project needs.
@@ -270,8 +270,7 @@ docs:capture:NN:
 |---|------|-------|---------|-------------|
 | 01 | Hello World | 3 — Polling | Async + refresh | `App.Handle`, `Print`, `Sleep`, auto-refresh, cancel |
 | 02 | Output Showcase | 2 — Scrolling | Async + refresh | All output types: `Print`, `Markdown`, `HTML`, `Table`, SVG charts |
-| 03 | WASM Hello World | 6 — WASM | Browser-only | `RunWASM`, Go→WASM compilation |
-| 04 | TinyGo WASM | 6 — WASM | Browser-only | TinyGo for smaller binaries (~500KB vs ~2MB) |
+| 03 | Style Sampler | 6 — WASM | Browser-only | Template inheritance, `NewControllerFromFS`, multiple page layouts |
 | 06 | Notes CRUD | 4 — Forms | CRUD + redirect | Form POST, `StateDict`, `RenderTemplate`, redirect-after-POST |
 | 07 | Water Tank | 3 — Polling | Dashboard | Generated SVG, simulation goroutine, clickable `<a>` links |
 | 08 | Water Tank Multi | 3 — Polling | Multi-page | Multiple routes, `LayoutNavbar`, HTTP Refresh per-page |

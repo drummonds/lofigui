@@ -41,8 +41,8 @@ func testGoExampleBuilds(t *testing.T) {
 			env:  nil,
 		},
 		{
-			name: "03_hello_world_wasm",
-			path: "examples/03_hello_world_wasm/go",
+			name: "03_style_sampler",
+			path: "examples/03_style_sampler/go",
 			env:  []string{"GOOS=js", "GOARCH=wasm"},
 		},
 		{
@@ -64,6 +64,16 @@ func testGoExampleBuilds(t *testing.T) {
 			if _, err := os.Stat(examplePath); os.IsNotExist(err) {
 				t.Skipf("Example directory does not exist: %s", examplePath)
 				return
+			}
+
+			// Example 03 needs templates copied into go/ for embed
+			if ex.name == "03_style_sampler" {
+				templateDst := filepath.Join(examplePath, "templates")
+				cpCmd := exec.Command("cp", "-r", "examples/03_style_sampler/templates", templateDst)
+				if out, err := cpCmd.CombinedOutput(); err != nil {
+					t.Fatalf("Failed to copy templates: %v\n%s", err, out)
+				}
+				defer os.RemoveAll(templateDst)
 			}
 
 			cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), ex.name), ".")
@@ -151,9 +161,9 @@ func testGoExampleModules(t *testing.T) {
 			moduleName: "codeberg.org/hum3/lofigui/examples/02_svg_graph",
 		},
 		{
-			name:       "03_hello_world_wasm",
-			path:       "examples/03_hello_world_wasm/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/03_hello_world_wasm",
+			name:       "03_style_sampler",
+			path:       "examples/03_style_sampler/go",
+			moduleName: "codeberg.org/hum3/lofigui/examples/03_style_sampler",
 		},
 		{
 			name:       "06_notes_crud",
@@ -226,12 +236,21 @@ func testGoExampleHTTPHandlers(t *testing.T) {
 }
 
 func testGoExampleWASMBuild(t *testing.T) {
-	examplePath := "examples/03_hello_world_wasm/go"
+	examplePath := "examples/03_style_sampler/go"
 
 	if _, err := os.Stat(examplePath); os.IsNotExist(err) {
 		t.Skip("WASM example does not exist")
 		return
 	}
+
+	// Copy templates into go/ for embed (go:embed cannot use ../paths)
+	templateSrc := "examples/03_style_sampler/templates"
+	templateDst := filepath.Join(examplePath, "templates")
+	cpCmd := exec.Command("cp", "-r", templateSrc, templateDst)
+	if out, err := cpCmd.CombinedOutput(); err != nil {
+		t.Fatalf("Failed to copy templates: %v\n%s", err, out)
+	}
+	defer os.RemoveAll(templateDst)
 
 	cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), "test.wasm"), ".")
 	cmd.Dir = examplePath
@@ -311,8 +330,8 @@ func testGoExampleStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "03_hello_world_wasm",
-			path: "examples/03_hello_world_wasm",
+			name: "03_style_sampler",
+			path: "examples/03_style_sampler",
 			requiredFiles: []string{
 				"go/main.go",
 				"go/go.mod",

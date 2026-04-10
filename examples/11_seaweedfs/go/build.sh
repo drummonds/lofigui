@@ -3,7 +3,7 @@ set -e
 
 echo "Building SeaweedFS WASM demo..."
 
-GOOS=js GOARCH=wasm go build -o ../templates/main.wasm .
+GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o ../templates/main.wasm .
 
 WASM_EXEC=$(find "$(go env GOROOT)" -name wasm_exec.js -print -quit)
 if [ -z "$WASM_EXEC" ]; then

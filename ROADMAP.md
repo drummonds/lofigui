@@ -9,7 +9,6 @@
 ## Planned
 
 - **Example 02 WASM**: go-chart in WASM — blocked by font loading in browser environment
-- **Example 04 TinyGo**: TinyGo build pipeline for smaller WASM binaries
 - **Example 06 WASM CRUD**: JavaScript form handlers to replace HTTP POST
 - **HTMX integration**: Example 09 demonstrates HTMX partial updates; framework-level support planned
 - **Background operations**: Example 10 demonstrates maintenance goroutines with progress, cancellation, and equipment lockout

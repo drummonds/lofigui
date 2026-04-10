@@ -144,7 +144,7 @@ tasks:
     dir: examples/11_water_tank_storage/go
     cmds:
       - go mod tidy
-      - GOOS=js GOARCH=wasm go build -o main.wasm .
+      - GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
       - go run .
 
@@ -264,6 +264,7 @@ tasks:
       - task-plus md2html --file docs/research-technical.md --dst docs
       - task-plus md2html --file docs/research-bugs.md --dst docs
       - task-plus md2html --file docs/research-python.md --dst docs
+      - task-plus md2html --file docs/research-wasm-service-workers.md --dst docs
       - task-plus md2html --file docs/recipes.md --dst docs
       - task-plus md2html --file docs/examples.md --dst docs
       - task-plus md2html --file docs/index.md --dst docs
@@ -296,7 +297,7 @@ tasks:
     cmds:
       # 01 Hello World
       - mkdir -p docs/01_hello_world
-      - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/01_hello_world/
       - cp examples/01_hello_world/go/main.wasm docs/01_hello_world/
       - cp examples/01_hello_world/templates/index.html docs/01_hello_world/demo.html
@@ -304,7 +305,7 @@ tasks:
       - rm examples/01_hello_world/go/main.wasm
       # 02 Output Showcase
       - mkdir -p docs/02_svg_graph
-      - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/02_svg_graph/
       - cp examples/02_svg_graph/go/main.wasm docs/02_svg_graph/
       - cp examples/02_svg_graph/templates/index.html docs/02_svg_graph/demo.html
@@ -313,7 +314,7 @@ tasks:
       # 03 Style Sampler (needs template copy for embed)
       - mkdir -p docs/03_style_sampler
       - cp -r examples/03_style_sampler/templates examples/03_style_sampler/go/templates
-      - cd examples/03_style_sampler/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/03_style_sampler/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/03_style_sampler/
       - cp examples/03_style_sampler/go/main.wasm docs/03_style_sampler/
       - cp examples/03_style_sampler/templates/index.html docs/03_style_sampler/demo.html
@@ -321,7 +322,7 @@ tasks:
       - rm -rf examples/03_style_sampler/go/templates examples/03_style_sampler/go/main.wasm
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
-      - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/07_water_tank/
       - cp examples/07_water_tank/go/main.wasm docs/07_water_tank/
       - cp examples/07_water_tank/templates/index.html docs/07_water_tank/demo.html
@@ -329,7 +330,7 @@ tasks:
       - rm examples/07_water_tank/go/main.wasm
       # 08 Water Tank Multi-Page
       - mkdir -p docs/08_water_tank_multi
-      - cd examples/08_water_tank_multi/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/08_water_tank_multi/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/08_water_tank_multi/
       - cp examples/08_water_tank_multi/go/main.wasm docs/08_water_tank_multi/
       - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/demo.html
@@ -337,15 +338,17 @@ tasks:
       - rm examples/08_water_tank_multi/go/main.wasm
       # 09 Water Tank HTMX
       - mkdir -p docs/09_water_tank_htmx
-      - cd examples/09_water_tank_htmx/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/09_water_tank_htmx/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/09_water_tank_htmx/
       - cp examples/09_water_tank_htmx/go/main.wasm docs/09_water_tank_htmx/
       - cp examples/09_water_tank_htmx/templates/index.html docs/09_water_tank_htmx/demo.html
       - cp examples/09_water_tank_htmx/templates/app.js docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/templates/sw.js docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/templates/demo-sw.html docs/09_water_tank_htmx/
       - rm examples/09_water_tank_htmx/go/main.wasm
       # 10 Water Tank Maintenance
       - mkdir -p docs/10_water_tank_maintenance
-      - cd examples/10_water_tank_maintenance/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/10_water_tank_maintenance/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/10_water_tank_maintenance/
       - cp examples/10_water_tank_maintenance/go/main.wasm docs/10_water_tank_maintenance/
       - cp examples/10_water_tank_maintenance/templates/index.html docs/10_water_tank_maintenance/demo.html
@@ -353,7 +356,7 @@ tasks:
       - rm examples/10_water_tank_maintenance/go/main.wasm
       # 11 Water Tank Storage
       - mkdir -p docs/11_water_tank_storage
-      - cd examples/11_water_tank_storage/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/11_water_tank_storage/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/11_water_tank_storage/
       - cp examples/11_water_tank_storage/go/main.wasm docs/11_water_tank_storage/
       - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/demo.html
@@ -361,28 +364,15 @@ tasks:
       - rm examples/11_water_tank_storage/go/main.wasm
       # 12 Batch Yield
       - mkdir -p docs/12_batch_yield
-      - cd examples/12_batch_yield/go && GOOS=js GOARCH=wasm go build -o main.wasm .
+      - cd examples/12_batch_yield/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/12_batch_yield/
       - cp examples/12_batch_yield/go/main.wasm docs/12_batch_yield/
       - cp examples/12_batch_yield/templates/index.html docs/12_batch_yield/demo.html
       - cp examples/12_batch_yield/templates/app.js docs/12_batch_yield/
       - rm examples/12_batch_yield/go/main.wasm
+      # Gzip all WASM binaries for hosts that support pre-compressed assets
+      - find docs -name "main.wasm" -exec gzip -9 -k {} \;
 
-  docs:build-wasm-tinygo:
-    desc: Build TinyGo WASM examples for docs/ folder (slow, release only)
-    vars:
-      TINYGO_WASM_EXEC_JS:
-        sh: echo "$(tinygo env TINYGOROOT)/targets/wasm_exec.js"
-    cmds:
-      - |
-        for dir in 01_hello_world 02_svg_graph 07_water_tank 08_water_tank_multi 09_water_tank_htmx 10_water_tank_maintenance 11_water_tank_storage 12_batch_yield; do
-          echo "TinyGo: $dir"
-          cd examples/$dir/go && tinygo build -o main-tinygo.wasm -target wasm . && cd ../../..
-          cp "{{.TINYGO_WASM_EXEC_JS}}" docs/$dir/tinygo_wasm_exec.js
-          cp examples/$dir/go/main-tinygo.wasm docs/$dir/
-          sed -e 's/wasm_exec\.js/tinygo_wasm_exec.js/' -e 's/main\.wasm/main-tinygo.wasm/' docs/$dir/demo.html > docs/$dir/demo-tinygo.html
-          rm examples/$dir/go/main-tinygo.wasm
-        done
 
   go-example:11:
     desc: 'Run SeaweedFS demo (starts weed server in background)'

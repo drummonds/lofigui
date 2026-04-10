@@ -13,7 +13,6 @@ A scrolling demonstration of every output type lofigui supports. The model runs 
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a href="demo-tinygo.html" class="button is-info is-light">Launch Demo (TinyGo)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
 </div>
 
@@ -334,14 +333,8 @@ import "codeberg.org/hum3/lofigui"
 func main() { lofigui.RunWASM(model) }
 ```
 
-| Build | Binary size |
-|-------|------------|
-| Go WASM | ~8 MB |
-| TinyGo WASM | ~2.5 MB |
-
 <div class="buttons">
 <a href="demo.html" class="button is-primary is-small">Go WASM Demo</a>
-<a href="demo-tinygo.html" class="button is-info is-light is-small">TinyGo WASM Demo</a>
 </div>
 
 [main_wasm.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go)
