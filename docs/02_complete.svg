@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="768" viewBox="0 0 1024 768">
+  <!-- Background -->
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+
+  <!-- Navbar -->
+  <rect x="0" y="0" width="1009" height="52" fill="rgb(0,209,178)"/>
+  <text x="12" y="31.4" fill="rgb(0,31,26)" font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Lofigui</text>
+  <rect x="950" y="14" width="47" height="24" rx="6" fill="rgb(72,199,142)"/>
+  <text x="959" y="29.4" fill="rgb(10,31,21)" font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12">Done</text>
+
+  <!-- Content area — showing "scrolled down" view with table, chart, and completion -->
+  <g font-family="Inter, 'SF Pro', 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="rgb(64,70,84)">
+
+    <!-- HR -->
+    <line x1="48" y1="72" x2="960" y2="72" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Tables -->
+    <text x="48" y="105" font-size="22" font-weight="700" fill="rgb(36,41,47)">Tables</text>
+
+    <!-- Table -->
+    <rect x="48" y="118" width="500" height="1" fill="#dbdbdb"/>
+    <!-- Header row -->
+    <rect x="48" y="118" width="500" height="30" fill="#fafafa"/>
+    <text x="58" y="138" font-size="14" font-weight="700">Language</text>
+    <text x="208" y="138" font-size="14" font-weight="700">Version</text>
+    <text x="328" y="138" font-size="14" font-weight="700">Primary Use Cases</text>
+    <line x1="48" y1="148" x2="548" y2="148" stroke="#dbdbdb" stroke-width="1"/>
+    <!-- Row 1 -->
+    <text x="58" y="168" font-size="14">Go</text>
+    <text x="208" y="168" font-size="14">1.25</text>
+    <text x="328" y="168" font-size="14">Systems, web, CLI</text>
+    <line x1="48" y1="178" x2="548" y2="178" stroke="#f0f0f0" stroke-width="1"/>
+    <!-- Row 2 -->
+    <text x="58" y="198" font-size="14">Python</text>
+    <text x="208" y="198" font-size="14">3.13</text>
+    <text x="328" y="198" font-size="14">Data science, scripting</text>
+    <line x1="48" y1="208" x2="548" y2="208" stroke="#f0f0f0" stroke-width="1"/>
+    <!-- Row 3 -->
+    <text x="58" y="228" font-size="14">Rust</text>
+    <text x="208" y="228" font-size="14">1.86</text>
+    <text x="328" y="228" font-size="14">Systems, embedded</text>
+    <line x1="48" y1="238" x2="548" y2="238" stroke="#f0f0f0" stroke-width="1"/>
+    <!-- Row 4 -->
+    <text x="58" y="258" font-size="14">JavaScript</text>
+    <text x="208" y="258" font-size="14">ES2024</text>
+    <text x="328" y="258" font-size="14">Web, full-stack</text>
+    <line x1="48" y1="268" x2="548" y2="268" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- HR -->
+    <line x1="48" y1="290" x2="960" y2="290" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Bulma Components -->
+    <text x="48" y="323" font-size="22" font-weight="700" fill="rgb(36,41,47)">Bulma Components</text>
+
+    <!-- Info notification -->
+    <rect x="48" y="338" width="600" height="32" rx="4" fill="rgb(235,248,253)"/>
+    <text x="64" y="359" font-size="14" fill="rgb(34,113,177)">This is an <tspan font-weight="700">info</tspan> notification.</text>
+
+    <!-- Success notification -->
+    <rect x="48" y="378" width="600" height="32" rx="4" fill="rgb(237,250,241)"/>
+    <text x="64" y="399" font-size="14" fill="rgb(34,120,58)">This is a <tspan font-weight="700">success</tspan> notification.</text>
+
+    <!-- Tags row -->
+    <rect x="48" y="424" width="60" height="24" rx="12" fill="rgb(0,209,178)"/>
+    <text x="59" y="440" font-size="11" fill="white">Primary</text>
+    <rect x="116" y="424" width="40" height="24" rx="12" fill="rgb(50,152,220)"/>
+    <text x="123" y="440" font-size="11" fill="white">Link</text>
+    <rect x="164" y="424" width="38" height="24" rx="12" fill="rgb(62,166,255)"/>
+    <text x="172" y="440" font-size="11" fill="white">Info</text>
+    <rect x="210" y="424" width="60" height="24" rx="12" fill="rgb(72,199,142)"/>
+    <text x="218" y="440" font-size="11" fill="white">Success</text>
+    <rect x="278" y="424" width="62" height="24" rx="12" fill="rgb(255,224,62)"/>
+    <text x="286" y="440" font-size="11" fill="rgb(64,64,0)">Warning</text>
+    <rect x="348" y="424" width="56" height="24" rx="12" fill="rgb(241,70,104)"/>
+    <text x="357" y="440" font-size="11" fill="white">Danger</text>
+
+    <!-- Progress bars -->
+    <text x="48" y="475" font-size="16" font-weight="700" fill="rgb(36,41,47)">Progress Bars</text>
+    <!-- 25% -->
+    <rect x="48" y="488" width="600" height="14" rx="7" fill="#ededed"/>
+    <rect x="48" y="488" width="150" height="14" rx="7" fill="rgb(0,209,178)"/>
+    <!-- 50% -->
+    <rect x="48" y="510" width="600" height="14" rx="7" fill="#ededed"/>
+    <rect x="48" y="510" width="300" height="14" rx="7" fill="rgb(62,166,255)"/>
+    <!-- 75% -->
+    <rect x="48" y="532" width="600" height="14" rx="7" fill="#ededed"/>
+    <rect x="48" y="532" width="450" height="14" rx="7" fill="rgb(72,199,142)"/>
+
+    <!-- HR -->
+    <line x1="48" y1="565" x2="960" y2="565" stroke="#dbdbdb" stroke-width="1"/>
+
+    <!-- H2: Live Updating Chart -->
+    <text x="48" y="598" font-size="22" font-weight="700" fill="rgb(36,41,47)">Live Updating Chart</text>
+    <text x="48" y="623" font-size="16">Fibonacci bar chart — grows one bar per second:</text>
+
+    <!-- Simple Fibonacci bar chart (n=10) -->
+    <text x="280" y="648" font-size="13" font-weight="700" text-anchor="middle" fill="#333">Fibonacci (n=10)</text>
+    <!-- Bars (scaled to fit, max=55 → 100px height) -->
+    <rect x="68"  y="749" width="30" height="2"  rx="1" fill="#3298dc"/>
+    <rect x="108" y="749" width="30" height="2"  rx="1" fill="#48c774"/>
+    <rect x="148" y="747" width="30" height="4"  rx="1" fill="#ffdd57"/>
+    <rect x="188" y="744" width="30" height="7"  rx="1" fill="#f14668"/>
+    <rect x="228" y="741" width="30" height="10" rx="1" fill="#b86bff"/>
+    <rect x="268" y="736" width="30" height="15" rx="1" fill="#ff8c42"/>
+    <rect x="308" y="727" width="30" height="24" rx="1" fill="#3298dc"/>
+    <rect x="348" y="713" width="30" height="38" rx="1" fill="#48c774"/>
+    <rect x="388" y="689" width="30" height="62" rx="1" fill="#ffdd57"/>
+    <rect x="428" y="651" width="30" height="100" rx="1" fill="#f14668"/>
+    <!-- Axis -->
+    <line x1="58" y1="751" x2="468" y2="751" stroke="#ccc" stroke-width="1"/>
+
+    <!-- Completion message (would be below chart but shown here) -->
+  </g>
+
+  <!-- Border -->
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
+</svg>

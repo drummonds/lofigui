@@ -1,3 +1,5 @@
+codeberg.org/hum3/gogal v0.1.2 h1:7hr+9bPLjHxIEBTwOqrPLMgMis8vPJ+N/gw/FMuZVZc=
+codeberg.org/hum3/gogal v0.1.2/go.mod h1:BLskewqD7ZZ2J/7d1nRYUxD2XNnX1x/s4YTB7epR8Ws=
 github.com/flosch/pongo2/v6 v6.0.0 h1:lsGru8IAzHgIAw6H2m4PCyleO58I40ow6apih0WprMU=
 github.com/flosch/pongo2/v6 v6.0.0/go.mod h1:CuDpFm47R0uGGE7z13/tTlt1Y6zdxvr2RLT5LJhsHEU=
 github.com/kr/pretty v0.2.1 h1:Fmg33tUaq4/8ym9TJN1x7sLJnHVwhP33CNkpYV/7rwI=

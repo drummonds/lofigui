@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block navbar %}
+<nav class="navbar is-dark">
+  <div class="navbar-brand">
+    <span class="navbar-item has-text-weight-bold">03 — Style Sampler</span>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Layout Style Sampler</h1>
+    <p class="subtitle">Each option demonstrates a different layout pattern. Intentionally jarring — these are meant to contrast, not harmonise.</p>
+    <hr>
+
+    <div class="columns is-multiline">
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Scrolling Navbar</p>
+            <p class="subtitle is-6 has-text-grey">Default Bulma navbar that scrolls with the page.</p>
+          </div>
+          <footer class="card-footer">
+            <a href="/style/scrolling" class="card-footer-item">View</a>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Fixed Navbar</p>
+            <p class="subtitle is-6 has-text-grey">Pinned to the top — content scrolls underneath.</p>
+          </div>
+          <footer class="card-footer">
+            <a href="/style/fixed" class="card-footer-item">View</a>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Three-Panel: Nav</p>
+            <p class="subtitle is-6 has-text-grey">Left sidebar with page navigation links.</p>
+          </div>
+          <footer class="card-footer">
+            <a href="/style/three-panel-nav" class="card-footer-item">View</a>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Three-Panel: Controls</p>
+            <p class="subtitle is-6 has-text-grey">Left sidebar with form inputs and buttons.</p>
+          </div>
+          <footer class="card-footer">
+            <a href="/style/three-panel-controls" class="card-footer-item">View</a>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column is-4">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-5">Full Width</p>
+            <p class="subtitle is-6 has-text-grey">No sidebar — teletype output fills the page.</p>
+          </div>
+          <footer class="card-footer">
+            <a href="/style/fullwidth" class="card-footer-item">View</a>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <div class="content">
+      <h2>What this example demonstrates</h2>
+      <ul>
+        <li><strong>Template inheritance</strong> — pongo2 <code>{%raw%}{% extends "base.html" %}{%endraw%}</code> with blocks</li>
+        <li><strong>Navbar styles</strong> — scrolling vs fixed position</li>
+        <li><strong>Layout patterns</strong> — full-width, two-column, three-panel</li>
+        <li><strong>Teletype output</strong> — same <code>lofigui.Print()</code> content in each layout</li>
+        <li><strong>No JavaScript</strong> — every page is a full server render</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

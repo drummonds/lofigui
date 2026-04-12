@@ -1,0 +1,12 @@
+# Compiled WASM
+main.wasm
+main-tinygo.wasm
+wasm_exec.js
+tinygo_wasm_exec.js
+
+# Templates copied into go/ for embed during WASM build
+go/templates/
+
+# OS
+.DS_Store
+Thumbs.db
