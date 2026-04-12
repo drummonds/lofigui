@@ -41,9 +41,9 @@ func testGoExampleBuilds(t *testing.T) {
 			env:  nil,
 		},
 		{
-			name: "03_hello_world_wasm",
-			path: "examples/03_hello_world_wasm/go",
-			env:  []string{"GOOS=js", "GOARCH=wasm"},
+			name: "03_style_sampler",
+			path: "examples/03_style_sampler/go",
+			env:  nil,
 		},
 		{
 			name: "06_notes_crud",
@@ -151,9 +151,9 @@ func testGoExampleModules(t *testing.T) {
 			moduleName: "codeberg.org/hum3/lofigui/examples/02_svg_graph",
 		},
 		{
-			name:       "03_hello_world_wasm",
-			path:       "examples/03_hello_world_wasm/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/03_hello_world_wasm",
+			name:       "03_style_sampler",
+			path:       "examples/03_style_sampler/go",
+			moduleName: "codeberg.org/hum3/lofigui/examples/03_style_sampler",
 		},
 		{
 			name:       "06_notes_crud",
@@ -226,12 +226,20 @@ func testGoExampleHTTPHandlers(t *testing.T) {
 }
 
 func testGoExampleWASMBuild(t *testing.T) {
-	examplePath := "examples/03_hello_world_wasm/go"
+	examplePath := "examples/03_style_sampler/go"
 
 	if _, err := os.Stat(examplePath); os.IsNotExist(err) {
 		t.Skip("WASM example does not exist")
 		return
 	}
+
+	// Copy templates into go/ for embed (go:embed cannot use ../paths)
+	srcDir := filepath.Join(examplePath, "..", "templates")
+	dstDir := filepath.Join(examplePath, "templates")
+	if err := copyDir(srcDir, dstDir); err != nil {
+		t.Fatalf("Failed to copy templates: %v", err)
+	}
+	defer os.RemoveAll(dstDir)
 
 	cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), "test.wasm"), ".")
 	cmd.Dir = examplePath
@@ -248,6 +256,25 @@ func testGoExampleWASMBuild(t *testing.T) {
 	} else {
 		os.Remove(wasmPath)
 	}
+}
+
+// copyDir copies a directory tree from src to dst.
+func copyDir(src, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(src, path)
+		target := filepath.Join(dst, rel)
+		if info.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, info.Mode())
+	})
 }
 
 func testGoExampleCompilationTime(t *testing.T) {
@@ -311,8 +338,8 @@ func testGoExampleStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "03_hello_world_wasm",
-			path: "examples/03_hello_world_wasm",
+			name: "03_style_sampler",
+			path: "examples/03_style_sampler",
 			requiredFiles: []string{
 				"go/main.go",
 				"go/go.mod",

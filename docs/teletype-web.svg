@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <defs>
+    <clipPath id="tt-clip">
+      <rect x="42" y="175" width="136" height="155"/>
+    </clipPath>
+    <filter id="win-shadow" x="-2%" y="-2%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <style>
+    .tt-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 7px;
+      fill: #2c2c2c;
+      opacity: 0;
+    }
+    .nav-text {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px;
+      fill: #4a4a4a;
+    }
+    .nav-active {
+      font-weight: bold;
+      fill: #3298dc;
+    }
+    .page-title {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      fill: #363636;
+    }
+    .form-label {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 8px;
+      fill: #4a4a4a;
+    }
+    .small-text {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 7px;
+      fill: #7a7a7a;
+    }
+    @keyframes typed { to { opacity: 1; } }
+    .t1  { animation: typed 0.05s 1.0s forwards; }
+    .t2  { animation: typed 0.05s 1.8s forwards; }
+    .t3  { animation: typed 0.05s 2.6s forwards; }
+    .t4  { animation: typed 0.05s 3.4s forwards; }
+    .t5  { animation: typed 0.05s 4.2s forwards; }
+    .t6  { animation: typed 0.05s 5.0s forwards; }
+    .t7  { animation: typed 0.05s 5.8s forwards; }
+    .t8  { animation: typed 0.05s 6.6s forwards; }
+    .t9  { animation: typed 0.05s 7.4s forwards; }
+
+    /* Page 2 highlight pulse */
+    @keyframes page-fade {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .page2-content { animation: page-fade 0.5s 9s forwards; opacity: 0; }
+    .page1-fade { animation: page-fade 0.3s 8.8s reverse forwards; }
+  </style>
+
+  <!-- ===== BROWSER WINDOW CHROME ===== -->
+  <g filter="url(#win-shadow)">
+    <!-- Window frame -->
+    <rect x="10" y="10" width="580" height="400" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
+
+    <!-- Title bar -->
+    <rect x="10" y="10" width="580" height="30" rx="8" fill="#f5f5f5"/>
+    <rect x="10" y="32" width="580" height="8" fill="#f5f5f5"/>
+    <!-- Traffic lights -->
+    <circle cx="28" cy="25" r="5" fill="#ff5f57"/>
+    <circle cx="44" cy="25" r="5" fill="#ffbd2e"/>
+    <circle cx="60" cy="25" r="5" fill="#28c840"/>
+    <!-- URL bar -->
+    <rect x="80" y="16" width="420" height="18" rx="4" fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+    <text x="90" y="28" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#999">localhost:1340</text>
+  </g>
+
+  <!-- ===== NAVBAR (Bulma-style) ===== -->
+  <rect x="10" y="40" width="580" height="32" fill="#fff"/>
+  <line x1="10" y1="72" x2="590" y2="72" stroke="#eee" stroke-width="1"/>
+
+  <!-- App name / brand -->
+  <text x="30" y="60" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="bold" fill="#363636">Water Tank</text>
+
+  <!-- Nav links -->
+  <text x="160" y="60" class="nav-text nav-active">Schematic</text>
+  <text x="240" y="60" class="nav-text">Diagnostics</text>
+  <text x="325" y="60" class="nav-text">Settings</text>
+  <text x="395" y="60" class="nav-text">About</text>
+
+  <!-- Active indicator underline -->
+  <line x1="157" y1="70" x2="210" y2="70" stroke="#3298dc" stroke-width="2"/>
+
+  <!-- ===== PAGE CONTENT AREA ===== -->
+
+  <!-- Left column: Teletype output (scrolling paper) -->
+  <rect x="25" y="82" width="170" height="260" rx="4" fill="#fafafa" stroke="#eee" stroke-width="1"/>
+  <text x="35" y="98" class="page-title">Output</text>
+
+  <!-- Mini teletype paper area -->
+  <rect x="35" y="106" width="150" height="228" rx="2" fill="#fff" stroke="#eee" stroke-width="0.5"/>
+
+  <!-- Scrolling teletype content -->
+  <g clip-path="url(#tt-clip)">
+    <g transform="translate(0,166)">
+      <animateTransform attributeName="transform" type="translate"
+        from="0,166" to="0,70" dur="8s" begin="0.8s" fill="freeze"/>
+
+      <!-- Paper strip -->
+      <rect x="42" y="-10" width="136" height="180" fill="#fefcf4"/>
+
+      <!-- Tractor holes left -->
+      <g fill="#f0ece0" stroke="#e4e0d4" stroke-width="0.3">
+        <circle cx="48" cy="0"   r="1.5"/>
+        <circle cx="48" cy="12"  r="1.5"/>
+        <circle cx="48" cy="24"  r="1.5"/>
+        <circle cx="48" cy="36"  r="1.5"/>
+        <circle cx="48" cy="48"  r="1.5"/>
+        <circle cx="48" cy="60"  r="1.5"/>
+        <circle cx="48" cy="72"  r="1.5"/>
+        <circle cx="48" cy="84"  r="1.5"/>
+        <circle cx="48" cy="96"  r="1.5"/>
+        <circle cx="48" cy="108" r="1.5"/>
+        <circle cx="48" cy="120" r="1.5"/>
+        <circle cx="48" cy="132" r="1.5"/>
+        <circle cx="48" cy="144" r="1.5"/>
+        <circle cx="48" cy="156" r="1.5"/>
+      </g>
+
+      <!-- Tractor holes right -->
+      <g fill="#f0ece0" stroke="#e4e0d4" stroke-width="0.3">
+        <circle cx="172" cy="0"   r="1.5"/>
+        <circle cx="172" cy="12"  r="1.5"/>
+        <circle cx="172" cy="24"  r="1.5"/>
+        <circle cx="172" cy="36"  r="1.5"/>
+        <circle cx="172" cy="48"  r="1.5"/>
+        <circle cx="172" cy="60"  r="1.5"/>
+        <circle cx="172" cy="72"  r="1.5"/>
+        <circle cx="172" cy="84"  r="1.5"/>
+        <circle cx="172" cy="96"  r="1.5"/>
+        <circle cx="172" cy="108" r="1.5"/>
+        <circle cx="172" cy="120" r="1.5"/>
+        <circle cx="172" cy="132" r="1.5"/>
+        <circle cx="172" cy="144" r="1.5"/>
+        <circle cx="172" cy="156" r="1.5"/>
+      </g>
+
+      <!-- Teletype text lines -->
+      <text x="55" y="6"   class="tt-text t1">&gt; TANK SIMULATION</text>
+      <text x="55" y="18"  class="tt-text t2">PUMP: ON</text>
+      <text x="55" y="30"  class="tt-text t3">LEVEL: 42%</text>
+      <text x="55" y="42"  class="tt-text t4">FLOW: 2.3 L/s</text>
+      <text x="55" y="54"  class="tt-text t5">VALVE: OPEN</text>
+      <text x="55" y="66"  class="tt-text t6">TEMP: 18.5C</text>
+      <text x="55" y="78"  class="tt-text t7">PRESSURE: 1.2 bar</text>
+      <text x="55" y="90"  class="tt-text t8">STATUS: NORMAL</text>
+      <text x="55" y="102" class="tt-text t9">&gt; OK_</text>
+    </g>
+  </g>
+
+  <!-- Right column: Form / controls -->
+  <rect x="210" y="82" width="370" height="260" rx="4" fill="#fafafa" stroke="#eee" stroke-width="1"/>
+  <text x="225" y="98" class="page-title">Controls</text>
+
+  <!-- Parameter form -->
+  <rect x="225" y="108" width="340" height="155" rx="4" fill="#fff" stroke="#eee" stroke-width="0.5"/>
+
+  <!-- Form fields -->
+  <text x="238" y="128" class="form-label">Pump Speed</text>
+  <rect x="238" y="132" width="140" height="18" rx="3" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="245" y="144" font-family="'Courier New', monospace" font-size="8" fill="#363636">75%</text>
+
+  <text x="395" y="128" class="form-label">Valve Position</text>
+  <rect x="395" y="132" width="140" height="18" rx="3" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="402" y="144" font-family="'Courier New', monospace" font-size="8" fill="#363636">OPEN</text>
+
+  <text x="238" y="168" class="form-label">Target Level (%)</text>
+  <rect x="238" y="172" width="140" height="18" rx="3" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="245" y="184" font-family="'Courier New', monospace" font-size="8" fill="#363636">80</text>
+
+  <text x="395" y="168" class="form-label">Mode</text>
+  <!-- Dropdown -->
+  <rect x="395" y="172" width="140" height="18" rx="3" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="402" y="184" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8" fill="#363636">Automatic</text>
+  <polygon points="525,179 530,185 520,185" fill="#7a7a7a"/>
+
+  <!-- Checkboxes -->
+  <text x="238" y="210" class="form-label">Options</text>
+  <rect x="238" y="215" width="10" height="10" rx="2" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="253" y="224" class="form-label">Enable alarms</text>
+  <polyline points="240,220 242,223 246,217" fill="none" stroke="#3298dc" stroke-width="1.2"/>
+
+  <rect x="338" y="215" width="10" height="10" rx="2" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="353" y="224" class="form-label">Log to file</text>
+
+  <!-- Buttons -->
+  <rect x="238" y="240" width="70" height="22" rx="4" fill="#3298dc"/>
+  <text x="258" y="254" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" font-weight="bold" fill="#fff" text-anchor="middle">Start</text>
+
+  <rect x="318" y="240" width="70" height="22" rx="4" fill="#fff" stroke="#dbdbdb" stroke-width="0.8"/>
+  <text x="338" y="254" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#4a4a4a" text-anchor="middle">Stop</text>
+
+  <rect x="398" y="240" width="70" height="22" rx="4" fill="#fff" stroke="#f14668" stroke-width="0.8"/>
+  <text x="418" y="254" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#f14668" text-anchor="middle">Reset</text>
+
+  <!-- Status bar at bottom of form -->
+  <rect x="225" y="268" width="340" height="24" rx="0 0 4 4" fill="#f5f5f5"/>
+  <circle cx="238" cy="280" r="3" fill="#48c774"/>
+  <text x="246" y="283" class="small-text">Simulation running — last update 2s ago</text>
+
+  <!-- Second teletype indicator (tabs below main output) -->
+  <rect x="25" y="348" width="170" height="56" rx="4" fill="#fafafa" stroke="#eee" stroke-width="1"/>
+
+  <!-- Tab-like headers for multiple teletypes -->
+  <rect x="30" y="352" width="55" height="16" rx="3 3 0 0" fill="#3298dc"/>
+  <text x="57" y="363" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" fill="#fff" font-weight="bold">Main</text>
+
+  <rect x="88" y="352" width="55" height="16" rx="3 3 0 0" fill="#f5f5f5" stroke="#eee" stroke-width="0.5"/>
+  <text x="115" y="363" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" fill="#7a7a7a">Diagnostics</text>
+
+  <rect x="146" y="352" width="40" height="16" rx="3 3 0 0" fill="#f5f5f5" stroke="#eee" stroke-width="0.5"/>
+  <text x="166" y="363" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" fill="#7a7a7a">Log</text>
+
+  <!-- Mini output preview in second teletype -->
+  <rect x="30" y="368" width="160" height="32" rx="0 0 3 3" fill="#fff" stroke="#eee" stroke-width="0.5"/>
+  <text x="37" y="379" font-family="'Courier New', monospace" font-size="6" fill="#7a7a7a">DIAG: sensors OK</text>
+  <text x="37" y="389" font-family="'Courier New', monospace" font-size="6" fill="#7a7a7a">DIAG: network OK</text>
+  <text x="37" y="399" font-family="'Courier New', monospace" font-size="6" fill="#7a7a7a">DIAG: storage 82% ▮</text>
+
+  <!-- Right bottom: static page hint -->
+  <rect x="210" y="348" width="370" height="56" rx="4" fill="#fafafa" stroke="#eee" stroke-width="1"/>
+  <text x="225" y="365" class="form-label" font-weight="bold">Template inheritance</text>
+  <text x="225" y="378" class="small-text">base.html → {% block content %} → schematic.html</text>
+  <text x="225" y="390" class="small-text">Navbar, footer, CSS defined once — every page inherits.</text>
+  <text x="225" y="402" class="small-text">No JS. Server renders complete pages. Full page loads on every action.</text>
+</svg>
