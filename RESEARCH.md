@@ -12,7 +12,9 @@ Design philosophy, trade-offs, and technical deep-dives.
 | [Technical](research-technical.html) | Architecture overview, polling mechanism, task scheduling |
 | [Bugs](research-bugs.html) | Known bugs, interaction analysis, and root causes |
 | [Python](research-python.html) | Python implementation — API reference, installation, development |
-| [WASM Service Workers](research-wasm-service-workers.html) | Go/TinyGo WASM in service workers — routing, HTMX, static hosting |
+| [WASM Service Workers](research-wasm-service-workers.html) | Go WASM in service workers — routing, HTMX, static hosting |
+| [WASM External APIs](research-wasm-external-apis.html) | Calling external HTTP APIs from a WASM service worker — routing loop, CORS, JS proxy patterns |
+| [WASM TinyGo](research-wasm-tinygo.html) | TinyGo for WASM — blockers, compression as alternative, research proposal |
 
 ## Overview
 
