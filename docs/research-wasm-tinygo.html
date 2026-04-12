@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: WASM TinyGo - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: WASM TinyGo</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-wasm-tinygo">Research: WASM TinyGo</h1>
+<p>TinyGo as a WASM compilation target for lofigui --- current status, blockers, and a research proposal to fix the core limitation.</p>
+<h2 id="background">Background</h2>
+<p>TinyGo is an alternative Go compiler targeting microcontrollers, WASM, and other constrained environments. Its primary appeal for browser WASM is dramatically smaller binary output. Lofigui previously shipped TinyGo-compiled WASM demos alongside standard Go WASM builds for every example, but removed them when adopting the <a href="research-wasm-service-workers.html">service worker approach</a> because TinyGo cannot compile <code>net/http</code> for browser targets.</p>
+<p>This page consolidates TinyGo-related findings that were previously scattered across the service workers research.</p>
+<h2 id="binary-size-tinygo-vs-standard-go-vs-compression">Binary size: TinyGo vs standard Go vs compression</h2>
+<p>TinyGo's headline advantage is binary size:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Standard Go</th>
+<th>TinyGo</th>
+<th>Reduction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimal hello</td>
+<td>~2 MB</td>
+<td>~86 KB</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>HTTP server app</td>
+<td>~8--10 MB</td>
+<td>~2--3 MB</td>
+<td>70%</td>
+</tr>
+</tbody>
+</table>
+<p>For a service worker, binary size directly affects cold-start time. A 10 MB binary is noticeably slow on first load. Caching the binary in the service worker cache mitigates repeat visits, but the first visit matters.</p>
+<h3 id="compression-closes-the-gap">Compression closes the gap</h3>
+<p>Standard Go WASM binaries compress extremely well. Browsers transparently decompress <code>Content-Encoding: gzip</code> (or brotli) before passing bytes to <code>WebAssembly.instantiateStreaming()</code>, so the user downloads the compressed size, not the raw size.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Raw size (typical lofigui)</th>
+<th>Compressed</th>
+<th>Transfer size</th>
+<th>Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard Go, uncompressed</td>
+<td>7.8 MB</td>
+<td>---</td>
+<td>7.8 MB</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Standard Go, gzip -9</td>
+<td>7.8 MB</td>
+<td>2.1 MB</td>
+<td>2.1 MB</td>
+<td>27%</td>
+</tr>
+<tr>
+<td>Standard Go, brotli -11</td>
+<td>7.8 MB</td>
+<td>~1.7 MB (est.)</td>
+<td>~1.7 MB</td>
+<td>~22%</td>
+</tr>
+<tr>
+<td>TinyGo, uncompressed</td>
+<td>~2.5 MB</td>
+<td>---</td>
+<td>2.5 MB</td>
+<td>32%</td>
+</tr>
+<tr>
+<td>TinyGo, gzip -9</td>
+<td>~2.5 MB</td>
+<td>~800 KB (est.)</td>
+<td>~800 KB</td>
+<td>~10%</td>
+</tr>
+</tbody>
+</table>
+<p>With gzip, standard Go is ~2.1 MB on the wire --- comparable to TinyGo's <em>uncompressed</em> size. With brotli, the gap narrows further. TinyGo + gzip would still be smallest (~800 KB), but the difference between 800 KB and 2.1 MB is far less dramatic than between 2.5 MB and 7.8 MB.</p>
+<p><strong>Compression is the pragmatic answer.</strong> It works today, requires no compiler changes, and is a single build step (<code>gzip -9 main.wasm</code>). Most static hosts (GitHub Pages, Netlify, Cloudflare Pages, statichost.eu) apply gzip automatically, so pre-compression may not even be needed for deployment. Lofigui's build pipeline already includes gzip compression for WASM artifacts.</p>
+<h3 id="build-flags-for-standard-go">Build flags for standard Go</h3>
+<p>These provide modest savings on top of compression:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect</th>
+<th>Saving</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-ldflags=&quot;-s&quot;</code></td>
+<td>Strips WASM <code>name</code> section</td>
+<td>~186 KB (2.2%)</td>
+</tr>
+<tr>
+<td><code>-trimpath</code></td>
+<td>Shortens embedded path strings</td>
+<td>~10 KB</td>
+</tr>
+<tr>
+<td><code>-ldflags=&quot;-w&quot;</code></td>
+<td>No effect on WASM (no DWARF)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>Total from flags: ~196 KB (~2.3% reduction). Worth including in the build command but not transformative.</p>
+<h2 id="what-tinygo-cannot-do-browser-wasm">What TinyGo cannot do (browser WASM)</h2>
+<p>These are the blockers that prevent TinyGo from being used for lofigui's service worker approach:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Standard Go</th>
+<th>TinyGo</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net/http</code> in browser</td>
+<td>Works (maps to Fetch API)</td>
+<td><strong>Panics at runtime</strong> (<a href="https://github.com/tinygo-org/tinygo/issues/4420">#4420</a>)</td>
+<td>Service workers need <code>net/http</code> for <code>go-wasm-http-server</code></td>
+</tr>
+<tr>
+<td><code>html/template</code></td>
+<td>Works</td>
+<td><strong>Cannot import</strong> (reflection limits)</td>
+<td>Server-side template rendering</td>
+</tr>
+<tr>
+<td><code>text/template</code></td>
+<td>Works</td>
+<td><strong>Cannot import</strong> (reflection limits)</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>pongo2</code></td>
+<td>Works</td>
+<td>Likely broken (reflection)</td>
+<td>Lofigui's Go template engine</td>
+</tr>
+<tr>
+<td><code>encoding/json</code></td>
+<td>Works</td>
+<td>Partial (missing <code>sync.WaitGroup.Go()</code>)</td>
+<td>API response parsing</td>
+</tr>
+<tr>
+<td>Full goroutine scheduler</td>
+<td>Yes (cooperative on single thread)</td>
+<td>Simpler scheduler, edge cases</td>
+<td>Complex concurrent handlers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-nethttp-problem-is-decisive">The net/http problem is decisive</h3>
+<p>TinyGo's <code>net/http</code> does not work in browser WASM because the Fetch API bridge is not implemented. Standard Go maps <code>net/http</code> calls to the browser's <code>fetch()</code> API via <code>syscall/js</code> --- this is what makes <code>go-wasm-http-server</code> possible. TinyGo's <code>net/http</code> was built for <code>wasip1</code> and bare-metal targets; the browser <code>js/wasm</code> transport layer simply does not exist.</p>
+<p>Since <code>go-wasm-http-server</code> depends on <code>net/http</code> types (<code>http.Request</code>, <code>http.ResponseWriter</code>, <code>http.Handler</code>), TinyGo cannot be used for the service worker pattern at all.</p>
+<h3 id="template-engines">Template engines</h3>
+<table>
+<thead>
+<tr>
+<th>Engine</th>
+<th>Standard Go WASM</th>
+<th>TinyGo WASM</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>html/template</code></td>
+<td>Works</td>
+<td>Broken</td>
+<td>Reflection-based</td>
+</tr>
+<tr>
+<td><code>text/template</code></td>
+<td>Works</td>
+<td>Broken</td>
+<td>Reflection-based</td>
+</tr>
+<tr>
+<td>pongo2</td>
+<td>Works</td>
+<td>Likely broken</td>
+<td>Reflection-based</td>
+</tr>
+<tr>
+<td><a href="https://github.com/a-h/templ">templ</a></td>
+<td>Works</td>
+<td><strong>Works</strong></td>
+<td>Code generation, no reflection</td>
+</tr>
+</tbody>
+</table>
+<p><code>templ</code> is the only viable template engine for TinyGo WASM because it uses code generation instead of reflection. For standard Go WASM, pongo2 and <code>html/template</code> both work.</p>
+<h2 id="where-tinygo-still-works">Where TinyGo still works</h2>
+<p>For lofigui's <em>original</em> WASM approach --- direct <code>syscall/js</code> function exports without service workers --- TinyGo works. This approach uses <code>js.Global().Set(&quot;goRender&quot;, ...)</code> and custom JavaScript glue, never touching <code>net/http</code>. The smaller binary size is genuinely valuable here.</p>
+<p>However, lofigui has decided to standardise on the service worker approach (shared <code>net/http</code> handlers for server and WASM builds), which makes TinyGo incompatible with the direction of the project. The direct JS export pattern remains available for trivial Level 1--2 examples where code sharing is not needed, but new examples should use the service worker pattern.</p>
+<h2 id="concurrency">Concurrency</h2>
+<p>Both Go and TinyGo WASM run on a single thread. Goroutines are cooperatively scheduled:</p>
+<ul>
+<li><code>time.Sleep()</code> suspends the Go runtime and returns control to the browser event loop</li>
+<li><code>runtime.Gosched()</code> yields between goroutines but does NOT return control to the browser</li>
+<li>Channel operations and select statements work normally</li>
+<li>There is no parallelism --- goroutines interleave, they do not run simultaneously</li>
+</ul>
+<p>TinyGo's goroutine scheduler is simpler than standard Go's and has known edge cases with deeply nested channel operations. For service worker request handling (where each request can be a goroutine), this would be a concern --- but since TinyGo can't do service workers anyway, it's academic.</p>
+<h2 id="research-proposal-tinygo-nethttp-for-browser-wasm">Research proposal: TinyGo net/http for browser WASM</h2>
+<h3 id="the-gap">The gap</h3>
+<p>Standard Go's <code>net/http</code> works in <code>GOOS=js GOARCH=wasm</code> because of a transport implementation in <code>net/http/roundtrip_js.go</code> that maps HTTP calls to the browser's <code>fetch()</code> API via <code>syscall/js</code>. TinyGo has no equivalent. The issue is tracked as <a href="https://github.com/tinygo-org/tinygo/issues/4420">tinygo-org/tinygo#4420</a>.</p>
+<h3 id="what-would-need-to-happen">What would need to happen</h3>
+<ol>
+<li>
+<p><strong>Implement the Fetch API transport.</strong> Port or rewrite Go's <code>roundtrip_js.go</code> for TinyGo's <code>syscall/js</code> implementation. This maps <code>http.RoundTrip</code> to <code>fetch()</code>, converting Go request/response types to and from JavaScript <code>Request</code>/<code>Response</code> objects. The standard Go implementation is ~300 lines.</p>
+</li>
+<li>
+<p><strong>Fix reflection for <code>net/http</code> types.</strong> TinyGo's reflection support is incomplete. <code>net/http</code> uses reflection in several places (header canonicalization, cookie parsing). Each site would need testing and potentially a TinyGo-compatible alternative.</p>
+</li>
+<li>
+<p><strong>Test with <code>go-wasm-http-server</code>.</strong> Once <code>net/http</code> works, verify that <code>go-wasm-http-server</code> (which bridges <code>net/http.Handler</code> to service worker <code>FetchEvent</code>) functions correctly. This library uses <code>http.Request</code>, <code>http.ResponseWriter</code>, and <code>http.Handler</code> --- all of which would need to work under TinyGo.</p>
+</li>
+<li>
+<p><strong>Template engine.</strong> Even with <code>net/http</code> working, <code>html/template</code> and <code>pongo2</code> would remain broken (reflection). The lofigui WASM build would need to switch to <code>templ</code> or raw string concatenation for template rendering. This is a separate, larger migration.</p>
+</li>
+</ol>
+<h3 id="effort-estimate">Effort estimate</h3>
+<p>The Fetch API transport (#1) is a focused, bounded piece of work --- likely 1--2 weeks for someone familiar with TinyGo internals. The reflection fixes (#2) are unbounded and may require upstream TinyGo changes. The template migration (#4) is a lofigui-specific concern, independent of TinyGo.</p>
+<h3 id="is-it-worth-it">Is it worth it?</h3>
+<p>With compression, the size argument for TinyGo is less compelling than it was:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Standard Go (gzip)</th>
+<th>TinyGo (gzip, hypothetical)</th>
+<th>Saving</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimal app</td>
+<td>~500 KB</td>
+<td>~50 KB</td>
+<td>450 KB</td>
+</tr>
+<tr>
+<td>Full lofigui app</td>
+<td>~2.1 MB</td>
+<td>~800 KB</td>
+<td>1.3 MB</td>
+</tr>
+</tbody>
+</table>
+<p>1.3 MB matters on slow mobile connections. It does not matter on broadband or after the service worker has cached the binary. For lofigui's target audience (1--10 users, internal tools, dashboards), it is unlikely to be the deciding factor.</p>
+<p><strong>The stronger argument for TinyGo is startup time</strong>, not transfer size. A 2.5 MB WASM binary instantiates significantly faster than an 8 MB one, even when both were transferred compressed. WASM instantiation is proportional to uncompressed binary size because the runtime must parse and compile all the code.</p>
+<p><strong>Recommendation:</strong> Monitor <a href="https://github.com/tinygo-org/tinygo/issues/4420">tinygo-org/tinygo#4420</a>. If the TinyGo team implements the Fetch API transport, re-evaluate. Contributing the implementation upstream would be a valuable open-source contribution but is not on lofigui's critical path. In the meantime, standard Go with gzip compression is the pragmatic choice.</p>
+<h2 id="decision-standard-go-with-compression">Decision: standard Go with compression</h2>
+<p>Lofigui uses standard Go for all WASM builds. TinyGo examples have been removed from the repository. The rationale:</p>
+<ol>
+<li><strong>Service worker compatibility.</strong> TinyGo cannot compile <code>net/http</code> for browser WASM. Lofigui's direction requires <code>net/http</code> for shared server/WASM handlers.</li>
+<li><strong>Compression closes the size gap.</strong> Gzip brings standard Go WASM to ~2.1 MB on the wire, comparable to TinyGo uncompressed. Brotli reduces this further.</li>
+<li><strong>Template compatibility.</strong> Pongo2 (lofigui's template engine) uses reflection and will not work under TinyGo.</li>
+<li><strong>Maintenance burden.</strong> Dual TinyGo/standard Go builds doubled the build matrix and produced divergent WASM behaviour. Consolidating on one target eliminates this.</li>
+</ol>
+<p>If TinyGo gains browser <code>net/http</code> support in the future, the decision can be revisited. The service worker architecture does not preclude TinyGo --- it just requires <code>net/http</code> to work.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://tinygo.org/">TinyGo</a> --- the alternative Go compiler</li>
+<li><a href="https://github.com/tinygo-org/tinygo/issues/4420">TinyGo net/http browser issue</a> --- the blocking issue</li>
+<li><a href="https://github.com/a-h/templ">templ</a> --- code-gen template engine that works with TinyGo</li>
+<li><a href="https://dev.bitolog.com/minimizing-go-webassembly-binary-size/">Minimizing Go WASM binary size</a></li>
+<li><a href="research-wasm-service-workers.html">WASM Service Workers research</a> --- the service worker approach that requires <code>net/http</code></li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -265,6 +265,8 @@ tasks:
       - task-plus md2html --file docs/research-bugs.md --dst docs
       - task-plus md2html --file docs/research-python.md --dst docs
       - task-plus md2html --file docs/research-wasm-service-workers.md --dst docs
+      - task-plus md2html --file docs/research-wasm-external-apis.md --dst docs
+      - task-plus md2html --file docs/research-wasm-tinygo.md --dst docs
       - task-plus md2html --file docs/recipes.md --dst docs
       - task-plus md2html --file docs/examples.md --dst docs
       - task-plus md2html --file docs/index.md --dst docs

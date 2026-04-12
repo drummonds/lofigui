@@ -1,6 +1,6 @@
 # Research: WASM Service Workers
 
-Go and TinyGo compiled to WebAssembly, running inside service workers as statically hosted web servers. Focus on routing, HTMX integration, and what this means for lofigui.
+Go compiled to WebAssembly, running inside service workers as statically hosted web servers. Focus on routing, HTMX integration, and what this means for lofigui.
 
 ## The idea
 
@@ -109,53 +109,21 @@ cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
 
 The `passthrough` callback is important: requests for external resources (CDN CSS, CDN JS) should not be routed to the Go WASM binary.
 
-## Go vs TinyGo for WASM
+## Binary size and compression
 
-### Binary size
+For a service worker, binary size directly affects cold-start time. Standard Go WASM binaries compress extremely well, and browsers transparently decompress before passing bytes to `WebAssembly.instantiateStreaming()`.
 
-This is the critical differentiator:
+| Method | Raw size (typical lofigui) | Transfer size | Ratio |
+|--------|---------------------------|---------------|-------|
+| Uncompressed | 7.8 MB | 7.8 MB | 100% |
+| gzip -9 | 7.8 MB | 2.1 MB | 27% |
+| brotli -11 | 7.8 MB | ~1.7 MB (est.) | ~22% |
 
-| Scenario | Standard Go | TinyGo | Reduction |
-|----------|-------------|--------|-----------|
-| Minimal hello | ~2 MB | ~86 KB | 95% |
-| HTTP server app | ~8--10 MB | ~2--3 MB | 70% |
-| Gzipped (std Go) | ~500--660 KB | --- | 75% of raw |
-| Brotli (std Go) | ~496 KB | --- | 80% of raw |
+Most static hosts apply gzip automatically. Pre-compressing gives control over level and enables brotli where supported.
 
-**Size reduction for standard Go:**
-- `-ldflags="-s -w"` strips debug info
-- `wasm-opt -Oz` (Binaryen) aggressively optimises
-- Brotli or gzip compression (most static hosts support this)
-- Minimise stdlib imports
+**Build flags** provide modest additional savings: `-ldflags="-s"` (strips WASM name section, ~186 KB) and `-trimpath` (shortens paths, ~10 KB). `-ldflags="-w"` has zero effect on WASM (no DWARF sections).
 
-For a service worker, binary size directly affects cold-start time. A 2 MB binary (gzipped ~500 KB) takes 1--3 seconds on a decent connection. A 10 MB binary is noticeably slow. Caching the binary in the service worker cache mitigates repeat visits.
-
-### TinyGo limitations that matter
-
-| Feature | Standard Go | TinyGo |
-|---------|-------------|--------|
-| `net/http` in browser | Works (maps to Fetch API internally) | **Panics** at runtime ([#4420](https://github.com/tinygo-org/tinygo/issues/4420)) |
-| `html/template` | Works | **Cannot import** (reflection limits) |
-| `text/template` | Works | **Cannot import** (reflection limits) |
-| `pongo2` | Works (uses reflection) | Likely broken (reflection) |
-| `templ` (code-gen) | Works | **Works** (no reflection) |
-| Full goroutine scheduler | Yes (cooperative on single thread) | Simpler scheduler, edge cases |
-| `encoding/json` | Works | Partial (missing `sync.WaitGroup.Go()`) |
-
-**The net/http problem is decisive for service workers.** TinyGo's `net/http` does not work in browser WASM --- the Fetch API bridge is not implemented. Since `go-wasm-http-server` depends on `net/http` types (`http.Request`, `http.ResponseWriter`), TinyGo cannot be used for service worker patterns today.
-
-For lofigui's current WASM approach (direct `syscall/js` function exports, no service worker), TinyGo works because it never touches `net/http`. But for service worker routing, standard Go is the only option.
-
-### Template engines in WASM
-
-| Engine | Standard Go WASM | TinyGo WASM | Approach |
-|--------|-----------------|-------------|----------|
-| `html/template` | Works | Broken | Reflection-based |
-| `text/template` | Works | Broken | Reflection-based |
-| pongo2 | Works (unconfirmed but likely, uses reflect) | Likely broken | Reflection-based |
-| [templ](https://github.com/a-h/templ) | Works | Works | Code generation, no reflection |
-
-`templ` is the recommended template engine for WASM if TinyGo support matters. For standard Go WASM, pongo2 and `html/template` should both work.
+For a comparison with TinyGo's smaller binaries and why standard Go with compression was chosen instead, see [WASM TinyGo research](research-wasm-tinygo.html).
 
 ## HTMX with WASM service workers
 
@@ -232,12 +200,12 @@ wasmhttp.Serve(nil)
 
 | | Current (direct JS) | Service worker |
 |---|---|---|
-| Binary size | ~2 MB (Go) | ~8--10 MB (includes net/http) |
+| Binary size (raw) | ~2 MB | ~8 MB (includes net/http) |
+| Binary size (gzipped) | ~500 KB | ~2.1 MB |
 | Cold start | Fast (WASM loaded directly) | Slower (service worker + WASM init) |
 | Code sharing | Separate `main_wasm.go` per example | Same handlers, different entry point |
 | Routing | JavaScript state + exported functions | Standard `net/http` routing |
 | HTMX | Not applicable (no HTTP in browser) | Full HTMX support |
-| TinyGo | Works | Does not work (`net/http` broken) |
 | Complexity | Lower (no service worker lifecycle) | Higher (service worker registration, caching, lifecycle) |
 | Offline | Works once WASM loaded | Works once service worker cached |
 
@@ -272,7 +240,7 @@ wasmhttp.Serve(nil)
 
 ## Concurrency in browser WASM
 
-Both Go and TinyGo WASM run on a single thread. Goroutines are cooperatively scheduled:
+Go WASM runs on a single thread. Goroutines are cooperatively scheduled:
 
 - `time.Sleep()` suspends the Go runtime and returns control to the browser event loop (essential for UI responsiveness --- this is what lofigui's `Yield()` does)
 - `runtime.Gosched()` yields between Go goroutines but does NOT return control to the browser
@@ -303,15 +271,11 @@ Routing, form handling, HTMX fragment endpoints, template rendering --- all shar
 
 ### TinyGo: out of scope
 
-TinyGo cannot be used for service worker WASM because `net/http` panics at runtime in browser WASM targets ([tinygo-org/tinygo#4420](https://github.com/tinygo-org/tinygo/issues/4420)). Additionally, `html/template`, `text/template`, and likely `pongo2` do not work under TinyGo due to reflection limitations.
-
-TinyGo produces dramatically smaller binaries (~86 KB vs ~2 MB for a minimal program, ~2--3 MB vs ~8--10 MB for an HTTP server app), and fixing the `net/http` browser bridge would be valuable. This could make a good focused research project --- contributing to TinyGo to implement the Fetch API mapping that standard Go already has. But until that work is done, TinyGo is not viable for the unified service worker approach.
-
-For the current lofigui WASM approach (direct `syscall/js` exports without service workers), TinyGo continues to work and produces much smaller binaries. This approach remains available for simple Level 1--2 examples where code sharing with the server is not needed.
+TinyGo cannot be used for the service worker approach because `net/http` panics at runtime in browser WASM. Standard Go with gzip compression closes the binary size gap sufficiently. See [WASM TinyGo research](research-wasm-tinygo.html) for the full analysis and a research proposal to make TinyGo viable in the future.
 
 ### Binary size and compression
 
-The uncompressed binary size for a lofigui WASM build including `net/http` is ~8 MB. This is dominated by fixed overhead:
+See [Binary size and compression](#binary-size-and-compression) above for transfer-size numbers. The uncompressed binary (~8 MB) is dominated by fixed overhead:
 
 | Component | Size contribution |
 |-----------|------------------|
@@ -319,30 +283,6 @@ The uncompressed binary size for a lofigui WASM build including `net/http` is ~8
 | `net/http` + `crypto/tls` | +1.8 MB (TLS precomputed tables) |
 | pongo2 + blackfriday | +3.9 MB (template + markdown engines) |
 | Application code | negligible |
-
-**Build flags** provide modest savings:
-- `-ldflags="-s"` strips the WASM `name` section: saves ~186 KB (2.2%)
-- `-trimpath` shortens embedded path strings: saves ~10 KB
-- `-ldflags="-w"` has **zero effect** on WASM (no DWARF sections emitted)
-- `-gcflags=-B` (disable bounds checking) has no measurable size benefit
-- Total from flags: ~196 KB (~2.3% reduction)
-
-**Compression** is where the real wins are:
-
-| Method | Size (from 7.8 MB) | Ratio | Tooling |
-|--------|-------------------|-------|---------|
-| gzip -9 | 2.1 MB | 27% | `compress/gzip` (stdlib) |
-| brotli -11 | ~1.7 MB (est.) | ~22% | `github.com/andybalholm/brotli` (pure Go) |
-
-Browsers transparently decompress `Content-Encoding: gzip` before passing bytes to `WebAssembly.instantiateStreaming()`. This means the user downloads 2.1 MB, not 8 MB.
-
-**Build pipeline goal**: a Go-native compression step in the Taskfile:
-
-1. `GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .`
-2. Compress with a small Go tool using `compress/gzip` (stdlib) or `andybalholm/brotli` (pure Go, no cgo)
-3. Deploy `main.wasm.gz` to static host
-
-Most static hosts (GitHub Pages, Netlify, Cloudflare Pages) apply on-the-fly gzip automatically, so pre-compression may be unnecessary for deployment. However, pre-compressing gives control over compression level and enables brotli where supported.
 
 **Build tag optimisation**: lofigui's `app.go`, `controller.go`, `favicon.go`, and `serve.go` currently have no build tags excluding them from `js/wasm` builds. Adding `//go:build !(js && wasm)` to server-only files would eliminate `net/http` and `crypto/tls` from non-service-worker WASM builds, dropping the binary from ~8 MB to ~4 MB (~1.2 MB gzipped). This optimisation is separate from the service worker migration and could be done first.
 
@@ -427,6 +367,5 @@ Each phase is independently useful. Phase 1 benefits all WASM builds immediately
 - [Go Wiki: WebAssembly](https://go.dev/wiki/WebAssembly) --- official Go WASM docs
 - [Go 1.24 WASM changes](https://go.dev/blog/wasmexport)
 - [Go 1.26 release notes](https://go.dev/doc/go1.26)
-- [TinyGo net/http browser issue](https://github.com/tinygo-org/tinygo/issues/4420)
-- [templ](https://github.com/a-h/templ) --- code-gen template engine (works with TinyGo)
+- [WASM TinyGo research](research-wasm-tinygo.html) --- TinyGo analysis, blockers, and research proposal
 - [Minimizing Go WASM binary size](https://dev.bitolog.com/minimizing-go-webassembly-binary-size/)
