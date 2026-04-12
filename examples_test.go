@@ -269,6 +269,25 @@ func testGoExampleWASMBuild(t *testing.T) {
 	}
 }
 
+// copyDir copies a directory tree from src to dst.
+func copyDir(src, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(src, path)
+		target := filepath.Join(dst, rel)
+		if info.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, info.Mode())
+	})
+}
+
 func testGoExampleCompilationTime(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping compilation time test in short mode")
