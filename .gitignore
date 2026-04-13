@@ -142,3 +142,5 @@ examples/11_water_tank_storage/go/data/
 .claude/settings.json
 .vscode/tasks.json
 .task
+
+.tp-release-comment
