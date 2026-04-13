@@ -4,13 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
-
-	"github.com/flosch/pongo2/v6"
 )
 
 // ErrCancelled is returned by [App.ListenAndServe] when the server shuts down
@@ -19,34 +18,33 @@ import (
 var ErrCancelled = errors.New("lofigui: cancelled by user")
 
 // defaultTemplate is the built-in template used when no controller is set.
-// defaultTemplate is the built-in template used when no controller is set.
 const defaultTemplate = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ version }}</title>
+  <title>{{.version}}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">{{ version }}</span>
+      <span class="navbar-item has-text-weight-bold">{{.version}}</span>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        {% if polling == "Running" %}
+        {{if eq .polling "Running"}}
         <span class="tag is-warning">Running</span>
         <a href="/cancel" class="tag is-danger is-light ml-1">Cancel</a>
-        {% else %}
+        {{else}}
         <span class="tag is-success">Done</span>
-        {% endif %}
+        {{end}}
       </div>
     </div>
   </nav>
   <section class="section">
     <div class="container content">
-      {{ results | safe }}
+      {{.results}}
     </div>
   </section>
 </body>
@@ -543,24 +541,24 @@ func (app *App) ControllerName() string {
 //   - Controller-level state (buffer content)
 //   - Extra context passed by the caller
 //
-// Returns a pongo2.Context containing:
+// Returns a TemplateContext containing:
 //   - request: The HTTP request object
 //   - version: Application version string
 //   - controller_name: Name of the active controller
-//   - results: Buffer content from Print/Markdown calls
+//   - results: Buffer content from Print/Markdown calls (as template.HTML)
 //   - polling: "Running" or "Stopped" (app-level singleton state)
 //   - poll_count: Number of refresh cycles (app-level)
-//   - refresh: Always empty string (refresh now uses HTTP header, kept for template compat)
+//   - refresh: Always empty template.HTML (refresh now uses HTTP header, kept for template compat)
 //   - Any additional keys from extraContext
 //
 // Example:
 //
 //	func (app *App) HandleCustomDisplay(w http.ResponseWriter, r *http.Request) {
-//	    extra := pongo2.Context{"title": "My Page"}
+//	    extra := lofigui.TemplateContext{"title": "My Page"}
 //	    data := app.StateDict(r, extra)
 //	    // Use data for template rendering
 //	}
-func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.Context {
+func (app *App) StateDict(r *http.Request, extraContext TemplateContext) TemplateContext {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
@@ -579,17 +577,17 @@ func (app *App) StateDict(r *http.Request, extraContext pongo2.Context) pongo2.C
 	}
 
 	// Build context with app-level state (singleton active model)
-	ctx := pongo2.Context{
+	ctx := TemplateContext{
 		"request":         r,
 		"version":         app.Version,
 		"controller_name": controllerName,
-		"results":         buffer,
+		"results":         template.HTML(buffer),
 	}
 
 	// Add polling state from app (singleton active model concept)
 	// Refresh is now handled via HTTP Refresh header (see WriteRefreshHeader),
 	// so the template variable is always empty for backward compatibility.
-	ctx["refresh"] = ""
+	ctx["refresh"] = template.HTML("")
 	if app.polling {
 		ctx["polling"] = "Running"
 		app.PollCount++

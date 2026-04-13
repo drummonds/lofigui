@@ -1,6 +1,7 @@
 package lofigui
 
 import (
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,8 +17,8 @@ func TestNewController(t *testing.T) {
 	templatePath := filepath.Join(tmpDir, "test.html")
 	templateContent := `<!DOCTYPE html>
 <html>
-<head>{{refresh|safe}}</head>
-<body>{{results|safe}}</body>
+<head>{{.refresh}}</head>
+<body>{{.results}}</body>
 </html>`
 
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
@@ -70,7 +71,7 @@ func TestNewController(t *testing.T) {
 
 	t.Run("TemplateString", func(t *testing.T) {
 		ctrl, err := NewController(ControllerConfig{
-			TemplateString: `<html><body>{{results|safe}}</body></html>`,
+			TemplateString: `<html><body>{{.results}}</body></html>`,
 		})
 		if err != nil {
 			t.Fatalf("NewController with TemplateString failed: %v", err)
@@ -85,7 +86,7 @@ func TestNewController(t *testing.T) {
 
 	t.Run("TemplateStringWithName", func(t *testing.T) {
 		ctrl, err := NewController(ControllerConfig{
-			TemplateString: `<html><body>{{results|safe}}</body></html>`,
+			TemplateString: `<html><body>{{.results}}</body></html>`,
 			Name:           "Embedded Controller",
 		})
 		if err != nil {
@@ -112,7 +113,7 @@ func TestNewController(t *testing.T) {
 
 	t.Run("InvalidTemplateString", func(t *testing.T) {
 		_, err := NewController(ControllerConfig{
-			TemplateString: `{% invalid tag %}`,
+			TemplateString: `{{end}}`,
 		})
 		if err == nil {
 			t.Fatal("Expected error for invalid template string")
@@ -122,7 +123,7 @@ func TestNewController(t *testing.T) {
 
 // TestNewControllerFromString tests the string convenience constructor
 func TestNewControllerFromString(t *testing.T) {
-	ctrl, err := NewControllerFromString(`<html><body>{{results|safe}}</body></html>`)
+	ctrl, err := NewControllerFromString(`<html><body>{{.results}}</body></html>`)
 	if err != nil {
 		t.Fatalf("NewControllerFromString failed: %v", err)
 	}
@@ -135,7 +136,7 @@ func TestNewControllerFromString(t *testing.T) {
 func TestNewControllerFromDir(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "test.html")
-	templateContent := `<html><body>{{results|safe}}</body></html>`
+	templateContent := `<html><body>{{.results}}</body></html>`
 
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
 		t.Fatalf("Failed to create test template: %v", err)
@@ -177,7 +178,7 @@ func TestStateDict(t *testing.T) {
 		t.Error("Expected request in state dict")
 	}
 
-	results := state["results"].(string)
+	results := string(state["results"].(template.HTML))
 	if !strings.Contains(results, "Test content") {
 		t.Error("Expected results to contain test content")
 	}
@@ -195,7 +196,7 @@ func TestStateDict(t *testing.T) {
 
 // TestHandleDisplayFromString tests display rendering with a string-based template
 func TestHandleDisplayFromString(t *testing.T) {
-	ctrl, err := NewControllerFromString(`<html><body>{{results|safe}}</body></html>`)
+	ctrl, err := NewControllerFromString(`<html><body>{{.results}}</body></html>`)
 	if err != nil {
 		t.Fatalf("NewControllerFromString failed: %v", err)
 	}
@@ -222,7 +223,7 @@ func TestHandleDisplayFromString(t *testing.T) {
 func TestHandleDisplay(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "test.html")
-	templateContent := `<html><body>{{results|safe}}</body></html>`
+	templateContent := `<html><body>{{.results}}</body></html>`
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +254,7 @@ func TestHandleDisplay(t *testing.T) {
 func TestHandleDisplayWithExtraContext(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "test.html")
-	templateContent := `<html><body>{{title}} - {{results|safe}}</body></html>`
+	templateContent := `<html><body>{{.title}} - {{.results}}</body></html>`
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -284,7 +285,7 @@ func TestHandleDisplayWithExtraContext(t *testing.T) {
 func TestServeHTTP(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "test.html")
-	templateContent := `<html><body>{{results|safe}}</body></html>`
+	templateContent := `<html><body>{{.results}}</body></html>`
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +316,7 @@ func TestServeHTTP(t *testing.T) {
 func TestCustomContext(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "test.html")
-	templateContent := `<html><body>{{results|safe}}</body></html>`
+	templateContent := `<html><body>{{.results}}</body></html>`
 	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
 		t.Fatal(err)
 	}

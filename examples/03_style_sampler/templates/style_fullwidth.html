@@ -1,8 +1,6 @@
-{% extends "base.html" %}
+{{define "title"}}Full Width{{end}}
 
-{% block title %}Full Width{% endblock %}
-
-{% block navbar %}
+{{define "navbar"}}
 <nav class="navbar is-success">
   <div class="navbar-brand">
     <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
@@ -17,9 +15,9 @@
     </div>
   </div>
 </nav>
-{% endblock %}
+{{end}}
 
-{% block content %}
+{{define "content"}}
 <section class="section">
   <div class="container">
     <h1 class="title">Full Width</h1>
@@ -29,8 +27,8 @@
     </div>
     <hr>
     <div class="content">
-      {{ results | safe }}
+      {{.results}}
     </div>
   </div>
 </section>
-{% endblock %}
+{{end}}

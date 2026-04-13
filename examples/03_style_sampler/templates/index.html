@@ -46,8 +46,8 @@
     <div class="container">
       <hr>
       <div class="content">
-        <h3>Technical: WASM + pongo2 templates</h3>
-        <p>This demo runs entirely in the browser. The pongo2 template engine is compiled into the WASM binary alongside the templates (embedded via <code>go:embed</code>). Clicking a style button calls <code>goRenderPage()</code> which renders the full page HTML using pongo2 — the same code path as the server-side version. Template inheritance (<code>{%raw%}{% extends "base.html" %}{%endraw%}</code>) works identically.</p>
+        <h3>Technical: WASM + Go templates</h3>
+        <p>This demo runs entirely in the browser. Go's <code>html/template</code> engine is compiled into the WASM binary alongside the templates (embedded via <code>go:embed</code>). Clicking a style button calls <code>goRenderPage()</code> which renders the full page HTML using Go templates — the same code path as the server-side version. Template inheritance (<code>{{block}}</code>/<code>{{define}}</code>) works identically.</p>
         <p>No server round-trip. No JavaScript framework. Same Go templates, same rendering engine, running client-side in WebAssembly.</p>
       </div>
     </div>

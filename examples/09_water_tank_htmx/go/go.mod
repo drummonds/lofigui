@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	codeberg.org/hum3/lofigui v0.17.0
-	github.com/flosch/pongo2/v6 v6.0.0
 	github.com/nlepage/go-wasm-http-server/v2 v2.2.1
 )
 

@@ -1,8 +1,6 @@
-{% extends "base.html" %}
+{{define "title"}}Three-Panel Controls{{end}}
 
-{% block title %}Three-Panel Controls{% endblock %}
-
-{% block navbar %}
+{{define "navbar"}}
 <nav class="navbar is-link">
   <div class="navbar-brand">
     <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
@@ -15,9 +13,9 @@
     </div>
   </div>
 </nav>
-{% endblock %}
+{{end}}
 
-{% block content %}
+{{define "content"}}
 <section class="section">
   <div class="container is-fluid">
     <div class="columns">
@@ -99,10 +97,10 @@
         </div>
         <hr>
         <div class="content">
-          {{ results | safe }}
+          {{.results}}
         </div>
       </div>
     </div>
   </div>
 </section>
-{% endblock %}
+{{end}}

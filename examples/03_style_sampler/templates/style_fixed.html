@@ -1,17 +1,15 @@
-{% extends "base.html" %}
+{{define "title"}}Fixed Navbar{{end}}
 
-{% block title %}Fixed Navbar{% endblock %}
-
-{% block head %}
+{{define "head"}}
 <style>
   /* Fixed navbar needs body padding so content isn't hidden behind it */
   body { padding-top: 3.25rem; }
 </style>
-{% endblock %}
+{{end}}
 
-{% block body_attrs %}class="has-navbar-fixed-top"{% endblock %}
+{{define "body_attrs"}}class="has-navbar-fixed-top"{{end}}
 
-{% block navbar %}
+{{define "navbar"}}
 <nav class="navbar is-danger is-fixed-top">
   <div class="navbar-brand">
     <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
@@ -31,9 +29,9 @@
     </div>
   </div>
 </nav>
-{% endblock %}
+{{end}}
 
-{% block content %}
+{{define "content"}}
 <section class="section">
   <div class="container">
     <h1 class="title">Fixed Navbar</h1>
@@ -43,7 +41,7 @@
     </div>
     <hr>
     <div class="content">
-      {{ results | safe }}
+      {{.results}}
     </div>
     <!-- Extra content to make scrolling visible -->
     <div class="content">
@@ -55,4 +53,4 @@
     </div>
   </div>
 </section>
-{% endblock %}
+{{end}}

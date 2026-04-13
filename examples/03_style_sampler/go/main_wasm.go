@@ -4,10 +4,10 @@ package main
 
 import (
 	"embed"
+	"html/template"
 	"syscall/js"
 
 	"codeberg.org/hum3/lofigui"
-	"github.com/flosch/pongo2/v6"
 )
 
 // templates/ is copied into go/ by build.sh before WASM compilation.
@@ -56,8 +56,8 @@ func goRenderPage(this js.Value, args []js.Value) any {
 
 	content := sampleOutput()
 
-	html, err := ctrl.GetTemplate().Execute(pongo2.Context{
-		"results":      content,
+	html, err := ctrl.RenderToString(lofigui.TemplateContext{
+		"results":      template.HTML(content),
 		"current_path": currentPath,
 	})
 	if err != nil {

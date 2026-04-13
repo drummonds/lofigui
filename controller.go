@@ -1,13 +1,26 @@
 package lofigui
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
-
-	"github.com/flosch/pongo2/v6"
 )
+
+// TemplateContext is the data passed to templates during rendering.
+// It replaces pongo2.Context as a simple map of string keys to values.
+type TemplateContext map[string]interface{}
+
+// Update merges all key-value pairs from other into this context.
+// Keys in other overwrite existing keys.
+func (ctx TemplateContext) Update(other TemplateContext) {
+	for k, v := range other {
+		ctx[k] = v
+	}
+}
 
 // Controller manages template rendering and buffer content for lofigui apps.
 //
@@ -32,9 +45,10 @@ import (
 //	    Name:         "My Custom Controller",
 //	})
 type Controller struct {
-	Name     string // Name of the controller
-	template *pongo2.Template
-	context  *Context
+	Name         string // Name of the controller
+	template     *template.Template
+	templateName string // which named template to execute
+	context      *Context
 }
 
 // ControllerConfig holds configuration for creating a Controller.
@@ -82,17 +96,20 @@ type ControllerConfig struct {
 //	    TemplateString: helloTemplate,
 //	})
 func NewController(config ControllerConfig) (*Controller, error) {
-	var tmpl *pongo2.Template
+	var tmpl *template.Template
+	var tplName string
 	var err error
 
 	switch {
 	case config.TemplateString != "":
-		tmpl, err = pongo2.FromString(config.TemplateString)
+		tplName = "inline"
+		tmpl, err = template.New(tplName).Parse(config.TemplateString)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse template string: %w", err)
 		}
 	case config.TemplatePath != "":
-		tmpl, err = pongo2.FromFile(config.TemplatePath)
+		tplName = filepath.Base(config.TemplatePath)
+		tmpl, err = parseWithBase(config.TemplatePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load template from %s: %w", config.TemplatePath, err)
 		}
@@ -109,15 +126,34 @@ func NewController(config ControllerConfig) (*Controller, error) {
 	}
 
 	return &Controller{
-		Name:     config.Name,
-		template: tmpl,
-		context:  config.Context,
+		Name:         config.Name,
+		template:     tmpl,
+		templateName: tplName,
+		context:      config.Context,
 	}, nil
+}
+
+// parseWithBase loads a template file and, if a base.html exists in the same
+// directory, parses both so that Go template inheritance ({{block}}/{{define}})
+// works. Returns the template set with the child template's base name as root.
+func parseWithBase(templatePath string) (*template.Template, error) {
+	tplName := filepath.Base(templatePath)
+	dir := filepath.Dir(templatePath)
+	basePath := filepath.Join(dir, "base.html")
+
+	if tplName != "base.html" {
+		if _, err := os.Stat(basePath); err == nil {
+			// Parse base first, then child overrides its blocks
+			return template.New("base.html").ParseFiles(basePath, templatePath)
+		}
+	}
+	return template.New(tplName).ParseFiles(templatePath)
 }
 
 // NewControllerFromDir creates a new Controller by loading a template from a directory.
 //
-// This is a convenience function that constructs the full template path.
+// If base.html exists in the directory alongside the requested template,
+// both are parsed together to support Go template inheritance ({{block}}/{{define}}).
 //
 // Example:
 //
@@ -146,9 +182,9 @@ func NewControllerFromString(templateString string) (*Controller, error) {
 
 // NewControllerFromFS creates a Controller from an fs.FS (e.g. embed.FS).
 //
-// This enables template inheritance ({% extends %}) to work with embedded
+// This enables template inheritance ({{block}}/{{define}}) to work with embedded
 // filesystems, including in WASM builds where there is no local filesystem.
-// The fsys is used to resolve all template references (extends, include).
+// If base.html exists in the directory, it is parsed alongside the named template.
 //
 // Example:
 //
@@ -161,16 +197,27 @@ func NewControllerFromFS(fsys fs.FS, dir string, templateName string) (*Controll
 	if err != nil {
 		return nil, fmt.Errorf("failed to open subdirectory %s: %w", dir, err)
 	}
-	loader := pongo2.NewFSLoader(subFS)
-	set := pongo2.NewSet("", loader)
-	tmpl, err := set.FromFile(templateName)
+
+	// Determine which files to parse: base.html + child (if base exists)
+	tplName := templateName
+	files := []string{templateName}
+
+	if templateName != "base.html" {
+		if _, err := fs.Stat(subFS, "base.html"); err == nil {
+			files = []string{"base.html", templateName}
+			tplName = "base.html"
+		}
+	}
+
+	tmpl, err := template.New(tplName).ParseFS(subFS, files...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load template %s from FS: %w", templateName, err)
 	}
 	return &Controller{
-		Name:     "Lofigui Controller",
-		template: tmpl,
-		context:  defaultContext,
+		Name:         "Lofigui Controller",
+		template:     tmpl,
+		templateName: tplName,
+		context:      defaultContext,
 	}, nil
 }
 
@@ -184,15 +231,15 @@ func NewControllerFromFS(fsys fs.FS, dir string, templateName string) (*Controll
 // Polling state and action management are now handled at the App level.
 // Use app.StateDict() for complete state including polling status.
 //
-// Returns a pongo2.Context containing:
+// Returns a TemplateContext containing:
 //   - request: The HTTP request object
-//   - results: Buffer content from Print/Markdown calls
+//   - results: Buffer content from Print/Markdown calls (as template.HTML)
 //
-// You can merge additional context by using pongo2.Context.Update().
-func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
-	ctx := pongo2.Context{
+// You can merge additional context by using TemplateContext.Update().
+func (ctrl *Controller) StateDict(r *http.Request) TemplateContext {
+	ctx := TemplateContext{
 		"request": r,
-		"results": ctrl.context.Buffer(),
+		"results": template.HTML(ctrl.context.Buffer()),
 	}
 
 	return ctx
@@ -219,10 +266,10 @@ func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context {
 //
 //	// With extra context
 //	http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
-//	    extra := pongo2.Context{"title": "My Page"}
+//	    extra := lofigui.TemplateContext{"title": "My Page"}
 //	    ctrl.HandleDisplay(w, r, extra)
 //	})
-func (ctrl *Controller) HandleDisplay(w http.ResponseWriter, r *http.Request, extraContext pongo2.Context) {
+func (ctrl *Controller) HandleDisplay(w http.ResponseWriter, r *http.Request, extraContext TemplateContext) {
 	data := ctrl.StateDict(r)
 
 	// Merge extra context if provided
@@ -231,7 +278,7 @@ func (ctrl *Controller) HandleDisplay(w http.ResponseWriter, r *http.Request, ex
 	}
 
 	// Render template
-	if err := ctrl.template.ExecuteWriter(data, w); err != nil {
+	if err := ctrl.template.ExecuteTemplate(w, ctrl.templateName, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -245,23 +292,34 @@ func (ctrl *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // RenderTemplate renders the controller's template with custom context.
 // This is useful for one-off custom rendering.
-func (ctrl *Controller) RenderTemplate(w http.ResponseWriter, context pongo2.Context) error {
-	return ctrl.template.ExecuteWriter(context, w)
+func (ctrl *Controller) RenderTemplate(w http.ResponseWriter, context TemplateContext) error {
+	return ctrl.template.ExecuteTemplate(w, ctrl.templateName, context)
 }
 
-// GetTemplate returns the underlying pongo2 template.
+// RenderToString renders the controller's template to a string.
+// This is useful for WASM builds where there is no http.ResponseWriter.
+func (ctrl *Controller) RenderToString(context TemplateContext) (string, error) {
+	var buf bytes.Buffer
+	if err := ctrl.template.ExecuteTemplate(&buf, ctrl.templateName, context); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+// GetTemplate returns the underlying html/template.Template.
 // This allows advanced users to work directly with the template if needed.
-func (ctrl *Controller) GetTemplate() *pongo2.Template {
+func (ctrl *Controller) GetTemplate() *template.Template {
 	return ctrl.template
 }
 
 // ReloadTemplate reloads the template from the original path.
 // This is useful during development when templates change.
 func (ctrl *Controller) ReloadTemplate(templatePath string) error {
-	tmpl, err := pongo2.FromFile(templatePath)
+	tmpl, err := parseWithBase(templatePath)
 	if err != nil {
 		return fmt.Errorf("failed to reload template: %w", err)
 	}
 	ctrl.template = tmpl
+	ctrl.templateName = filepath.Base(templatePath)
 	return nil
 }
