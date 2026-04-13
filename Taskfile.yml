@@ -292,6 +292,14 @@ tasks:
         done
       - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 
+  post:release:
+    desc: Commit docs assets rebuilt during pages deploy
+    cmds:
+      - git add docs/
+      - git diff --cached --quiet || git commit -m "Rebuild docs assets for $(git describe --tags --abbrev=0)"
+      - git push origin main
+      - git push github main
+
   docs:build-wasm:
     desc: Build Go WASM examples for docs/ folder (fast, used by tp pages)
     vars:
