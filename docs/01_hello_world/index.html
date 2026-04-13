@@ -151,6 +151,22 @@ func main() { lofigui.RunWASM(model) }
 <strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
 </div>
 <p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
+<h3 id="gzipped-wasm">Gzipped WASM</h3>
+<p>The demo page offers two buttons: <strong>Start</strong> loads the uncompressed <code>main.wasm</code> (~4.8 MB), while <strong>Start (gzipped)</strong> loads <code>main.wasm.gz</code> (~2.1 MB) and decompresses it in the browser. The <code>docs:build-wasm</code> task creates both files automatically:</p>
+<pre><code class="language-bash"># Build step (Taskfile.yml)
+find docs -name &quot;main.wasm&quot; -exec gzip -9 -k {} \;
+</code></pre>
+<p>The JavaScript uses the browser's built-in <code>DecompressionStream</code> to decompress on the fly, then feeds the result to <code>WebAssembly.instantiateStreaming</code>:</p>
+<pre><code class="language-js">const resp = await fetch('main.wasm.gz');
+const ds = new DecompressionStream('gzip');
+const decompressed = new Response(resp.body.pipeThrough(ds), {
+    headers: {'Content-Type': 'application/wasm'}
+});
+const result = await WebAssembly.instantiateStreaming(decompressed, go.importObject);
+</code></pre>
+<div class="annotation">
+<strong>Why not serve gzip transparently?</strong> Most production static hosts (GitHub Pages, Cloudflare Pages, Netlify) automatically compress responses with gzip or brotli. The explicit <code>.wasm.gz</code> approach is for hosts that don't, or for demonstrating the size difference in the UI. <code>DecompressionStream</code> is supported in all modern browsers.
+</div>
 <h3 id="server-vs-wasm-lifecycle">Server vs WASM lifecycle</h3>
 <p>The server app and WASM app run the same model, but their lifecycles differ:</p>
 <ul>
