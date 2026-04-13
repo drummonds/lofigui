@@ -2,6 +2,7 @@ package lofigui
 
 import (
 	"context"
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -330,7 +331,7 @@ func TestAppSetControllerIsIdempotent(t *testing.T) {
 func TestAppStateDictDoesNotDeadlock(t *testing.T) {
 	app := NewApp()
 	ctrl, err := NewController(ControllerConfig{
-		TemplateString: `<html>{{ results | safe }}</html>`,
+		TemplateString: `<html>{{.results}}</html>`,
 		Name:           "Test",
 	})
 	if err != nil {
@@ -369,7 +370,7 @@ func TestAppStateDictPollingState(t *testing.T) {
 	if data["polling"] != "Stopped" {
 		t.Errorf("Expected Stopped, got %v", data["polling"])
 	}
-	if data["refresh"] != "" {
+	if data["refresh"] != template.HTML("") {
 		t.Errorf("Expected empty refresh, got %v", data["refresh"])
 	}
 
@@ -379,7 +380,7 @@ func TestAppStateDictPollingState(t *testing.T) {
 	if data["polling"] != "Running" {
 		t.Errorf("Expected Running, got %v", data["polling"])
 	}
-	if data["refresh"] != "" {
+	if data["refresh"] != template.HTML("") {
 		t.Errorf("Expected empty refresh (now uses HTTP header), got %v", data["refresh"])
 	}
 }
@@ -395,7 +396,7 @@ func TestAppStateDictExtraContext(t *testing.T) {
 	}
 	app.SetController(ctrl)
 
-	extra := map[string]interface{}{"title": "My Page"}
+	extra := TemplateContext{"title": "My Page"}
 	data := app.StateDict(nil, extra)
 	if data["title"] != "My Page" {
 		t.Errorf("Expected title=My Page, got %v", data["title"])
@@ -406,7 +407,7 @@ func TestAppStateDictExtraContext(t *testing.T) {
 func TestAppHandleDisplayIncludesRefresh(t *testing.T) {
 	app := NewApp()
 	ctrl, err := NewController(ControllerConfig{
-		TemplateString: `{{ polling }}`,
+		TemplateString: `{{.polling}}`,
 		Name:           "Test",
 	})
 	if err != nil {
@@ -434,7 +435,7 @@ func TestAppHandleDisplayIncludesRefresh(t *testing.T) {
 func TestAppHandleDisplayStopped(t *testing.T) {
 	app := NewApp()
 	ctrl, err := NewController(ControllerConfig{
-		TemplateString: `{{ polling }}`,
+		TemplateString: `{{.polling}}`,
 		Name:           "Test",
 	})
 	if err != nil {

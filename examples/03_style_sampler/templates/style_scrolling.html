@@ -1,8 +1,6 @@
-{% extends "base.html" %}
+{{define "title"}}Scrolling Navbar{{end}}
 
-{% block title %}Scrolling Navbar{% endblock %}
-
-{% block navbar %}
+{{define "navbar"}}
 <nav class="navbar is-primary">
   <div class="navbar-brand">
     <a class="navbar-item has-text-weight-bold" href="/">Style Sampler</a>
@@ -22,9 +20,9 @@
     </div>
   </div>
 </nav>
-{% endblock %}
+{{end}}
 
-{% block content %}
+{{define "content"}}
 <section class="section">
   <div class="container">
     <h1 class="title">Scrolling Navbar</h1>
@@ -34,8 +32,8 @@
     </div>
     <hr>
     <div class="content">
-      {{ results | safe }}
+      {{.results}}
     </div>
   </div>
 </section>
-{% endblock %}
+{{end}}
