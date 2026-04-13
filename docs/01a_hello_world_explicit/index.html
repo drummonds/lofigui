@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>01a — Hello World Explicit - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">01a — Hello World Explicit</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+</style>
+<h1 id="01a--hello-world-explicit">01a — Hello World Explicit</h1>
+<p>Same model as <a href="../01_hello_world/index.html">example 01</a>, but with everything unbundled. Where 01 uses <code>app.Run()</code> (one call does everything), this example shows the explicit wiring: custom template, separate route handlers, and a service worker for the WASM build.</p>
+<div class="buttons">
+<a href="demo-sw.html" class="button is-primary">Launch Service Worker Demo</a>
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>
+</div>
+<hr>
+<h2 id="the-model--unchanged">The model — unchanged</h2>
+<p>The model is identical to example 01. It lives in <code>model.go</code> and is shared by both server and WASM builds:</p>
+<pre><code class="language-go">func model(app *lofigui.App) {
+    lofigui.Print(&quot;Hello world.&quot;)
+    for i := 0; i &lt; 5; i++ {
+        app.Sleep(1 * time.Second)
+        lofigui.Printf(&quot;Count %d&quot;, i)
+    }
+    lofigui.Print(&quot;Done.&quot;)
+}
+</code></pre>
+<hr>
+<h2 id="explicit-routes--setuproutes">Explicit routes — setupRoutes()</h2>
+<p>Instead of <code>app.Run()</code>, all routes are registered explicitly in <code>setupRoutes()</code>, which returns a standard <code>*http.ServeMux</code>:</p>
+<pre><code class="language-go">func setupRoutes(app *lofigui.App) *http.ServeMux {
+    mux := http.NewServeMux()
+
+    // GET / — display current state
+    mux.HandleFunc(&quot;GET /{$}&quot;, func(w http.ResponseWriter, r *http.Request) {
+        app.HandleDisplay(w, r)
+    })
+
+    // POST /start — reset buffer, start model, redirect to /
+    mux.HandleFunc(&quot;POST /start&quot;, func(w http.ResponseWriter, r *http.Request) {
+        app.HandleRoot(w, r, model, true)
+    })
+
+    // POST /cancel — cancel running action, redirect to /
+    mux.HandleFunc(&quot;POST /cancel&quot;, app.HandleCancel(&quot;/&quot;))
+
+    mux.HandleFunc(&quot;GET /favicon.ico&quot;, lofigui.ServeFavicon)
+    return mux
+}
+</code></pre>
+<div class="annotation">
+<strong>HandleRoot vs Handle</strong> — Example 01 uses <code>Handle()</code> which auto-starts the model on the first request and auto-shuts down the server when done. Here, <code>HandleRoot</code> starts the model explicitly on <code>POST /start</code>, and <code>HandleDisplay</code> renders the current state on <code>GET /</code>. The model is started by a form submit, not by the first page visit.
+</div>
+<div class="annotation">
+<strong>HandleCancel</strong> — In example 01, <code>Run()</code> registers this internally. Here it's explicit: <code>POST /cancel</code> cancels the running action and redirects to <code>/</code>.
+</div>
+<hr>
+<h2 id="custom-template">Custom template</h2>
+<p>The template is defined as a Go string constant in <code>routes.go</code> (so it works in both server and WASM builds). It uses Go's <code>html/template</code> syntax with the standard lofigui variables:</p>
+<pre><code class="language-html">&lt;nav class=&quot;navbar is-primary&quot;&gt;
+  &lt;div class=&quot;navbar-brand&quot;&gt;
+    &lt;span class=&quot;navbar-item has-text-weight-bold&quot;&gt;{{.version}}&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;navbar-end&quot;&gt;
+    {{if eq .polling &quot;Running&quot;}}
+      &lt;span class=&quot;tag is-warning&quot;&gt;Running&lt;/span&gt;
+      &lt;form action=&quot;/cancel&quot; method=&quot;post&quot;&gt;
+        &lt;button class=&quot;tag is-danger is-light&quot; type=&quot;submit&quot;&gt;Cancel&lt;/button&gt;
+      &lt;/form&gt;
+    {{else}}
+      &lt;span class=&quot;tag is-success&quot;&gt;Ready&lt;/span&gt;
+    {{end}}
+  &lt;/div&gt;
+&lt;/nav&gt;
+&lt;section class=&quot;section&quot;&gt;
+  &lt;div class=&quot;container content&quot;&gt;
+    {{.results}}
+    {{if ne .polling &quot;Running&quot;}}
+      &lt;form action=&quot;/start&quot; method=&quot;post&quot;&gt;
+        &lt;button class=&quot;button is-success&quot; type=&quot;submit&quot;&gt;Start&lt;/button&gt;
+      &lt;/form&gt;
+    {{end}}
+  &lt;/div&gt;
+&lt;/section&gt;
+</code></pre>
+<div class="annotation">
+<strong>Form-based actions</strong> — Start and Cancel are HTML forms with <code>method="post"</code>. No JavaScript needed. The template conditionally shows the Start button when idle and the Cancel button when running.
+</div>
+<div class="annotation">
+<strong>{{.polling}}</strong> — <code>"Running"</code> while the model is active, <code>"Stopped"</code> when idle. Combined with the HTTP <code>Refresh</code> header (set by <code>HandleDisplay</code>), the page auto-refreshes while running and stops when done.
+</div>
+<hr>
+<h2 id="server-vs-wasm-same-handlers-different-entry-points">Server vs WASM: same handlers, different entry points</h2>
+<p>The key insight: <code>setupRoutes()</code> is called by both builds. Only the entry point differs.</p>
+<h3 id="server-maingo">Server (main.go)</h3>
+<pre><code class="language-go">func main() {
+    app := lofigui.NewApp()
+    app.Version = &quot;Hello World Explicit v1.0&quot;
+    app.SetDisplayURL(&quot;/&quot;)
+
+    ctrl, _ := lofigui.NewController(lofigui.ControllerConfig{
+        TemplateString: helloTemplate,
+        Name:           &quot;Hello World Explicit&quot;,
+    })
+    app.SetController(ctrl)
+
+    mux := setupRoutes(app)
+    log.Fatal(http.ListenAndServe(&quot;:1341&quot;, mux))
+}
+</code></pre>
+<h3 id="wasm-main-wasmgo">WASM (main_wasm.go)</h3>
+<pre><code class="language-go">func main() {
+    app := lofigui.NewApp()
+    app.Version = &quot;Hello World Explicit v1.0&quot;
+    app.SetDisplayURL(&quot;/&quot;)
+
+    ctrl, _ := lofigui.NewController(lofigui.ControllerConfig{
+        TemplateString: helloTemplate,
+        Name:           &quot;Hello World Explicit&quot;,
+    })
+    app.SetController(ctrl)
+
+    mux := setupRoutes(app)
+    wasmhttp.Serve(mux)  // ← only this line differs
+}
+</code></pre>
+<div class="annotation">
+<strong>wasmhttp.Serve(mux)</strong> replaces <code>http.ListenAndServe()</code>. The <a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a> library registers a service worker that intercepts browser fetch events and routes them through the Go <code>*http.ServeMux</code> running inside WASM. The browser makes real HTTP requests; the service worker answers them from Go.
+</div>
+<hr>
+<h2 id="javascript-direct-exports-vs-service-worker">JavaScript: direct exports vs service worker</h2>
+<p>This is the fundamental difference between example 01 and 01a's WASM builds:</p>
+<h3 id="example-01--direct-syscalljs-exports-appjs">Example 01 — direct <code>syscall/js</code> exports (app.js)</h3>
+<pre><code class="language-js">// Go exports functions to JavaScript via RunWASM():
+//   goStart(), goRender(), goCancel(), goIsRunning()
+
+// JavaScript actively polls Go for updates:
+renderInterval = setInterval(function() {
+    outputDiv.innerHTML = goRender();    // pull HTML from Go
+    updateStatus();                       // check goIsRunning()
+}, 500);
+
+// Button clicks call Go directly:
+startBtn.addEventListener('click', function() { goStart(); });
+cancelBtn.addEventListener('click', function() { goCancel(); });
+</code></pre>
+<div class="annotation">
+<strong>01 pattern</strong>: JavaScript is the driver. It calls Go functions on a timer, manages button state, and renders HTML from Go's buffer. The page never makes HTTP requests — everything happens through direct function calls between JS and WASM.
+</div>
+<h3 id="example-01a--service-worker-swjs--demo-swhtml">Example 01a — service worker (sw.js + demo-sw.html)</h3>
+<pre><code class="language-js">// sw.js — the entire WASM integration:
+importScripts('wasm_exec.js');
+importScripts('https://cdn.jsdelivr.net/.../sw.js');
+
+registerWasmHTTPListener('main.wasm', {
+    base: scope,
+    passthrough: function(request) {
+        // External CDN resources pass through to network
+        if (url.hostname !== self.location.hostname) return true;
+        if (url.pathname.endsWith('demo-sw.html')) return true;
+        return false;
+    }
+});
+</code></pre>
+<div class="annotation">
+<strong>01a pattern</strong>: The service worker is the driver. It loads the Go WASM binary and intercepts all fetch events. When the browser requests <code>/</code>, the service worker routes it to Go's <code>HandleDisplay</code>. When a form POSTs to <code>/start</code>, the service worker routes it to Go's <code>HandleRoot</code>. No custom JavaScript, no polling logic, no button state management — just standard HTML forms and HTTP semantics.
+</div>
+<h3 id="when-to-use-which">When to use which</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Best for</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Direct exports</strong> (01)</td>
+<td>Simple apps, single-page output, no routing</td>
+<td>Requires custom JS per app; JS manages all state</td>
+</tr>
+<tr>
+<td><strong>Service worker</strong> (01a)</td>
+<td>Multi-route apps, forms, HTMX</td>
+<td>Requires service worker support; slightly larger binary</td>
+</tr>
+</tbody>
+</table>
+<p>The service worker approach scales to complex apps (examples 09-12) because adding a new route is just adding a handler in <code>setupRoutes()</code> — no JS changes needed. The direct export approach stays simpler for single-page demos where you just need <code>goStart()</code> and <code>goRender()</code>.</p>
+<hr>
+<h2 id="running">Running</h2>
+<pre><code class="language-bash"># Server mode
+task go-example:01a
+# Opens http://localhost:1341 — click Start, watch output, click Cancel
+
+# WASM demo (via docs)
+task docs:build-wasm
+tp pages
+# Navigate to 01a_hello_world_explicit/demo-sw.html
+</code></pre>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>
