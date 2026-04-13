@@ -177,15 +177,7 @@
 <p><em>lofigui examples: 06 (Notes CRUD), 07 (Water Tank), 08 (Water Tank Multi-Page).</em></p>
 <h3 id="3-refreshing-whole-page-polling">3. Refreshing whole page (polling)</h3>
 <p>The server renders the complete page. The browser periodically reloads it via <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code>. Good for dashboards and status pages where the user watches but doesn't interact. The entire page is replaced on each refresh cycle.</p>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<p><strong>Limitation</strong>: you cannot interact with the page while it refreshes. Clicking a button, filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring user input during live updates.</p>
-=======
 <p><strong>Limitation</strong>: you cannot interact with the page while it refreshes. Clicking a button is ok but filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring complex user input during live updates.</p>
->>>>>>> task/WTteletype
-=======
-<p><strong>Limitation</strong>: you cannot interact with the page while it refreshes. Clicking a button is ok but filling in a form field, or selecting a dropdown — all are interrupted by the next refresh. This is fine for display-only views but unusable for anything requiring complex user input during live updates.</p>
->>>>>>> task/WTteletype
 <p><em>lofigui examples: polling is the mechanism used by Level 1 (Teletype) and Level 2 (Teletype+ web). Level 3 exists as an architectural description — it is the point where polling becomes a limitation rather than a feature.</em></p>
 <h3 id="4-htmx-partial-updates-dynamic-pages">4. HTMX partial updates (dynamic pages)</h3>
 <p>Only parts of the page update — the rest stays stable. Forms, text inputs, and buttons remain functional while live data refreshes around them. HTMX makes this possible with <code>hx-get</code> and <code>hx-trigger</code> attributes — the server still renders HTML, but the browser swaps only the targeted <code>&lt;div&gt;</code>.</p>
