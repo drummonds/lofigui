@@ -120,4 +120,3 @@ func pieChartSVG(slices []pieSlice, title string) string {
 	sb.WriteString("</svg>")
 	return sb.String()
 }
-
