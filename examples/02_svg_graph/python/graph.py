@@ -32,7 +32,7 @@ class Controller:
 
 controller = Controller()
 
-templates = Jinja2Templates(directory="../templates")
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/favicon.ico")

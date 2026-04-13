@@ -20,7 +20,7 @@ import uvicorn
 controller = lg.Controller()
 
 # Create lofigui state manager and FastAPI app separately
-lg_app = lg.App(template_dir="../templates", controller=controller)
+lg_app = lg.App(template_dir="templates", controller=controller)
 app = FastAPI()
 
 
