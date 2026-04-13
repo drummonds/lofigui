@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.33] - 2026-04-13
+
+ - Add post:release task to commit rebuilt docs assets
+
 ## [0.17.32] - 2026-04-13
 
  - Split Python Jinja2 templates from Go html/template templates
