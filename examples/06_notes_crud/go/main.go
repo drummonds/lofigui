@@ -8,6 +8,8 @@ import (
 	"strconv"
 
 	"codeberg.org/hum3/lofigui"
+
+	"html/template"
 )
 
 // Simple in-memory notes database
@@ -187,7 +189,7 @@ func main() {
 		`)
 
 		context := ctrl.StateDict(r)
-		context["content"] = lofigui.Buffer()
+		context["content"] = template.HTML(lofigui.Buffer())
 		ctrl.RenderTemplate(w, context)
 	})
 

@@ -1,16 +1,14 @@
-{% extends "base.html" %}
+{{define "title"}}Home{{end}}
 
-{% block title %}Home{% endblock %}
-
-{% block navbar %}
+{{define "navbar"}}
 <nav class="navbar is-dark">
   <div class="navbar-brand">
     <span class="navbar-item has-text-weight-bold">03 — Style Sampler</span>
   </div>
 </nav>
-{% endblock %}
+{{end}}
 
-{% block content %}
+{{define "content"}}
 <section class="section">
   <div class="container">
     <h1 class="title">Layout Style Sampler</h1>
@@ -83,7 +81,7 @@
     <div class="content">
       <h2>What this example demonstrates</h2>
       <ul>
-        <li><strong>Template inheritance</strong> — pongo2 <code>{%raw%}{% extends "base.html" %}{%endraw%}</code> with blocks</li>
+        <li><strong>Template inheritance</strong> — Go <code>{{"{{"}}block "name" .{{"}}"}}</code> with define overrides</li>
         <li><strong>Navbar styles</strong> — scrolling vs fixed position</li>
         <li><strong>Layout patterns</strong> — full-width, two-column, three-panel</li>
         <li><strong>Teletype output</strong> — same <code>lofigui.Print()</code> content in each layout</li>
@@ -92,4 +90,4 @@
     </div>
   </div>
 </section>
-{% endblock %}
+{{end}}

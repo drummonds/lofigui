@@ -4,11 +4,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
 	"codeberg.org/hum3/lofigui"
-	"github.com/flosch/pongo2/v6"
 )
 
 const htmxLayout = `<!DOCTYPE html>
@@ -16,33 +16,33 @@ const htmxLayout = `<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ controller_name }}</title>
+  <title>{{.controller_name}}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation">
     <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">{{ controller_name }}</span>
+      <span class="navbar-item has-text-weight-bold">{{.controller_name}}</span>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <span class="tag {% if connected %}is-success{% else %}is-danger{% endif %}">
-          {% if connected %}Connected{% else %}Disconnected{% endif %}
+        <span class="tag {{if .connected}}is-success{{else}}is-danger{{end}}">
+          {{if .connected}}Connected{{else}}Disconnected{{end}}
         </span>
       </div>
     </div>
   </nav>
   <section class="section">
     <div class="container">
-      <div id="results" hx-get="{{ fragment_url }}" hx-trigger="every 1s" hx-swap="innerHTML">
-        {{ results | safe }}
+      <div id="results" hx-get="{{.fragment_url}}" hx-trigger="every 1s" hx-swap="innerHTML">
+        {{.results}}
       </div>
     </div>
   </section>
   <footer class="footer">
     <div class="content has-text-centered">
-      <p>{{ version }}</p>
+      <p>{{.version}}</p>
     </div>
   </footer>
 </body>
@@ -147,10 +147,10 @@ func main() {
 			return
 		}
 		content := renderAndCapture(renderMain)
-		ctrl.RenderTemplate(w, pongo2.Context{
+		ctrl.RenderTemplate(w, lofigui.TemplateContext{
 			"controller_name": ctrl.Name,
 			"version":         version,
-			"results":         content,
+			"results":         template.HTML(content),
 			"fragment_url":    "/fragment",
 			"connected":       isConnected(),
 		})

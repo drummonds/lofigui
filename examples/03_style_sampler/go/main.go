@@ -4,10 +4,10 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"codeberg.org/hum3/lofigui"
-	"github.com/flosch/pongo2/v6"
 )
 
 var controllers map[string]*lofigui.Controller
@@ -15,8 +15,8 @@ var controllers map[string]*lofigui.Controller
 func handleStyle(w http.ResponseWriter, r *http.Request, templateName string) {
 	ctrl := controllers[templateName]
 	content := sampleOutput()
-	ctrl.RenderTemplate(w, pongo2.Context{
-		"results":      content,
+	ctrl.RenderTemplate(w, lofigui.TemplateContext{
+		"results":      template.HTML(content),
 		"current_path": r.URL.Path,
 	})
 }
