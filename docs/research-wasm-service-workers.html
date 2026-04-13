@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: WASM Service Workers - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: WASM Service Workers</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-wasm-service-workers">Research: WASM Service Workers</h1>
+<p>Go compiled to WebAssembly, running inside service workers as statically hosted web servers. Focus on routing, HTMX integration, and what this means for lofigui.</p>
+<h2 id="the-idea">The idea</h2>
+<p>A service worker intercepts every <code>fetch</code> event in its scope. If a Go program compiled to WASM handles those requests using standard <code>net/http</code>, you have a web server running entirely in the browser. The site can be hosted on GitHub Pages, statichost.eu, or any static file host --- no server process needed.</p>
+<pre><code>Browser fetch(&quot;/api/data&quot;)
+  -&gt; Service worker intercepts
+  -&gt; Routes to Go WASM (net/http handlers)
+  -&gt; Returns HTML response
+  -&gt; Browser renders it
+</code></pre>
+<p>The key library enabling this is <a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a> (v2, Apache 2.0, ~400 stars). It bridges Go's <code>net/http</code> to service worker fetch events.</p>
+<h2 id="go-wasm-two-targets-one-relevant">Go WASM: two targets, one relevant</h2>
+<p>Go has two WASM compilation targets:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Since</th>
+<th>Purpose</th>
+<th>Browser?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GOOS=js GOARCH=wasm</code></td>
+<td>Go 1.11</td>
+<td>Browser via <code>syscall/js</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GOOS=wasip1 GOARCH=wasm</code></td>
+<td>Go 1.21</td>
+<td>Standalone runtimes (wasmtime, wazero)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Service workers need the <code>js/wasm</code> target. The <code>wasip1</code> target is for server-side WASM runtimes and edge computing (Cloudflare Workers, etc.).</p>
+<h3 id="recent-go-wasm-changes">Recent Go WASM changes</h3>
+<p><strong>Go 1.22 (Feb 2024):</strong> Enhanced <code>ServeMux</code> with method matching and path parameters --- <code>mux.HandleFunc(&quot;GET /items/{id}&quot;, handler)</code>. This makes the standard library router viable for most routing needs inside WASM, eliminating the need for third-party routers.</p>
+<p><strong>Go 1.24 (Feb 2025):</strong> Added <code>go:wasmexport</code> directive and WASI reactor build mode. These are <code>wasip1</code> features (not browser-relevant) but signal Go's investment in WASM as a first-class target.</p>
+<p><strong>Go 1.26 (Feb 2026):</strong> Runtime manages heap memory in smaller increments, significantly reducing memory usage for apps with heaps under ~16 MiB. Unconditionally uses Wasm 2.0 instructions (sign extension, non-trapping float-to-int). Good news for service worker memory footprint.</p>
+<p><strong>WASI P3 (proposed, mid 2026):</strong> Composable concurrency for WASI --- goroutines that can block on I/O without blocking others. Server-side focused, not directly relevant to browser service workers, but shows the direction of Go+WASM.</p>
+<h2 id="how-it-works-go-side">How it works: Go side</h2>
+<p>Standard <code>net/http</code> handlers, with <code>wasmhttp.Serve()</code> replacing <code>http.ListenAndServe()</code>:</p>
+<pre><code class="language-go">//go:build js &amp;&amp; wasm
+
+package main
+
+import (
+    &quot;embed&quot;
+    &quot;io/fs&quot;
+    &quot;net/http&quot;
+
+    wasmhttp &quot;github.com/nlepage/go-wasm-http-server/v2&quot;
+)
+
+//go:embed static/*
+var staticFiles embed.FS
+
+func main() {
+    mux := http.NewServeMux()
+
+    // Standard routing --- method + path patterns (Go 1.22+)
+    mux.HandleFunc(&quot;GET /&quot;,             handleIndex)
+    mux.HandleFunc(&quot;GET /items/{id}&quot;,   handleGetItem)
+    mux.HandleFunc(&quot;POST /items&quot;,       handleCreateItem)
+    mux.HandleFunc(&quot;DELETE /items/{id}&quot;, handleDeleteItem)
+
+    // Static files embedded in the WASM binary
+    sub, _ := fs.Sub(staticFiles, &quot;static&quot;)
+    mux.Handle(&quot;/static/&quot;, http.StripPrefix(&quot;/static/&quot;, http.FileServer(http.FS(sub))))
+
+    wasmhttp.Serve(mux)
+}
+</code></pre>
+<p>Everything that works with <code>net/http</code> works here: URL parameters (<code>r.PathValue(&quot;id&quot;)</code>), query strings (<code>r.URL.Query()</code>), form data (<code>r.FormValue()</code>), request bodies, headers, cookies. Third-party routers like Echo and Gin compile to <code>js/wasm</code>. chi and gorilla/mux should work (standard <code>net/http</code> compatible) but are untested.</p>
+<h2 id="how-it-works-service-worker-side">How it works: service worker side</h2>
+<p>Three files on the static host:</p>
+<p><strong><code>sw.js</code></strong> (service worker):</p>
+<pre><code class="language-javascript">importScripts('wasm_exec.js')
+importScripts('https://cdn.jsdelivr.net/gh/nlepage/go-wasm-http-server@v2.2.1/sw.js')
+
+registerWasmHTTPListener('server.wasm', {
+    // Optional: let CDN requests pass through to the network
+    passthrough: (request) =&gt; request.url.includes('cdn.jsdelivr.net')
+})
+</code></pre>
+<p><strong><code>index.html</code></strong> (registers the service worker):</p>
+<pre><code class="language-html">&lt;script&gt;
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+        .then(() =&gt; navigator.serviceWorker.ready)
+        .then(() =&gt; { /* WASM server is ready */ });
+}
+&lt;/script&gt;
+</code></pre>
+<p><strong><code>wasm_exec.js</code></strong> (from Go stdlib --- must match compiler version exactly):</p>
+<pre><code class="language-bash">cp &quot;$(go env GOROOT)/misc/wasm/wasm_exec.js&quot; .
+</code></pre>
+<p>The <code>passthrough</code> callback is important: requests for external resources (CDN CSS, CDN JS) should not be routed to the Go WASM binary.</p>
+<h2 id="binary-size-and-compression">Binary size and compression</h2>
+<p>For a service worker, binary size directly affects cold-start time. Standard Go WASM binaries compress extremely well, and browsers transparently decompress before passing bytes to <code>WebAssembly.instantiateStreaming()</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Raw size (typical lofigui)</th>
+<th>Transfer size</th>
+<th>Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uncompressed</td>
+<td>7.8 MB</td>
+<td>7.8 MB</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>gzip -9</td>
+<td>7.8 MB</td>
+<td>2.1 MB</td>
+<td>27%</td>
+</tr>
+<tr>
+<td>brotli -11</td>
+<td>7.8 MB</td>
+<td>~1.7 MB (est.)</td>
+<td>~22%</td>
+</tr>
+</tbody>
+</table>
+<p>Most static hosts apply gzip automatically. Pre-compressing gives control over level and enables brotli where supported.</p>
+<p><strong>Build flags</strong> provide modest additional savings: <code>-ldflags=&quot;-s&quot;</code> (strips WASM name section, ~186 KB) and <code>-trimpath</code> (shortens paths, ~10 KB). <code>-ldflags=&quot;-w&quot;</code> has zero effect on WASM (no DWARF sections).</p>
+<p>For a comparison with TinyGo's smaller binaries and why standard Go with compression was chosen instead, see <a href="research-wasm-tinygo.html">WASM TinyGo research</a>.</p>
+<h2 id="htmx-with-wasm-service-workers">HTMX with WASM service workers</h2>
+<p>This is the compelling integration. HTMX makes standard HTTP requests (<code>hx-get</code>, <code>hx-post</code>). Service workers intercept all fetch requests. HTMX has no idea whether responses come from a real server or a WASM binary --- it just sees HTTP responses containing HTML fragments.</p>
+<pre><code>User clicks [hx-get=&quot;/fragment/tank&quot;]
+  -&gt; Browser fetch(&quot;/fragment/tank&quot;)
+  -&gt; Service worker intercepts
+  -&gt; Go handler renders HTML fragment
+  -&gt; Service worker returns response
+  -&gt; HTMX swaps into target div
+</code></pre>
+<p><strong>What works:</strong></p>
+<ul>
+<li>All HTMX attributes: <code>hx-get</code>, <code>hx-post</code>, <code>hx-put</code>, <code>hx-delete</code>, <code>hx-trigger</code>, <code>hx-target</code>, <code>hx-swap</code>, <code>hx-push-url</code></li>
+<li>HTMX polling (<code>hx-trigger=&quot;every 1s&quot;</code>) --- each poll is intercepted</li>
+<li><code>hx-boost</code> for form submissions</li>
+<li>Server-Sent Events (SSE) --- <code>go-wasm-http-server</code> supports SSE</li>
+</ul>
+<p><strong>What does not work:</strong></p>
+<ul>
+<li><code>hx-ws</code> (WebSocket extension) --- service workers <strong>cannot</strong> intercept WebSocket connections (fundamental browser limitation)</li>
+</ul>
+<p><strong>Confirmed projects:</strong></p>
+<ul>
+<li><a href="https://github.com/ocomsoft/go-wasm-htmx-service-worker">go-wasm-htmx-service-worker</a> --- PoC with Go WASM + HTMX + templ + service worker</li>
+<li><a href="https://github.com/stackus/todos-htmx-wasm">todos-htmx-wasm</a> --- Todo app with HTMX frontend and Go WASM BFF proxy</li>
+<li><a href="https://elijahm.com/posts/local_first_htmx/">Local First HTMX</a> --- Echo router compiled to WASM, same handlers work on server and in browser</li>
+</ul>
+<h2 id="what-this-means-for-lofigui">What this means for lofigui</h2>
+<h3 id="current-wasm-approach">Current WASM approach</h3>
+<p>lofigui's WASM examples (01, 02, 03, 07, 08, 12) use direct <code>syscall/js</code> function exports:</p>
+<pre><code class="language-go">js.Global().Set(&quot;goRender&quot;, js.FuncOf(renderFunc))
+js.Global().Set(&quot;goStart&quot;, js.FuncOf(startFunc))
+</code></pre>
+<p>JavaScript calls these functions directly and puts the HTML into the DOM. Routing is handled client-side in JavaScript (tab switching, SVG link interception). This works but means:</p>
+<ul>
+<li>Every new &quot;route&quot; requires a new exported Go function AND JavaScript glue</li>
+<li>The HTML/JS interaction pattern diverges from the server-side pattern</li>
+<li>No standard HTTP semantics (no GET/POST, no URL parameters, no form handling)</li>
+</ul>
+<h3 id="service-worker-approach">Service worker approach</h3>
+<p>With a service worker, the <strong>same Go HTTP handlers</strong> serve both server and browser:</p>
+<pre><code class="language-go">// Shared handler --- works on server AND in WASM service worker
+func handleTankFragment(w http.ResponseWriter, r *http.Request) {
+    lofigui.Reset()
+    lofigui.HTML(sim.buildSVG())
+    renderTankStatus()
+    w.Header().Set(&quot;Content-Type&quot;, &quot;text/html; charset=utf-8&quot;)
+    fmt.Fprint(w, lofigui.Buffer())
+}
+</code></pre>
+<p>The HTMX template is identical in both deployments. The routing is standard <code>net/http</code>. The only difference is the entry point:</p>
+<pre><code class="language-go">// Server build
+http.HandleFunc(&quot;GET /fragment/tank&quot;, handleTankFragment)
+http.ListenAndServe(&quot;:8080&quot;, nil)
+
+// WASM build
+http.HandleFunc(&quot;GET /fragment/tank&quot;, handleTankFragment)
+wasmhttp.Serve(nil)
+</code></pre>
+<h3 id="trade-offs">Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Current (direct JS)</th>
+<th>Service worker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binary size (raw)</td>
+<td>~2 MB</td>
+<td>~8 MB (includes net/http)</td>
+</tr>
+<tr>
+<td>Binary size (gzipped)</td>
+<td>~500 KB</td>
+<td>~2.1 MB</td>
+</tr>
+<tr>
+<td>Cold start</td>
+<td>Fast (WASM loaded directly)</td>
+<td>Slower (service worker + WASM init)</td>
+</tr>
+<tr>
+<td>Code sharing</td>
+<td>Separate <code>main_wasm.go</code> per example</td>
+<td>Same handlers, different entry point</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>JavaScript state + exported functions</td>
+<td>Standard <code>net/http</code> routing</td>
+</tr>
+<tr>
+<td>HTMX</td>
+<td>Not applicable (no HTTP in browser)</td>
+<td>Full HTMX support</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Lower (no service worker lifecycle)</td>
+<td>Higher (service worker registration, caching, lifecycle)</td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>Works once WASM loaded</td>
+<td>Works once service worker cached</td>
+</tr>
+</tbody>
+</table>
+<h3 id="where-each-approach-fits-on-the-interactivity-spectrum">Where each approach fits on the interactivity spectrum</h3>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Current approach</th>
+<th>Service worker approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (Teletype)</td>
+<td>Direct JS: <code>goStart()</code> + <code>setInterval(goRender, 500)</code></td>
+<td>Overkill --- adds net/http weight for no benefit</td>
+</tr>
+<tr>
+<td>2 (Teletype+ web)</td>
+<td>Direct JS with template inheritance (example 03)</td>
+<td>Could work --- forms POST to service worker</td>
+</tr>
+<tr>
+<td>3 (Polling)</td>
+<td>Direct JS: <code>setInterval</code> replaces HTTP Refresh</td>
+<td>Service worker + <code>&lt;meta Refresh&gt;</code> would work but is odd</td>
+</tr>
+<tr>
+<td>4 (HTMX)</td>
+<td>Not currently possible in WASM</td>
+<td><strong>Natural fit</strong> --- HTMX requests routed through service worker</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The service worker approach is most compelling at Level 4</strong> (HTMX), where it enables the same server-side handlers to work in both deployments. At lower levels, direct JS exports are simpler and produce smaller binaries.</p>
+<h2 id="limitations-and-constraints">Limitations and constraints</h2>
+<p><strong>Service worker lifecycle:</strong> Browsers may terminate idle service workers. In-memory state is lost. For persistent state, use IndexedDB. The <code>go-wasm-http-server</code> keepalive demo shows approaches to extend lifetime.</p>
+<p><strong>No real network access:</strong> The Go code inside the service worker cannot make outbound HTTP requests to external APIs. It can only respond to intercepted fetch events. For apps that need a real backend, the WASM service worker acts as a BFF (Backend-For-Frontend) proxy --- but the &quot;backend&quot; must be reached via <code>passthrough</code>.</p>
+<p><strong>No WebSockets:</strong> Service workers fundamentally cannot intercept WebSocket connections. SSE works.</p>
+<p><strong>HTTPS required:</strong> Service workers only register over HTTPS (or localhost). Fine for statichost.eu, GitHub Pages, etc.</p>
+<p><strong>Firefox Private Browsing:</strong> Service workers are disabled. The site falls back to... nothing, unless there is a server.</p>
+<p><strong>Force reload (Ctrl+Shift+R):</strong> Bypasses service workers. The page loads without the Go server.</p>
+<p><strong><code>wasm_exec.js</code> version coupling:</strong> Must exactly match the Go compiler version used to build the WASM binary. A version mismatch causes silent failures.</p>
+<p><strong>Memory:</strong> WASM modules are limited to 4 GB (32-bit addressing). In practice, a service worker running Go WASM uses 10--50 MB depending on the application. Go 1.26 improved heap management for sub-16 MiB heaps.</p>
+<h2 id="concurrency-in-browser-wasm">Concurrency in browser WASM</h2>
+<p>Go WASM runs on a single thread. Goroutines are cooperatively scheduled:</p>
+<ul>
+<li><code>time.Sleep()</code> suspends the Go runtime and returns control to the browser event loop (essential for UI responsiveness --- this is what lofigui's <code>Yield()</code> does)</li>
+<li><code>runtime.Gosched()</code> yields between Go goroutines but does NOT return control to the browser</li>
+<li>Channel operations and select statements work normally</li>
+<li>There is no parallelism --- goroutines interleave, they do not run simultaneously</li>
+</ul>
+<p>For service worker request handling, each request can be a goroutine. They will be processed sequentially (single thread) but the programming model is the same as server-side Go.</p>
+<h2 id="conclusion-adopting-go-wasm-http-server-for-lofigui">Conclusion: adopting go-wasm-http-server for lofigui</h2>
+<h3 id="decision-unified-wasm-via-service-workers">Decision: unified WASM via service workers</h3>
+<p>lofigui will adopt <code>go-wasm-http-server</code> as the standard approach for all WASM builds. The primary motivation is <strong>eliminating drift between server and WASM code paths</strong>.</p>
+<p>Currently, each WASM example has a separate <code>main_wasm.go</code> that re-implements the server's behaviour using <code>syscall/js</code> function exports and custom JavaScript glue. The server version uses <code>net/http</code> handlers, the WASM version uses <code>js.Global().Set(&quot;goRender&quot;, ...)</code>. Over time these diverge --- the server gets new features, the WASM build lags behind, and every example duplicates the bridging boilerplate.</p>
+<p>With <code>go-wasm-http-server</code>, the same <code>net/http</code> handlers serve both deployments. The only code that differs is the entry point:</p>
+<pre><code class="language-go">// +build !js !wasm
+func main() { http.ListenAndServe(&quot;:8080&quot;, nil) }
+
+// +build js,wasm
+func main() { wasmhttp.Serve(nil) }
+</code></pre>
+<p>Routing, form handling, HTMX fragment endpoints, template rendering --- all shared. One set of handlers, two targets.</p>
+<h3 id="tinygo-out-of-scope">TinyGo: out of scope</h3>
+<p>TinyGo cannot be used for the service worker approach because <code>net/http</code> panics at runtime in browser WASM. Standard Go with gzip compression closes the binary size gap sufficiently. See <a href="research-wasm-tinygo.html">WASM TinyGo research</a> for the full analysis and a research proposal to make TinyGo viable in the future.</p>
+<h3 id="binary-size-and-compression-1">Binary size and compression</h3>
+<p>See <a href="#binary-size-and-compression">Binary size and compression</a> above for transfer-size numbers. The uncompressed binary (~8 MB) is dominated by fixed overhead:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Size contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Go runtime + <code>syscall/js</code></td>
+<td>1.7 MB (irreducible floor)</td>
+</tr>
+<tr>
+<td><code>net/http</code> + <code>crypto/tls</code></td>
+<td>+1.8 MB (TLS precomputed tables)</td>
+</tr>
+<tr>
+<td>pongo2 + blackfriday</td>
+<td>+3.9 MB (template + markdown engines)</td>
+</tr>
+<tr>
+<td>Application code</td>
+<td>negligible</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Build tag optimisation</strong>: lofigui's <code>app.go</code>, <code>controller.go</code>, <code>favicon.go</code>, and <code>serve.go</code> currently have no build tags excluding them from <code>js/wasm</code> builds. Adding <code>//go:build !(js &amp;&amp; wasm)</code> to server-only files would eliminate <code>net/http</code> and <code>crypto/tls</code> from non-service-worker WASM builds, dropping the binary from ~8 MB to ~4 MB (~1.2 MB gzipped). This optimisation is separate from the service worker migration and could be done first.</p>
+<h3 id="security-audit-of-go-wasm-http-server">Security audit of go-wasm-http-server</h3>
+<p>An audit of the library (v2.2.1, 795 lines Go + 95 lines JS) identified the following:</p>
+<p><strong>Strengths:</strong></p>
+<ul>
+<li>Small, auditable codebase --- can be read entirely in one sitting</li>
+<li>Shallow dependency tree: 3 direct dependencies, zero transitive</li>
+<li>Architecturally sound --- leverages the browser's own security model for scope, CORS, and CSP enforcement</li>
+<li>Apache 2.0 license with no concerns</li>
+</ul>
+<p><strong>Concerns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Severity</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bus factor of 1</strong></td>
+<td>Medium</td>
+<td>Single maintainer (103 of 107 commits). No succession plan.</td>
+</tr>
+<tr>
+<td><strong>No CI or test suite</strong></td>
+<td>Medium</td>
+<td>One example doc test exists. No functional tests for request/response serialization, edge cases, or streaming.</td>
+</tr>
+<tr>
+<td><strong>Two unmaintained dependencies</strong></td>
+<td>Low-Medium</td>
+<td><code>hack-pad/safejs</code> (3+ years stale), <code>go-js-promise</code> (4.5+ years stale, same author). Both are small and stable, but no one is watching for issues.</td>
+</tr>
+<tr>
+<td><strong>Multi-value response headers dropped</strong></td>
+<td>Low</td>
+<td><code>response.go</code> <code>headerValue()</code> uses <code>h.Get(k)</code> which returns only the first value. Multiple <code>Set-Cookie</code> headers are silently lost.</td>
+</tr>
+<tr>
+<td><strong>No request body size limits</strong></td>
+<td>Low</td>
+<td>A malicious page in scope could POST a multi-GB body to exhaust WASM memory. This is inherent to the architecture, not unique to this library. The Go handler must enforce limits.</td>
+</tr>
+<tr>
+<td><strong>Unreleased work on master</strong></td>
+<td>Info</td>
+<td>Multi-WASM support and Referer/Host/RequestURI fixes from Nov 2025 have no tagged release.</td>
+</tr>
+<tr>
+<td><strong>No SECURITY.md</strong></td>
+<td>Info</td>
+<td>No responsible disclosure process documented.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Risk rating for lofigui: Low-Medium.</strong> The browser sandbox is the ultimate security boundary. The main risks are reliability (no tests, single maintainer) rather than exploitable vulnerabilities. For demo and internal tool use --- lofigui's target --- the risks are acceptable.</p>
+<p><strong>Mitigations to consider:</strong></p>
+<ul>
+<li>Vendor the library (or fork) to insulate against upstream abandonment</li>
+<li>Add <code>http.MaxBytesReader</code> in Go handlers to limit POST body size</li>
+<li>Pin <code>wasm_exec.js</code> to the exact Go compiler version in the build script</li>
+<li>Monitor the upstream repo; if the maintainer goes silent for 12+ months, fork</li>
+</ul>
+<h3 id="work-plan">Work plan</h3>
+<p>This is a significant migration. Recommended phases:</p>
+<p><strong>Phase 1: Build tag cleanup</strong> (small, immediate value)</p>
+<ul>
+<li>Add <code>//go:build !(js &amp;&amp; wasm)</code> to lofigui's server-only files (<code>app.go</code>, <code>controller.go</code>, <code>favicon.go</code>, <code>serve.go</code>)</li>
+<li>Verify existing WASM examples still build and run</li>
+<li>Measure binary size reduction (~8 MB -&gt; ~4 MB)</li>
+</ul>
+<p><strong>Phase 2: Compression pipeline</strong></p>
+<ul>
+<li>Write a small Go tool or Taskfile step that gzip-compresses <code>.wasm</code> files</li>
+<li>Evaluate whether <code>andybalholm/brotli</code> is worth adding for ~20% better compression</li>
+<li>Update <code>build.sh</code> scripts and Taskfile to include compression</li>
+<li>Test with <code>WebAssembly.instantiateStreaming</code> to confirm transparent decompression</li>
+</ul>
+<p><strong>Phase 3: Service worker proof of concept</strong></p>
+<ul>
+<li>Pick one HTMX example (09 or 10) as the pilot</li>
+<li>Add <code>go-wasm-http-server</code> dependency</li>
+<li>Create <code>main_sw.go</code> (service worker entry point) alongside existing <code>main.go</code> (server) and <code>main_wasm.go</code> (direct JS)</li>
+<li>Write <code>sw.js</code> with passthrough for CDN resources (Bulma, HTMX)</li>
+<li>Verify HTMX partial updates work through the service worker</li>
+<li>Measure cold start time, memory usage, and binary size</li>
+</ul>
+<p><strong>Phase 4: Unify handlers</strong></p>
+<ul>
+<li>Refactor the pilot example so server and service worker share the same <code>net/http</code> handlers</li>
+<li>Remove the direct JS export <code>main_wasm.go</code> for that example</li>
+<li>Document the shared handler pattern</li>
+</ul>
+<p><strong>Phase 5: Roll out to all examples</strong></p>
+<ul>
+<li>Migrate remaining WASM examples to the service worker approach</li>
+<li>Remove per-example <code>app.js</code> JavaScript glue where it becomes unnecessary</li>
+<li>Update <code>docs/examples.md</code> and the interactivity spectrum documentation</li>
+</ul>
+<p><strong>Phase 6: Evaluate and document</strong></p>
+<ul>
+<li>Measure final binary sizes across all examples (uncompressed, gzipped, brotli)</li>
+<li>Document cold start times on target static hosts</li>
+<li>Write up the migration as a reference for other lofigui users</li>
+<li>Decide whether to vendor or fork <code>go-wasm-http-server</code></li>
+</ul>
+<p>Each phase is independently useful. Phase 1 benefits all WASM builds immediately. Phase 3 validates the approach before committing to a full migration.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a> --- the foundational library</li>
+<li><a href="https://dev.to/nlepage/emulate-a-go-http-server-in-your-browser-32">Emulate a Go HTTP server in your browser</a> --- introduction article</li>
+<li><a href="https://github.com/ocomsoft/go-wasm-htmx-service-worker">go-wasm-htmx-service-worker</a> --- HTMX + Go WASM PoC</li>
+<li><a href="https://github.com/stackus/todos-htmx-wasm">todos-htmx-wasm</a> --- HTMX + Go WASM todo app</li>
+<li><a href="https://elijahm.com/posts/local_first_htmx/">Local First HTMX</a> --- Echo router in WASM</li>
+<li><a href="https://go.dev/wiki/WebAssembly">Go Wiki: WebAssembly</a> --- official Go WASM docs</li>
+<li><a href="https://go.dev/blog/wasmexport">Go 1.24 WASM changes</a></li>
+<li><a href="https://go.dev/doc/go1.26">Go 1.26 release notes</a></li>
+<li><a href="research-wasm-tinygo.html">WASM TinyGo research</a> --- TinyGo analysis, blockers, and research proposal</li>
+<li><a href="https://dev.bitolog.com/minimizing-go-webassembly-binary-size/">Minimizing Go WASM binary size</a></li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

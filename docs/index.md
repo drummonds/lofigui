@@ -17,6 +17,7 @@
 <li><a href="research-technical.html">Technical</a></li>
 <li><a href="research-bugs.html">Bugs</a></li>
 <li><a href="research-python.html">Python</a></li>
+<li><a href="research-wasm-service-workers.html">WASM Service Workers</a></li>
 </ul>
 </li>
 <li><a href="CHANGELOG.html">Changelog</a></li>
@@ -36,8 +37,7 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 |---|------|-------------|
 | [01](01_hello_world/) | Hello World | Async with polling |
 | [02](02_svg_graph/) | Output Showcase | All output types: Print, Markdown, HTML, Table, SVG |
-| [03](03_hello_world_wasm/) | WASM Hello World | Go compiled to WASM |
-| [04](04_tinygo_wasm/) | TinyGo WASM | Smaller WASM binaries |
+| [03](03_style_sampler/) | Style Sampler | WASM with template inheritance |
 | [06](06_notes.svg) | Notes CRUD | Form POST handlers |
 | [07](07_water_tank/) | Water Tank | SVG dashboard with simulation |
 | [08](08_water_tank_multi/) | Water Tank Multi | Multi-page with HTTP Refresh |
