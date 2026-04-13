@@ -26,6 +26,7 @@ lofigui/
     research-philosophy.md # Design philosophy and interactivity spectrum
   examples/
     01_hello_world/        # Level 3: Async with polling (Python + Go)
+    01a_hello_world_explicit/ # Level 3: Explicit handlers + service worker WASM (Go only)
     02_svg_graph/          # Level 2: Scrolling output showcase (Python + Go)
     03_style_sampler/      # Level 6: WASM with template inheritance
     05_demo_app/           # Python template inheritance
@@ -446,6 +447,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 | # | Name | Key features introduced | Base pattern |
 |---|------|------------------------|-------------|
 | 01 | Hello World | `App`, `HandleRoot`, `HandleDisplay`, background goroutine, auto-refresh polling | Async polling |
+| 01a | Hello World Explicit | `setupRoutes()`, `HandleRoot`/`HandleDisplay`/`HandleCancel`, custom template, `go-wasm-http-server` service worker | Async polling |
 | 02 | Output Showcase | All output types: `Print`, `Printf`, `Markdown`, `HTML`, `Table`, inline SVG charts | Async polling |
 | 03 | Style Sampler | Template inheritance in WASM, `NewControllerFromFS`, multiple page layouts | WASM |
 | 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
@@ -481,6 +483,7 @@ task example-06          # Notes CRUD
 
 # Go examples
 task go-example:01       # Hello World (net/http)
+task go-example:01a      # Hello World Explicit (service worker WASM)
 task go-example:02       # SVG Graph
 task go-wasm:03          # Style Sampler WASM
 task go-example:06       # Notes CRUD
@@ -494,5 +497,6 @@ task build-wasm:03       # Build WASM binary only (no serve)
 task tidy                # Run go mod tidy for all modules
 task tidy:main           # Tidy root module only
 task tidy:01             # Tidy example 01 only (etc.)
+task tidy:01a            # Tidy example 01a
 task tidy:10             # Tidy example 10
 ```

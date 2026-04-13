@@ -143,6 +143,30 @@ func main() { lofigui.RunWASM(model) }
 
 [WASM source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go)
 
+### Gzipped WASM
+
+The demo page offers two buttons: **Start** loads the uncompressed `main.wasm` (~4.8 MB), while **Start (gzipped)** loads `main.wasm.gz` (~2.1 MB) and decompresses it in the browser. The `docs:build-wasm` task creates both files automatically:
+
+```bash
+# Build step (Taskfile.yml)
+find docs -name "main.wasm" -exec gzip -9 -k {} \;
+```
+
+The JavaScript uses the browser's built-in `DecompressionStream` to decompress on the fly, then feeds the result to `WebAssembly.instantiateStreaming`:
+
+```js
+const resp = await fetch('main.wasm.gz');
+const ds = new DecompressionStream('gzip');
+const decompressed = new Response(resp.body.pipeThrough(ds), {
+    headers: {'Content-Type': 'application/wasm'}
+});
+const result = await WebAssembly.instantiateStreaming(decompressed, go.importObject);
+```
+
+<div class="annotation">
+<strong>Why not serve gzip transparently?</strong> Most production static hosts (GitHub Pages, Cloudflare Pages, Netlify) automatically compress responses with gzip or brotli. The explicit <code>.wasm.gz</code> approach is for hosts that don't, or for demonstrating the size difference in the UI. <code>DecompressionStream</code> is supported in all modern browsers.
+</div>
+
 ### Server vs WASM lifecycle
 
 The server app and WASM app run the same model, but their lifecycles differ:

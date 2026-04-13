@@ -272,6 +272,7 @@ tasks:
       - task-plus md2html --file docs/index.md --dst docs
       # Example documentation pages (from examples/NN_name/docs.md)
       - task-plus md2html --file examples/01_hello_world/index.md --dst docs/01_hello_world
+      - task-plus md2html --file examples/01a_hello_world_explicit/index.md --dst docs/01a_hello_world_explicit
       - task-plus md2html --file examples/02_svg_graph/index.md --dst docs/02_svg_graph
       - task-plus md2html --file examples/03_style_sampler/index.md --dst docs/03_style_sampler
       - task-plus md2html --file examples/05_demo_app/index.md --dst docs/05_demo_app
@@ -305,6 +306,15 @@ tasks:
       - cp examples/01_hello_world/templates/index.html docs/01_hello_world/demo.html
       - cp examples/01_hello_world/templates/app.js docs/01_hello_world/
       - rm examples/01_hello_world/go/main.wasm
+      # 01a Hello World Explicit (service worker)
+      - mkdir -p docs/01a_hello_world_explicit
+      - cd examples/01a_hello_world_explicit/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
+      - cp "{{.WASM_EXEC_JS}}" docs/01a_hello_world_explicit/
+      - cp examples/01a_hello_world_explicit/go/main.wasm docs/01a_hello_world_explicit/
+      - cp examples/01a_hello_world_explicit/templates/index.html docs/01a_hello_world_explicit/demo.html
+      - cp examples/01a_hello_world_explicit/templates/sw.js docs/01a_hello_world_explicit/
+      - cp examples/01a_hello_world_explicit/templates/demo-sw.html docs/01a_hello_world_explicit/
+      - rm examples/01a_hello_world_explicit/go/main.wasm
       # 02 Output Showcase
       - mkdir -p docs/02_svg_graph
       - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
@@ -410,7 +420,7 @@ tasks:
   # Go module tidy tasks (wildcard)
   tidy:
     desc: Run go tidy and update for all
-    deps: [tidy:main, tidy:01, tidy:02, tidy:03, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10, tidy:11, tidy:12]
+    deps: [tidy:main, tidy:01, tidy:01a, tidy:02, tidy:03, tidy:06, tidy:07, tidy:08, tidy:09, tidy:10, tidy:11, tidy:12]
 
   tidy:main:
     desc: Run go tidy and update main
