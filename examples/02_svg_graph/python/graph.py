@@ -45,7 +45,7 @@ async def favicon():
 async def root(request: Request):
     lg.reset()  # If you don't have this the runs keep concatenating.
     model()
-    return templates.TemplateResponse("hello.html", controller.state_dict({"request": request}))
+    return templates.TemplateResponse(request, "hello.html", controller.state_dict({}))
 
 
 if __name__ == "__main__":

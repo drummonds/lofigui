@@ -27,8 +27,7 @@ lofigui/
   examples/
     01_hello_world/        # Level 3: Async with polling (Python + Go)
     02_svg_graph/          # Level 2: Scrolling output showcase (Python + Go)
-    03_hello_world_wasm/   # Level 6: Go WASM
-    04_tinygo_wasm/        # Level 6: TinyGo WASM
+    03_style_sampler/      # Level 6: WASM with template inheritance
     05_demo_app/           # Python template inheritance
     06_notes_crud/         # Level 4: CRUD app (Python + Go)
     07_water_tank/         # Level 3: SVG schematic, simulation goroutine, WASM-compatible
@@ -309,9 +308,9 @@ Model runs in background like example 01, printing all output types (Markdown, H
 GET / -> same as pattern 1 (async polling), model prints progressively
 ```
 
-### 3. WASM (examples 03, 04)
+### 3. WASM (example 03)
 
-Go/TinyGo compiled to WASM, served via `build.sh` + `serve.py`. No server-side app.
+Go compiled to WASM, served via `build.sh`. No server-side app.
 
 ### 4. CRUD (example 06)
 
@@ -448,8 +447,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 |---|------|------------------------|-------------|
 | 01 | Hello World | `App`, `HandleRoot`, `HandleDisplay`, background goroutine, auto-refresh polling | Async polling |
 | 02 | Output Showcase | All output types: `Print`, `Printf`, `Markdown`, `HTML`, `Table`, inline SVG charts | Async polling |
-| 03 | WASM Hello World | Go compiled to WASM, browser-side rendering, no server | WASM |
-| 04 | TinyGo WASM | TinyGo for smaller WASM binaries (~500KB vs ~2MB) | WASM |
+| 03 | Style Sampler | Template inheritance in WASM, `NewControllerFromFS`, multiple page layouts | WASM |
 | 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
 | 06 | Notes CRUD | Form POST handlers, `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly (no App), redirect-after-POST | CRUD |
 | 07 | Water Tank | Generated SVG schematic (`buildSVG()`), simulation goroutine, clickable SVG `<a>` links, dual server/WASM build | Dashboard |
@@ -484,15 +482,13 @@ task example-06          # Notes CRUD
 # Go examples
 task go-example:01       # Hello World (net/http)
 task go-example:02       # SVG Graph
-task go-wasm:03          # WASM Hello World
-task go-wasm:04          # TinyGo WASM
+task go-wasm:03          # Style Sampler WASM
 task go-example:06       # Notes CRUD
 task go-example:07       # Water Tank (SVG dashboard)
 task go-example:08       # Water Tank Multi-Page (HTTP Refresh)
 task go-example:09       # Water Tank HTMX (partial updates)
 task go-example:10       # Water Tank Maintenance (background operations)
 task build-wasm:03       # Build WASM binary only (no serve)
-task build-wasm:04       # Build TinyGo WASM binary only
 
 # Go module maintenance
 task tidy                # Run go mod tidy for all modules

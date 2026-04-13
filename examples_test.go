@@ -43,7 +43,7 @@ func testGoExampleBuilds(t *testing.T) {
 		{
 			name: "03_style_sampler",
 			path: "examples/03_style_sampler/go",
-			env:  nil,
+			env:  []string{"GOOS=js", "GOARCH=wasm"},
 		},
 		{
 			name: "06_notes_crud",
@@ -64,6 +64,16 @@ func testGoExampleBuilds(t *testing.T) {
 			if _, err := os.Stat(examplePath); os.IsNotExist(err) {
 				t.Skipf("Example directory does not exist: %s", examplePath)
 				return
+			}
+
+			// Example 03 needs templates copied into go/ for embed
+			if ex.name == "03_style_sampler" {
+				templateDst := filepath.Join(examplePath, "templates")
+				cpCmd := exec.Command("cp", "-r", "examples/03_style_sampler/templates", templateDst)
+				if out, err := cpCmd.CombinedOutput(); err != nil {
+					t.Fatalf("Failed to copy templates: %v\n%s", err, out)
+				}
+				defer os.RemoveAll(templateDst)
 			}
 
 			cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), ex.name), ".")

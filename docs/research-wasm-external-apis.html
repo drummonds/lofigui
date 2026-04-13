@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research: WASM Accessing External APIs - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">Research: WASM Accessing External APIs</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <h1 id="research-wasm-accessing-external-apis">Research: WASM Accessing External APIs</h1>
+<p>How a Go WASM program running inside a service worker can talk to external HTTP APIs, and why the obvious approach doesn't work.</p>
+<h2 id="the-problem">The problem</h2>
+<p>Once you've adopted the <a href="research-wasm-service-workers.html">WASM service worker pattern</a>, every request inside your scope is intercepted and routed into Go's <code>net/http</code> mux. The WASM is no longer a leaf in the browser --- it sits <em>behind</em> the service worker and <em>in front of</em> the page. This is great for serving HTML fragments to HTMX, but it creates a subtle problem the moment your handler needs to call an upstream service:</p>
+<pre><code class="language-go">func handleWeather(w http.ResponseWriter, r *http.Request) {
+    // Inside a WASM service worker handler, this is the problem case:
+    resp, err := http.Get(&quot;https://api.openweathermap.org/data/2.5/weather?q=London&quot;)
+    ...
+}
+</code></pre>
+<p>The intuition that &quot;WASM can't make network calls&quot; is wrong --- Go's <code>net/http</code> on <code>GOOS=js GOARCH=wasm</code> is a perfectly real HTTP transport that wraps the browser's <code>fetch()</code> API. The actual issue is more interesting and lives in three layers.</p>
+<h2 id="why-the-naive-call-breaks">Why the naive call breaks</h2>
+<h3 id="layer-1-the-routing-loop">Layer 1: The routing loop</h3>
+<p>When Go code inside the service worker calls <code>http.Get(...)</code>, the <code>js/wasm</code> HTTP transport calls <code>fetch()</code> via <code>syscall/js</code>. <strong>Fetches initiated from inside a service worker still pass through that service worker's own fetch event listeners.</strong> This is documented browser behaviour and surprises almost everyone the first time.</p>
+<p>So the call sequence is:</p>
+<pre><code>WASM handler -&gt; http.Get(&quot;https://api.example.com/foo&quot;)
+             -&gt; Go js/wasm transport -&gt; fetch()
+             -&gt; Service worker fetch event fires
+             -&gt; registerWasmHTTPListener routes it back to the WASM mux
+             -&gt; mux returns 404 (no handler for api.example.com/foo)
+             -&gt; Go transport sees a 404 response
+</code></pre>
+<p>The WASM is talking to itself. No request ever leaves the browser.</p>
+<h3 id="layer-2-passthrough-is-not-enough">Layer 2: Passthrough is not enough</h3>
+<p><code>go-wasm-http-server</code> provides a <code>passthrough</code> callback that lets requests bypass the WASM router and go to the real network. Lofigui already uses it for CDN assets:</p>
+<pre><code class="language-js">passthrough: function(request) {
+    var url = new URL(request.url);
+    if (url.hostname !== self.location.hostname) return true;  // CDN, etc.
+    return false;
+}
+</code></pre>
+<p>This solves the routing loop --- a passthrough request goes to the network --- but the response goes back to <strong>whoever issued the fetch</strong>. If the original caller was the page (e.g. an <code>&lt;img src=&quot;https://cdn.../bulma.css&quot;&gt;</code>), the page receives the response. If the original caller was Go code inside the WASM, Go <em>also</em> receives the response, because <code>passthrough</code> does not care who initiated the fetch. So technically this can work for outbound calls from Go.</p>
+<p>The catch is that passthrough is a single global function evaluated for every request. Mixing &quot;WASM-internal external calls&quot; with &quot;page-direct CDN requests&quot; in the same predicate gets messy fast, and there is no opportunity to inject auth headers, rewrite URLs, cache responses, or apply per-call policy.</p>
+<h3 id="layer-3-cors-is-still-in-force">Layer 3: CORS is still in force</h3>
+<p>Service worker fetches are subject to the same CORS rules as page fetches. If <code>api.example.com</code> does not return <code>Access-Control-Allow-Origin: &lt;your-static-host&gt;</code>, the browser blocks the response body. You can request <code>mode: 'no-cors'</code> to get an opaque response back, but you cannot read it --- which defeats the point.</p>
+<p>CORS is the constraint that no amount of WASM cleverness fixes. If the upstream API does not permit your origin, you need a real server somewhere (a CORS-relaxing proxy) and you've left the static-hosting model behind. This research page is about everything <em>up to</em> that wall.</p>
+<h2 id="approach-a-passthrough-the-lightweight-option">Approach A: Passthrough (the lightweight option)</h2>
+<p>For an external API that supports CORS for your origin and that Go code can call without any header massaging, the existing passthrough mechanism is enough. Add the upstream host to the predicate and Go's <code>http.Get</code> will work transparently:</p>
+<pre><code class="language-js">registerWasmHTTPListener('main.wasm', {
+    base: scope,
+    passthrough: function(request) {
+        var url = new URL(request.url);
+        if (url.hostname === 'api.openweathermap.org') return true;
+        if (url.hostname !== self.location.hostname)   return true;
+        return false;
+    }
+});
+</code></pre>
+<pre><code class="language-go">resp, err := http.Get(&quot;https://api.openweathermap.org/data/2.5/weather?q=London&quot;)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zero new code on the Go side</td>
+<td>No place to inject auth headers (Go has to do it)</td>
+</tr>
+<tr>
+<td>Zero new code on the JS side beyond the predicate</td>
+<td>No URL rewriting, caching, allowlisting</td>
+</tr>
+<tr>
+<td>Standard <code>net/http</code> semantics</td>
+<td>Predicate gets crowded with mixed concerns</td>
+</tr>
+<tr>
+<td></td>
+<td>API key ends up baked into the WASM binary</td>
+</tr>
+</tbody>
+</table>
+<p>Use this when: the upstream API is public, supports CORS, and you don't need secrets. Weather feeds, public datasets, status endpoints, GitHub's public API.</p>
+<h2 id="approach-b-http-path-proxy-in-the-service-worker-recommended">Approach B: HTTP-path proxy in the service worker (recommended)</h2>
+<p>Install a fetch listener <em>before</em> <code>registerWasmHTTPListener</code> that claims any request matching a reserved URL prefix and forwards it to the real upstream. Go code calls <code>/_proxy/&lt;encoded-target&gt;</code> and gets back exactly what the upstream returned.</p>
+<pre><code class="language-js">// sw.js --- this listener must be added BEFORE the WASM router listener
+self.addEventListener('fetch', function(event) {
+    var url = new URL(event.request.url);
+    if (url.pathname.startsWith('/_proxy/')) {
+        event.respondWith(handleProxy(event.request));
+    }
+    // else: don't call respondWith --- let the WASM listener handle it
+});
+
+async function handleProxy(req) {
+    var url = new URL(req.url);
+    // /_proxy/https://api.example.com/v1/foo
+    var target = url.pathname.slice('/_proxy/'.length) + url.search;
+
+    var allowed = ['api.openweathermap.org', 'api.example.com'];
+    var targetUrl = new URL(target);
+    if (!allowed.includes(targetUrl.hostname)) {
+        return new Response('upstream not allowed', { status: 403 });
+    }
+
+    var init = {
+        method: req.method,
+        headers: req.headers,
+        body: ['GET','HEAD'].includes(req.method) ? undefined : await req.blob(),
+    };
+
+    try {
+        var upstream = await fetch(targetUrl.toString(), init);
+        return new Response(upstream.body, {
+            status:  upstream.status,
+            headers: upstream.headers,
+        });
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+            status:  502,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+}
+
+importScripts('wasm_exec.js');
+importScripts('https://cdn.jsdelivr.net/gh/nlepage/go-wasm-http-server@v2.2.1/sw.js');
+registerWasmHTTPListener('main.wasm', { base: '/' });
+</code></pre>
+<pre><code class="language-go">// Inside the WASM handler --- looks like a normal HTTP call
+resp, err := http.Get(&quot;/_proxy/https://api.openweathermap.org/data/2.5/weather?q=London&quot;)
+</code></pre>
+<h3 id="why-this-is-the-cleanest-fit-for-lofigui">Why this is the cleanest fit for lofigui</h3>
+<ul>
+<li><strong>The Go side stays standard <code>net/http</code>.</strong> No <code>syscall/js</code>, no Promise/channel plumbing, no separate code path for &quot;external&quot; vs &quot;internal&quot; calls. The same handler can run on the server build by stripping the <code>/_proxy/</code> prefix in a tiny middleware (or by setting up an equivalent route on the real server).</li>
+<li><strong>One place to enforce policy.</strong> Allowlists, auth header injection, response caching via the Cache API, request budgeting, log-and-trace --- all live in <code>handleProxy</code>. The Go code stays oblivious.</li>
+<li><strong>No double-fetch.</strong> The proxy listener calls <code>respondWith</code> before the WASM router listener gets a chance, so the request never enters the WASM mux. No loop.</li>
+<li><strong>Auth without baking secrets into the WASM binary.</strong> API keys can live in <code>sw.js</code> (visible to anyone who fetches it from your static host --- so still not <em>secret</em>, but at least one layer removed from the WASM blob). For real secrets you still need a server.</li>
+</ul>
+<h3 id="the-listener-ordering-subtlety">The listener ordering subtlety</h3>
+<p>This pattern relies on a specific browser quirk: a service worker can have multiple <code>fetch</code> event listeners, they all fire, but only the first one to call <code>event.respondWith()</code> wins. Subsequent calls to <code>respondWith</code> on the same event throw. So the proxy listener does not need to &quot;intercept&quot; anything special --- it just needs to be registered <em>before</em> <code>registerWasmHTTPListener</code>, and to call <code>respondWith</code> only for the proxy paths it cares about.</p>
+<p>If you accidentally register the WASM listener first, the WASM router will see proxy paths, hit a 404, and respond 404 --- and your proxy listener will never get a chance. The fix is just import order in <code>sw.js</code>.</p>
+<h2 id="how-the-two-servers-coexist">How the two servers coexist</h2>
+<p>Once you've added the proxy listener you have <strong>two HTTP servers living inside the same service worker</strong>: the existing <code>go-wasm-http-server</code> (which runs your Go <code>net/http</code> mux as WASM) and the new proxy listener (which runs as plain JavaScript). They share the global scope, both register <code>fetch</code> event listeners, and both see every request that touches the SW. This section spells out exactly how they relate, because the mental model is what makes or breaks debugging.</p>
+<h3 id="two-listeners-one-event-one-winner">Two listeners, one event, one winner</h3>
+<p>Every fetch in the SW's scope fires a <code>FetchEvent</code>. The browser dispatches that event to <strong>all</strong> registered listeners --- there is no priority, no short-circuit, and no concept of &quot;the request was already handled&quot;. What <code>respondWith()</code> actually does is mark the event as having a response promise; the <em>first</em> call wins, and any subsequent call on the same event throws <code>InvalidStateError</code>. Both listeners therefore have to make a synchronous decision at the top of their handler: &quot;is this mine, or do I let it fall through?&quot;</p>
+<pre><code class="language-js">// Listener 1 (proxy) --- runs first because it was added first
+self.addEventListener('fetch', function(event) {
+    if (new URL(event.request.url).pathname.startsWith('/_proxy/')) {
+        event.respondWith(handleProxy(event.request));   // &lt;-- claim
+    }
+    // else: return without calling respondWith --- listener 2 gets to decide
+});
+
+// Listener 2 (registerWasmHTTPListener, added by importScripts) --- runs second
+// Internally does the equivalent of:
+self.addEventListener('fetch', function(event) {
+    if (passthrough(event.request)) return;              // &lt;-- network
+    event.respondWith(routeIntoWasmMux(event.request));  // &lt;-- claim
+});
+</code></pre>
+<p>The key invariant: <strong>the proxy listener must decide synchronously</strong>. You cannot <code>await</code> anything before calling <code>respondWith</code> --- if you do, the WASM listener has already run, and either it claimed the event (in which case your <code>respondWith</code> throws) or it didn't (in which case the browser has already moved on and is giving the caller a network error). Async work happens <em>inside</em> the promise passed to <code>respondWith</code>, not before.</p>
+<h3 id="routing-matrix">Routing matrix</h3>
+<p>For a request hitting the SW, here is which subsystem actually handles it:</p>
+<table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Proxy listener</th>
+<th>WASM listener (<code>registerWasmHTTPListener</code>)</th>
+<th>Where it ends up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/index.html</code>, <code>/main.wasm</code>, <code>/sw.js</code></td>
+<td>ignores</td>
+<td>claims</td>
+<td>WASM mux (or static fallback)</td>
+</tr>
+<tr>
+<td><code>/fragment/tank</code> (HTMX)</td>
+<td>ignores</td>
+<td>claims</td>
+<td>WASM <code>net/http</code> handler</td>
+</tr>
+<tr>
+<td><code>/_proxy/https://api.example.com/v1/foo</code></td>
+<td><strong>claims</strong></td>
+<td>never sees it</td>
+<td>Real upstream via <code>fetch()</code></td>
+</tr>
+<tr>
+<td><code>https://cdn.jsdelivr.net/...</code></td>
+<td>ignores</td>
+<td>passthrough returns true</td>
+<td>Real network</td>
+</tr>
+<tr>
+<td><code>/favicon.ico</code></td>
+<td>ignores</td>
+<td>claims</td>
+<td>WASM mux</td>
+</tr>
+<tr>
+<td>WASM-internal <code>http.Get(&quot;/fragment/tank&quot;)</code></td>
+<td>ignores</td>
+<td>claims</td>
+<td>Same WASM mux (loops back in)</td>
+</tr>
+<tr>
+<td>WASM-internal <code>http.Get(&quot;/_proxy/https://...&quot;)</code></td>
+<td><strong>claims</strong></td>
+<td>never sees it</td>
+<td>Real upstream</td>
+</tr>
+</tbody>
+</table>
+<p>The last two rows are the interesting ones. A <code>http.Get</code> from inside the Go handler is itself a fetch through the SW. If the path is <code>/_proxy/...</code> the proxy claims it and the upstream call happens. If the path is a normal mux route the WASM listener claims it and the call recurses into the same Go process. Both cases are well-defined --- there is no ambiguity --- as long as the proxy listener was registered first.</p>
+<h3 id="the-two-servers-are-independent">The two servers are independent</h3>
+<p>This is the design property that matters most:</p>
+<ul>
+<li><strong>No code sharing.</strong> The proxy listener is plain JavaScript that uses only standard service worker APIs (<code>fetch</code>, <code>Response</code>, <code>URL</code>, <code>Cache</code>). It does not call any function from <code>go-wasm-http-server</code>, does not read or set any of its globals, and does not need to know the WASM is there.</li>
+<li><strong>No build coupling.</strong> Editing <code>sw.js</code> to change proxy behaviour does not require rebuilding the WASM binary. Conversely, rebuilding the WASM does not invalidate the proxy listener --- the SW just has a fresh <code>main.wasm</code> to instantiate the next time the WASM listener is invoked.</li>
+<li><strong>No version pinning.</strong> You can upgrade <code>go-wasm-http-server</code> to a new tag and the proxy listener is unaffected, because it does not depend on the library's internal API. The only contract is &quot;the WASM listener does not call <code>respondWith</code> for <code>/_proxy/*</code> paths&quot;, which is guaranteed by the proxy listener running first.</li>
+<li><strong>No shared state.</strong> Each listener has its own closures. They do not share counters, caches, or auth tokens unless you explicitly thread them through <code>self.*</code> globals or the Cache API.</li>
+</ul>
+<p>In effect, the proxy is a separate microservice that happens to share an address space with the WASM HTTP server. You could lift it into its own <code>proxy.js</code> file and <code>importScripts</code> it from <code>sw.js</code> --- which is what the recommendation at the bottom of this page suggests for lofigui.</p>
+<h3 id="lifecycle-interaction">Lifecycle interaction</h3>
+<p>Service workers have a non-trivial lifecycle (install, activate, idle, terminate, restart) and the two servers behave differently at each stage:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Proxy listener</th>
+<th>WASM HTTP server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Install</td>
+<td>Available as soon as <code>sw.js</code> finishes parsing</td>
+<td>Library code loaded; WASM binary not yet instantiated</td>
+</tr>
+<tr>
+<td>Activate</td>
+<td>Ready</td>
+<td>Ready (registers fetch listener)</td>
+</tr>
+<tr>
+<td>First fetch</td>
+<td>Handles <code>/_proxy/*</code> immediately</td>
+<td>Lazily instantiates <code>main.wasm</code> on the first matching request</td>
+</tr>
+<tr>
+<td>Idle/terminate</td>
+<td>Listener persists across termination</td>
+<td>WASM heap is lost; reinstantiated on next fetch</td>
+</tr>
+<tr>
+<td>Update</td>
+<td>New <code>sw.js</code> replaces both listeners atomically</td>
+<td>Same</td>
+</tr>
+</tbody>
+</table>
+<p>There is a useful side-effect here: <strong>the proxy listener is available before the WASM is loaded</strong>. If your app needs to make an external API call during a &quot;loading&quot; page that runs before the WASM is ready (e.g. fetching a license check, prefetching config), the proxy works without waiting for <code>main.wasm</code> to instantiate. This is hard to achieve any other way on a static host.</p>
+<p>The same property cuts the other way during failure: if the WASM panics on startup or the binary is corrupt, <strong>the proxy still works</strong>. You can build a tiny error page that fetches diagnostics from an external service through <code>/_proxy/...</code> even when the main app is broken.</p>
+<h3 id="failure-modes-and-how-they-propagate">Failure modes and how they propagate</h3>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What the caller sees</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>handleProxy</code> throws synchronously</td>
+<td>The promise passed to <code>respondWith</code> rejects → caller gets a network error. WASM does <strong>not</strong> get a fallback chance --- <code>respondWith</code> was already called.</td>
+</tr>
+<tr>
+<td><code>handleProxy</code> returns a rejected promise</td>
+<td>Same as above --- network error to caller.</td>
+</tr>
+<tr>
+<td><code>handleProxy</code> returns a 502 <code>Response</code></td>
+<td>Caller sees a normal HTTP 502 and can handle it. <strong>This is the preferred failure shape</strong> --- prefer returning an error <code>Response</code> over throwing.</td>
+</tr>
+<tr>
+<td>Upstream is unreachable</td>
+<td><code>fetch()</code> rejects inside <code>handleProxy</code>; the <code>try/catch</code> converts it to a 502.</td>
+</tr>
+<tr>
+<td>Upstream is reachable but blocks CORS</td>
+<td><code>fetch()</code> returns an opaque response with <code>status: 0</code>; if you forward it, the caller gets an empty body. The fix is server-side (Approach D), not in the proxy.</td>
+</tr>
+<tr>
+<td>Proxy listener registered <em>after</em> WASM listener</td>
+<td>WASM listener 404s on <code>/_proxy/*</code> paths before the proxy ever sees them. Symptom: &quot;my proxy never runs&quot;. Fix: import order in <code>sw.js</code>.</td>
+</tr>
+<tr>
+<td>WASM is still loading when proxy is hit</td>
+<td>Proxy works fine --- it doesn't depend on WASM.</td>
+</tr>
+<tr>
+<td>WASM crashes during the request</td>
+<td>Affects only the WASM listener's response. Proxy is unaffected.</td>
+</tr>
+</tbody>
+</table>
+<p>The takeaway: <strong>return error <code>Response</code> objects from <code>handleProxy</code>, never throw</strong>. Throwing makes the failure invisible to Go code (it just sees <code>connection refused</code>) and bypasses any logging or telemetry you might add.</p>
+<h3 id="interaction-with-a-real-backend-approach-d">Interaction with a real backend (Approach D)</h3>
+<p>If you also adopt Approach D --- a real BFF server somewhere on the internet --- the picture becomes a three-tier system:</p>
+<pre><code>Browser page
+  -&gt; Service worker
+       -&gt; Proxy listener (JS)         -&gt; Real backend (Approach D)
+       -&gt; WASM HTTP server (Go)        -&gt; Lofigui handlers
+                                            -&gt; http.Get(&quot;/_proxy/https://backend.example/api/...&quot;)
+                                                 -&gt; back through the SW, claimed by proxy listener
+                                                      -&gt; outbound fetch to real backend
+</code></pre>
+<p>The Go handler does not know whether <code>/_proxy/https://backend.example/...</code> ends up in a real upstream or in a Cloudflare Worker --- it just calls <code>http.Get</code> and reads the response. The proxy listener is the seam where deployment-specific routing lives. This means you can develop locally with the proxy pointing at <code>localhost:8080</code>, ship to production with the proxy pointing at the real BFF, and the WASM binary is identical in both deployments.</p>
+<h3 id="trade-offs">Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard Go <code>net/http</code> calls</td>
+<td>One file (<code>sw.js</code>) becomes load-bearing</td>
+</tr>
+<tr>
+<td>Single place for auth, allowlist, caching, logging</td>
+<td>API keys in <code>sw.js</code> are visible to anyone on the origin</td>
+</tr>
+<tr>
+<td>Same Go handler runs on server (with a trivial mux entry)</td>
+<td>Adds ~50 lines of JS to maintain</td>
+</tr>
+<tr>
+<td>Composes naturally with existing <code>passthrough</code> (CDN passthrough still works)</td>
+<td>Listener ordering is a sharp edge to remember</td>
+</tr>
+<tr>
+<td>Easy to test in DevTools (Network tab shows real upstream calls)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Use this when: you need any combination of auth injection, allowlisting, caching, or &quot;the handler runs on both server and WASM and I don't want a fork in the code&quot;.</p>
+<h2 id="approach-c-syscalljs-bridge-to-a-js-function">Approach C: <code>syscall/js</code> bridge to a JS function</h2>
+<p>Skip HTTP entirely. Define a JS function on <code>self</code>, call it from Go via <code>syscall/js</code>, await the returned Promise via a channel.</p>
+<pre><code class="language-js">// sw.js
+self.proxyFetch = async function(url, opts) {
+    var resp = await fetch(url, opts || {});
+    return await resp.text();
+};
+</code></pre>
+<pre><code class="language-go">// Go side --- helper that turns a JS Promise into a blocking Go call
+func proxyFetch(url string) (string, error) {
+    promise := js.Global().Call(&quot;proxyFetch&quot;, url)
+    done := make(chan struct{})
+    var result string
+    var fetchErr error
+
+    promise.Call(&quot;then&quot;,
+        js.FuncOf(func(this js.Value, args []js.Value) any {
+            result = args[0].String()
+            close(done)
+            return nil
+        }),
+        js.FuncOf(func(this js.Value, args []js.Value) any {
+            fetchErr = errors.New(args[0].Get(&quot;message&quot;).String())
+            close(done)
+            return nil
+        }),
+    )
+
+    &lt;-done
+    return result, fetchErr
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No HTTP serialization overhead</td>
+<td>Forks the Go code path --- server build needs different code</td>
+</tr>
+<tr>
+<td>Can pass binary data, streams, structured types directly</td>
+<td>Needs a <code>js.FuncOf</code>/channel helper at every call site</td>
+</tr>
+<tr>
+<td>Free from the listener-ordering subtlety</td>
+<td><code>syscall/js</code> types are clunky and easy to leak</td>
+</tr>
+<tr>
+<td></td>
+<td>Doesn't compose with the rest of the <code>net/http</code>-shaped lofigui surface</td>
+</tr>
+</tbody>
+</table>
+<p>Use this when: you're calling from low-level WASM code that isn't already inside an <code>http.Handler</code>, or you need binary streaming that HTTP serialization would mangle. For ordinary lofigui handlers, Approach B is strictly nicer.</p>
+<h2 id="approach-d-a-real-backend-somewhere">Approach D: A real backend somewhere</h2>
+<p>If the upstream API does not support CORS for your origin and you need to read the response body, no amount of service worker cleverness will save you. The browser will block the body. You need a server that:</p>
+<ol>
+<li>Receives the request from your static-hosted WASM</li>
+<li>Calls the upstream on your behalf (server-to-server, no CORS in play)</li>
+<li>Returns the response with <code>Access-Control-Allow-Origin</code> set for your origin</li>
+</ol>
+<p>This is just a CORS proxy / BFF and is a well-trodden path --- a 30-line Go program on Fly, a Cloudflare Worker, or <code>cors-anywhere</code> self-hosted. The relevant point for this research page is that <strong>adopting Approach D moves you off pure static hosting</strong>, which is the whole reason you went down the WASM service worker route in the first place. So if you reach for Approach D, ask whether the simpler answer is to drop the static-hosting constraint and run a real lofigui server.</p>
+<h2 id="comparison">Comparison</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>A. Passthrough</th>
+<th>B. Path proxy</th>
+<th>C. JS bridge</th>
+<th>D. Real backend</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Static hosting only</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td>Bypasses CORS</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Standard Go <code>net/http</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Auth injection in JS</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes (server)</td>
+</tr>
+<tr>
+<td>Code shared with server build</td>
+<td>Trivial</td>
+<td>Trivial (small middleware)</td>
+<td>Forked</td>
+<td>Same as today</td>
+</tr>
+<tr>
+<td>Lines of new code</td>
+<td>~3</td>
+<td>~50 (JS)</td>
+<td>~30 (Go + JS)</td>
+<td>~30 (server)</td>
+</tr>
+<tr>
+<td>Sharp edges</td>
+<td>Predicate sprawl</td>
+<td>Listener ordering</td>
+<td><code>syscall/js</code> plumbing</td>
+<td>Hosting and ops</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security-considerations">Security considerations</h2>
+<p>Anything in <code>sw.js</code> is fetchable from the static host. Treat it as <strong>public configuration</strong>, not as a secret store:</p>
+<ul>
+<li>API keys placed in <code>sw.js</code> are visible to anyone who knows where to look. They are <em>one step removed from being baked into the WASM</em>, which is a small improvement (you can rotate keys without rebuilding the binary) but not a real security boundary.</li>
+<li>For genuinely secret keys, use Approach D --- the secret lives on the server, never on any static asset.</li>
+<li>An open path proxy (<code>/_proxy/&lt;anything&gt;</code>) turns your origin into a CORS-bypass relay for whatever upstream you forward to. Always allowlist hostnames in <code>handleProxy</code>. An attacker can't directly use this from another origin (browser CORS would still apply at the original-page level), but an XSS on your own pages becomes much more useful.</li>
+<li>Set <code>Cache-Control</code> headers on proxy responses deliberately. The default behaviour (whatever the upstream sent) may be wildly inappropriate for a service-worker-cached environment.</li>
+<li>Consider rate-limiting at the proxy layer if the upstream charges per request.</li>
+</ul>
+<h2 id="operational-notes">Operational notes</h2>
+<ul>
+<li><strong>Allowlist with intent.</strong> A growing allowlist in <code>handleProxy</code> is a code smell. If you have more than half a dozen upstreams, generate the list from a config file at build time.</li>
+<li><strong>Cache responses with the Cache API.</strong> Service workers have direct access to <code>caches.open(...)</code> and <code>cache.match(...)</code>. The proxy is the natural place to add a &quot;30-second cache for GET requests with no auth&quot; policy.</li>
+<li><strong>Log to the page via <code>postMessage</code>.</strong> <code>console.log</code> inside the service worker shows up in DevTools but not on the page. For demos, post a message back to clients on every proxied call so the user sees what just happened.</li>
+<li><strong>Test with <code>chrome://serviceworker-internals/</code>.</strong> Forcing a service worker update is annoying; bookmark this page.</li>
+<li><strong>Force-reload bypasses everything.</strong> <code>Ctrl+Shift+R</code> skips the service worker entirely, so neither the WASM nor the proxy will run. Plain reload is what you want during development.</li>
+</ul>
+<h2 id="recommendation-for-lofigui">Recommendation for lofigui</h2>
+<p>Adopt <strong>Approach B</strong> as the standard pattern, with Approach A reserved for the trivial public-API case. Specifically:</p>
+<ol>
+<li>Document the <code>/_proxy/&lt;absolute-url&gt;</code> convention as the lofigui way to call external APIs from a WASM service worker handler.</li>
+<li>Provide a small <code>proxy.js</code> snippet in the <code>examples/</code> tree that other examples can <code>importScripts</code> from <code>sw.js</code> --- so the listener-ordering and allowlist boilerplate lives in one place.</li>
+<li>On the server build, add a one-line middleware that strips the <code>/_proxy/</code> prefix and proxies upstream. This makes handlers identical between the two builds.</li>
+<li>Build a pilot example (provisional name <code>13_external_api</code>) that fetches from one or two real public APIs (e.g. weather, GitHub status) using the path proxy, with both server and service worker entry points.</li>
+<li>Update the <a href="research-wasm-service-workers.html">WASM Service Workers research page</a> to cross-reference this page from the &quot;No real network access&quot; limitation.</li>
+</ol>
+<p>If a future example needs CORS-bypassed access to an API that does not allow the origin, that's the trigger to step back and consider whether the example should run on a real server instead of in a service worker. Adding a hosted CORS proxy to a static site is the worst of both worlds.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Fetch API in service workers</a> --- MDN reference for service worker fetch interception</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith">FetchEvent.respondWith()</a> --- the &quot;first listener wins&quot; semantics</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">CORS</a> --- the constraint that no client-side trick removes</li>
+<li><a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a> --- the library lofigui uses to run <code>net/http</code> inside a service worker</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Cache">Cache API</a> --- for caching proxied responses inside the service worker</li>
+<li><a href="research-wasm-service-workers.html">WASM Service Workers research</a> --- the broader context this page sits inside</li>
+</ul>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,8 +1,12 @@
 # Compiled WASM
 main.wasm
+<<<<<<< HEAD
 main-tinygo.wasm
 wasm_exec.js
 tinygo_wasm_exec.js
+=======
+wasm_exec.js
+>>>>>>> task/WTteletype
 
 # Templates copied into go/ for embed during WASM build
 go/templates/
