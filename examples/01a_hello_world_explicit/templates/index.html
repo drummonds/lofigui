@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 01a — Hello World Explicit</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <span class="navbar-item has-text-weight-bold">01a — Hello World Explicit</span>
+    </div>
+  </nav>
+
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Explicit Handlers + Service Worker WASM</h1>
+        <h2 class="subtitle">Same model as 01, unbundled into HandleRoot / HandleDisplay / HandleCancel</h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="content mb-5">
+        <h3 class="title is-5">What this demonstrates</h3>
+        <ul>
+          <li><strong>Explicit route registration</strong> &mdash; <code>setupRoutes()</code> returns a <code>*http.ServeMux</code> with separate start, display, and cancel handlers</li>
+          <li><strong>Custom template</strong> &mdash; embedded Go string constant with start/cancel forms, replacing the default template</li>
+          <li><strong>Service worker WASM</strong> &mdash; same <code>setupRoutes()</code> serves both the HTTP server and <code>go-wasm-http-server</code> in the browser</li>
+          <li><strong>No custom JavaScript</strong> &mdash; unlike example 01&rsquo;s <code>app.js</code> (which polls <code>goRender()</code> via <code>setInterval</code>), the service worker intercepts normal HTTP requests</li>
+        </ul>
+
+        <h3 class="title is-5">Server-side flow</h3>
+        <pre>GET  /       &rarr; app.HandleDisplay() &mdash; renders template with current buffer
+POST /start  &rarr; app.HandleRoot()    &mdash; resets buffer, starts model, redirects to /
+POST /cancel &rarr; app.HandleCancel()  &mdash; cancels action, redirects to /</pre>
+
+        <p class="is-size-7 has-text-grey">
+          The WASM demo below uses a service worker to intercept these same HTTP requests in the browser.
+          Run <code>task go-example:01a</code> to see the server version.
+        </p>
+      </div>
+
+      <hr>
+      <h3 class="title is-5">Live Demo (Service Worker WASM)</h3>
+      <p class="mb-4">
+        The service worker loads the Go WASM binary and intercepts all fetch requests.
+        Your browser makes real HTTP requests to <code>/</code>, <code>/start</code>, and <code>/cancel</code> &mdash;
+        the service worker routes them to the same Go handlers that run on the server.
+      </p>
+      <a href="demo-sw.html" class="button is-primary">Launch Service Worker Demo</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>
+        <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit">
+          Source on Codeberg
+        </a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
