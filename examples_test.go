@@ -244,12 +244,13 @@ func testGoExampleWASMBuild(t *testing.T) {
 	}
 
 	// Copy templates into go/ for embed (go:embed cannot use ../paths)
-	srcDir := filepath.Join(examplePath, "..", "templates")
-	dstDir := filepath.Join(examplePath, "templates")
-	if err := copyDir(srcDir, dstDir); err != nil {
-		t.Fatalf("Failed to copy templates: %v", err)
+	templateSrc := "examples/03_style_sampler/templates"
+	templateDst := filepath.Join(examplePath, "templates")
+	cpCmd := exec.Command("cp", "-r", templateSrc, templateDst)
+	if out, err := cpCmd.CombinedOutput(); err != nil {
+		t.Fatalf("Failed to copy templates: %v\n%s", err, out)
 	}
-	defer os.RemoveAll(dstDir)
+	defer os.RemoveAll(templateDst)
 
 	cmd := exec.Command("go", "build", "-o", filepath.Join(os.TempDir(), "test.wasm"), ".")
 	cmd.Dir = examplePath
