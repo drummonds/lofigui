@@ -2,14 +2,14 @@
 
 ## What is lofigui
 
-lofigui is a lightweight web-UI framework with dual Python and Go implementations. It provides a **print-like interface** for building server-side rendered HTML applications: you call `print()`, `markdown()`, `html()`, and `table()` to accumulate HTML in a buffer, then render it into a template. It uses **Bulma CSS** for styling, **Jinja2** (Python) or **pongo2** (Go) for templates, and **FastAPI** (Python) or **net/http** (Go) as the web server.
+lofigui is a lightweight web-UI framework with dual Python and Go implementations. It provides a **print-like interface** for building server-side rendered HTML applications: you call `print()`, `markdown()`, `html()`, and `table()` to accumulate HTML in a buffer, then render it into a template. It uses **Bulma CSS** for styling, **Jinja2** (Python) or **html/template** (Go) for templates, and **FastAPI** (Python) or **net/http** (Go) as the web server.
 
 ## Project structure
 
 ```
 lofigui/
   lofigui.go              # Go: Print, Markdown, HTML, Table, Buffer, Reset, Context
-  controller.go           # Go: Controller (pongo2 template wrapper)
+  controller.go           # Go: Controller (html/template wrapper)
   app.go                  # Go: App (controller lifecycle, polling, action state)
   favicon.go              # Go: ServeFavicon handler
   lofigui/                # Python package
@@ -151,7 +151,7 @@ ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 })
 
 // From embedded string
-ctrl, err := lofigui.NewControllerFromString(`<html>{{ results | safe }}</html>`)
+ctrl, err := lofigui.NewControllerFromString(`<html>{{.results}}</html>`)
 
 // From directory
 ctrl, err := lofigui.NewControllerFromDir("templates", "page.html")
@@ -219,10 +219,10 @@ For HTMX-based apps, use `Controller` directly — no `App` or polling state nee
 ```go
 import (
     "fmt"
+    "html/template"
     "net/http"
     "sync"
     "github.com/drummonds/lofigui"
-    "github.com/flosch/pongo2/v6"
 )
 
 // Template with HTMX: results div polls a fragment endpoint every 1s
@@ -235,8 +235,8 @@ const htmxLayout = `<!DOCTYPE html>
 </head>
 <body>
   <section class="section"><div class="container">
-    <div id="results" hx-get="{{ fragment_url }}" hx-trigger="every 1s" hx-swap="innerHTML">
-      {{ results | safe }}
+    <div id="results" hx-get="{{.fragment_url}}" hx-trigger="every 1s" hx-swap="innerHTML">
+      {{.results}}
     </div>
   </div></section>
 </body>
@@ -264,8 +264,8 @@ func main() {
         content := renderAndCapture(func() {
             lofigui.Print("Hello from HTMX!")
         })
-        ctrl.RenderTemplate(w, pongo2.Context{
-            "results":      content,
+        ctrl.RenderTemplate(w, lofigui.TemplateContext{
+            "results":      template.HTML(content),
             "fragment_url": "/fragment",
         })
     })
@@ -284,7 +284,7 @@ func main() {
 ```
 
 Key points:
-- `ctrl.RenderTemplate(w, pongo2.Context{...})` — render with custom context (no App state injection)
+- `ctrl.RenderTemplate(w, lofigui.TemplateContext{...})` — render with custom context (no App state injection)
 - Fragment endpoints return raw HTML via `fmt.Fprint` — no template rendering
 - `renderAndCapture` mutex ensures concurrent HTMX requests don't interleave buffer writes
 - Multiple pages: each full page sets its own `fragment_url` to poll the right fragment
@@ -415,13 +415,13 @@ func (s *Simulation) runMaintenance(ctx context.Context, maintType string) {
 
 ## Template requirements
 
-Templates receive these variables from `state_dict` / `StateDict`:
+Templates receive these variables from `state_dict` / `StateDict`. HTML values (`results`, `refresh`) are passed as `template.HTML` so they render unescaped:
 
 | Variable  | Description |
 |-----------|-------------|
-| `results` | Accumulated buffer HTML (use `{{ results \| safe }}`) |
-| `refresh` | Auto-refresh `<meta>` tag when polling is active |
-| `polling` | Boolean: whether polling is active |
+| `results` | Accumulated buffer HTML (as `template.HTML`, use `{{.results}}`) |
+| `refresh` | Always empty `template.HTML` (refresh now uses HTTP header) |
+| `polling` | String: "Running" or "Stopped" |
 | `version` | App version string |
 | `name`    | Controller name |
 
@@ -431,10 +431,10 @@ Minimal template:
 <!DOCTYPE html>
 <html>
 <head>
-  {{ refresh | safe }}
+  {{.refresh}}
 </head>
 <body>
-  {{ results | safe }}
+  {{.results}}
 </body>
 </html>
 ```

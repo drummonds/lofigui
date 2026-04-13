@@ -1,6 +1,7 @@
 package lofigui
 
 import (
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -72,7 +73,7 @@ func TestLayoutThreePanelRenders(t *testing.T) {
 	app := NewAppWithController(ctrl)
 	Print("Main Content")
 
-	extra := map[string]interface{}{"sidebar": "<p>Sidebar Menu</p>"}
+	extra := TemplateContext{"sidebar": template.HTML("<p>Sidebar Menu</p>")}
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 

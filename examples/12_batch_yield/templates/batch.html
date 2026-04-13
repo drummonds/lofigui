@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Batch Yield Demo - lofigui</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
-    {{refresh | safe}}
+    {{.refresh}}
   </head>
   <body>
     <section class="section">
@@ -13,7 +13,7 @@
         <h1 class="title">Batch Yield Demo</h1>
         <p class="subtitle">Demonstrates <code>lofigui.Yield()</code> keeping the UI responsive during tight loops</p>
         <div class="content">
-          {{ results | safe }}
+          {{.results}}
         </div>
       </div>
     </section>
