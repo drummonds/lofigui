@@ -36,6 +36,7 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 | # | Name | Description |
 |---|------|-------------|
 | [01](01_hello_world/) | Hello World | Async with polling |
+| [01a](01a_hello_world_explicit/) | Hello World Explicit | Explicit handlers + service worker WASM |
 | [02](02_svg_graph/) | Output Showcase | All output types: Print, Markdown, HTML, Table, SVG |
 | [03](03_style_sampler/) | Style Sampler | WASM with template inheritance |
 | [06](06_notes.svg) | Notes CRUD | Form POST handlers |

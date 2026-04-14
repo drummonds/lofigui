@@ -311,8 +311,10 @@ tasks:
       - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/01_hello_world/
       - cp examples/01_hello_world/go/main.wasm docs/01_hello_world/
-      - cp examples/01_hello_world/templates/index.html docs/01_hello_world/demo.html
-      - cp examples/01_hello_world/templates/app.js docs/01_hello_world/
+      - cp examples/01_hello_world/templates/demo.html docs/01_hello_world/demo.html
+      - cp examples/01_hello_world/templates/demo-gz.html docs/01_hello_world/demo-gz.html
+      - cp examples/01_hello_world/templates/sw.js docs/01_hello_world/sw.js
+      - cp examples/01_hello_world/templates/sw-gz.js docs/01_hello_world/sw-gz.js
       - rm examples/01_hello_world/go/main.wasm
       # 01a Hello World Explicit (service worker)
       - mkdir -p docs/01a_hello_world_explicit

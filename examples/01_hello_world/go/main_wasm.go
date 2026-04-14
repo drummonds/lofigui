@@ -4,4 +4,7 @@ package main
 
 import "codeberg.org/hum3/lofigui"
 
-func main() { lofigui.RunWASM(model) }
+func main() {
+	app := lofigui.NewApp()
+	app.RunWASM(model)
+}
