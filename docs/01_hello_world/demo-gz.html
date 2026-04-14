@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 01 — Hello World (gzipped)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">01 — Hello World (gzipped)</h1>
+      <h2 class="subtitle">Service worker WASM loaded from gzipped binary</h2>
+      <div id="status">
+        <progress class="progress is-primary" max="100">Loading...</progress>
+        <p class="mt-3">Decompressing gzipped WASM binary...</p>
+      </div>
+    </div>
+  </section>
+  <script>
+    var statusDiv = document.getElementById('status');
+    var statusP = statusDiv.querySelector('p');
+
+    if (!('serviceWorker' in navigator)) {
+      statusDiv.innerHTML = '<div class="notification is-danger">' +
+        'Service workers are not supported in this browser.' +
+        '</div>';
+    } else {
+      // Decompress main.wasm.gz and cache as main.wasm so the service worker
+      // picks up the decompressed version via the cacheName option.
+      fetch('main.wasm.gz')
+        .then(function(resp) {
+          var ds = new DecompressionStream('gzip');
+          return new Response(resp.body.pipeThrough(ds)).blob();
+        })
+        .then(function(blob) {
+          statusP.textContent = 'Caching decompressed WASM...';
+          return caches.open('wasm-gz').then(function(cache) {
+            var wasmUrl = new URL('main.wasm', location.href).href;
+            return cache.put(wasmUrl, new Response(blob, {
+              headers: {'Content-Type': 'application/wasm'}
+            }));
+          });
+        })
+        .then(function() {
+          statusP.textContent = 'Registering service worker...';
+          return navigator.serviceWorker.register('sw-gz.js');
+        })
+        .then(function() {
+          return navigator.serviceWorker.ready;
+        })
+        .then(function() {
+          statusDiv.innerHTML = '<div class="notification is-success">' +
+            '<p>WASM server ready! (loaded from gzipped binary)</p>' +
+            '<p class="mt-2"><a href="./" class="button is-primary">Open Hello World</a></p>' +
+            '</div>';
+        })
+        .catch(function(err) {
+          statusDiv.innerHTML = '<div class="notification is-danger">' +
+            'Failed to start: ' + err.message +
+            '</div>';
+        });
+    }
+  </script>
+</body>
+</html>

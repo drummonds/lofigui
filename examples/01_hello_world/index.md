@@ -11,6 +11,7 @@ If you can write a Go program that prints to stdout, you can write a lofigui app
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
+<a href="demo-gz.html" class="button is-primary is-outlined">Launch Demo (gzipped)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
 
@@ -119,9 +120,9 @@ See [technical details](../research-technical.html) for the full cancel flow.
 
 ## WASM: running in the browser
 
-The [live demo](demo.html) runs the same `model()` function compiled to WebAssembly — entirely in your browser, no server required. Because the model lives in its own file (`model.go`), both the server and WASM builds share it unchanged.
+The [live demo](demo.html) runs the same `model()` function compiled to WebAssembly — entirely in your browser, no server required. A service worker intercepts HTTP requests and routes them to Go's `net/http` handlers running inside the WASM binary. The browser sees real HTTP responses — forms, redirects, Refresh headers — identical to the server version.
 
-A separate `main_wasm.go` file (build-tagged `js && wasm`) replaces the server with a single call:
+Because the model lives in its own file (`model.go`), both the server and WASM builds share it unchanged. A separate `main_wasm.go` file (build-tagged `js && wasm`) replaces the server with a single call:
 
 ```go
 //go:build js && wasm
@@ -130,11 +131,14 @@ package main
 
 import "codeberg.org/hum3/lofigui"
 
-func main() { lofigui.RunWASM(model) }
+func main() {
+    app := lofigui.NewApp()
+    app.RunWASM(model)
+}
 ```
 
 <div class="annotation">
-<strong>RunWASM</strong> exports four functions to JavaScript — <code>goStart()</code>, <code>goCancel()</code>, <code>goRender()</code>, and <code>goIsRunning()</code> — then calls <code>wasmReady()</code> and blocks. A small JavaScript timer calls <code>goRender()</code> every 500ms to update the page. For apps that need custom JS exports (extra buttons, multiple render functions), write the wiring by hand instead — see examples 07-12.
+<strong>App.RunWASM</strong> is the service worker equivalent of <code>App.Run</code>. It registers the same routes (display, start, cancel, favicon) on an <code>http.ServeMux</code> and serves them via <a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a>. The browser page uses a service worker (<code>sw.js</code>) that loads the WASM binary and intercepts fetch events. No custom JavaScript polling — just standard HTTP.
 </div>
 
 <div class="annotation">
@@ -145,35 +149,24 @@ func main() { lofigui.RunWASM(model) }
 
 ### Gzipped WASM
 
-The demo page offers two buttons: **Start** loads the uncompressed `main.wasm` (~4.8 MB), while **Start (gzipped)** loads `main.wasm.gz` (~2.1 MB) and decompresses it in the browser. The `docs:build-wasm` task creates both files automatically:
+The [gzipped demo](demo-gz.html) loads `main.wasm.gz` (~2.1 MB) instead of the uncompressed `main.wasm` (~4.8 MB). The bootstrap page decompresses it using the browser's `DecompressionStream` API and caches the result, so the service worker picks up the decompressed binary from cache. The `docs:build-wasm` task creates both files automatically:
 
 ```bash
 # Build step (Taskfile.yml)
 find docs -name "main.wasm" -exec gzip -9 -k {} \;
 ```
 
-The JavaScript uses the browser's built-in `DecompressionStream` to decompress on the fly, then feeds the result to `WebAssembly.instantiateStreaming`:
-
-```js
-const resp = await fetch('main.wasm.gz');
-const ds = new DecompressionStream('gzip');
-const decompressed = new Response(resp.body.pipeThrough(ds), {
-    headers: {'Content-Type': 'application/wasm'}
-});
-const result = await WebAssembly.instantiateStreaming(decompressed, go.importObject);
-```
-
 <div class="annotation">
-<strong>Why not serve gzip transparently?</strong> Most production static hosts (GitHub Pages, Cloudflare Pages, Netlify) automatically compress responses with gzip or brotli. The explicit <code>.wasm.gz</code> approach is for hosts that don't, or for demonstrating the size difference in the UI. <code>DecompressionStream</code> is supported in all modern browsers.
+<strong>Why not serve gzip transparently?</strong> Most production static hosts (GitHub Pages, Cloudflare Pages, Netlify) automatically compress responses with gzip or brotli. The explicit <code>.wasm.gz</code> approach is for hosts that don't, or for demonstrating the size difference. <code>DecompressionStream</code> is supported in all modern browsers.
 </div>
 
 ### Server vs WASM lifecycle
 
-The server app and WASM app run the same model, but their lifecycles differ:
+Both the server and WASM builds use the same HTTP handler pattern. The lifecycles differ only in how the server starts:
 
-- **Server** — the model starts automatically on the first HTTP request to `/`. While the model runs, the browser polls for updates via the Refresh header. When the model completes, the server exits (unless `LOFIGUI_HOLD=1` is set).
-- **WASM** — the page loads with a **Start** button. The user clicks to begin, and JavaScript polls `goRender()` every 500ms to update the output. After the model completes, clicking Start again restarts it.
+- **Server** — `app.Run(":1340", model)` starts a real HTTP server. The model auto-starts on the first request to `/`. When the model completes, the server exits (unless `LOFIGUI_HOLD=1` is set).
+- **WASM** — `app.RunWASM(model)` registers the same routes but serves them via a service worker. The user clicks a **Start** button (HTML form POST to `/start`). The browser's Refresh header handles polling — no custom JavaScript needed.
 
 <div class="annotation">
-<strong>Why the difference?</strong> The server uses <code>Handle()</code> which auto-starts on an empty buffer — request-driven. WASM uses <code>RunWASM()</code> which exports <code>goStart()</code> behind a button — user-driven. The model code itself is identical in both cases.
+<strong>Explicit wiring</strong> — for custom routes, templates, or multi-page apps, see <a href="../01a_hello_world_explicit/">example 01a</a> which unbundles <code>RunWASM</code> into <code>setupRoutes()</code> + <code>wasmhttp.Serve()</code>.
 </div>

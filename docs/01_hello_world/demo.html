@@ -7,39 +7,42 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
-  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">01 — Hello World</span>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <span id="status-tag" class="tag is-success">Ready</span>
-        <span id="cancel-btn" class="tag is-danger is-light ml-1" style="cursor:pointer;display:none">Cancel</span>
-      </div>
-    </div>
-  </nav>
-
   <section class="section">
     <div class="container">
-      <div id="output">
-        <progress class="progress is-primary" max="100">Loading WASM...</progress>
+      <h1 class="title">01 — Hello World</h1>
+      <h2 class="subtitle">Go net/http handlers running in WASM inside a service worker</h2>
+      <div id="status">
+        <progress class="progress is-primary" max="100">Loading...</progress>
+        <p class="mt-3">Registering service worker and loading WASM binary...</p>
       </div>
     </div>
   </section>
+  <script>
+    var statusDiv = document.getElementById('status');
+    var statusP = statusDiv.querySelector('p');
 
-  <section class="section pt-0">
-    <div class="container">
-      <hr>
-      <div class="buttons">
-        <button id="startBtn" class="button is-success" disabled>Start</button>
-        <button id="startGzBtn" class="button is-success is-outlined" disabled>Start (gzipped)</button>
-      </div>
-      <p id="size-info" class="is-size-7 has-text-grey" style="display:none"></p>
-    </div>
-  </section>
-
-  <script>window.WASM_BINARY = 'main.wasm';</script>
-  <script src="wasm_exec.js"></script>
-  <script src="app.js"></script>
+    if (!('serviceWorker' in navigator)) {
+      statusDiv.innerHTML = '<div class="notification is-danger">' +
+        'Service workers are not supported in this browser.' +
+        '</div>';
+    } else {
+      navigator.serviceWorker.register('sw.js')
+        .then(function(reg) {
+          statusP.textContent = 'Service worker registered, loading WASM binary...';
+          return navigator.serviceWorker.ready;
+        })
+        .then(function() {
+          statusDiv.innerHTML = '<div class="notification is-success">' +
+            '<p>WASM server ready!</p>' +
+            '<p class="mt-2"><a href="./" class="button is-primary">Open Hello World</a></p>' +
+            '</div>';
+        })
+        .catch(function(err) {
+          statusDiv.innerHTML = '<div class="notification is-danger">' +
+            'Failed to start: ' + err.message +
+            '</div>';
+        });
+    }
+  </script>
 </body>
 </html>
