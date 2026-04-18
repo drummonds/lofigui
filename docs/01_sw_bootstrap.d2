@@ -1,0 +1,47 @@
+title: Service Worker WASM Bootstrap Flow {
+  near: top-center
+  shape: text
+  style.font-size: 20
+  style.bold: true
+}
+
+page: Bootstrap Page (demo.html)
+sw: Service Worker (sw.js)
+wasm: WASM Go Server (main.wasm)
+static: Static File Server
+
+# 1. Load bootstrap page
+page -> static: "1. GET wasm_demo/demo.html"
+static -> page: "HTML bootstrap page"
+
+# 2. Clean up
+page -> page: "2. getRegistrations() → unregister all stale SWs"
+
+# 3. Register SW — sw.js runs synchronously
+page -> sw: "3. register('sw.js')"
+sw -> static: "importScripts('wasm_exec.js')"
+sw -> static: "importScripts('go-wasm-http-server/sw.js')"
+sw -> sw: "registerWasmHTTPListener:\n  • registers fetch handler\n  • creates handlerPromise"
+
+# 4. SW starts async WASM download
+sw -> static: "4. fetch('main.wasm') [async, bypasses own fetch handler]"
+static -> sw: "main.wasm (11 MB)"
+
+# 5. SW lifecycle events
+sw -> sw: "5. install → skipWaiting()"
+sw -> sw: "activate → clients.claim()"
+sw -> page: "controllerchange (page now controlled)"
+page -> page: "ready resolves → status: Compiling WASM..."
+
+# 6. WASM compile (parallel with 5)
+sw -> wasm: "6. WebAssembly.instantiateStreaming()"
+wasm -> sw: "go.run() → wasmhttp.Serve(mux)\n  → resolves handlerPromise"
+
+# 7. Probe loop
+page -> sw: "7. fetch('./favicon.ico') [probe]"
+sw -> sw: "respondWith(handlerPromise.then(handler))\n  → QUEUED until WASM ready"
+
+# 8. Redirect (after probe succeeds)
+page -> sw: "8. location.replace('./')"
+sw -> wasm: "GET / → HandleDisplay()"
+wasm -> page: "App HTML (Start button)"
