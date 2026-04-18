@@ -1,6 +1,6 @@
 # lofigui
 
-<!-- auto:version -->Latest: v0.17.34<!-- /auto:version -->
+<!-- auto:version -->Latest: v0.17.35<!-- /auto:version -->
 
 **Lofi GUI** - A minimalist Go library for creating really simple web-based GUIs for CLI tools and small projects. It provides a print-like interface for building lightweight web UIs with minimal complexity.
 
