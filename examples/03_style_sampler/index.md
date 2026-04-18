@@ -42,18 +42,14 @@ ctrl, err := lofigui.NewControllerFromDir("templates", "style_scrolling.html")
 
 **The key insight: pongo2 is pure Go and compiles to WASM.** Template inheritance — `{% extends %}`, `{% block %}`, `{% include %}` — works identically in the browser.
 
-### The problem
+### The layout
 
-`go:embed` cannot use `..` paths. The templates live in `../templates/` relative to the Go source, but embed only looks within or below the source directory.
-
-### The solution
-
-The build script copies templates into `go/templates/` before compilation:
+`go:embed` can only reach paths within or below the Go source directory, so
+the templates live alongside the Go code at `go/templates/`. No copy step
+needed — the build picks them up directly:
 
 ```bash
-cp -r ../templates .
 GOOS=js GOARCH=wasm go build -o main.wasm .
-rm -rf templates
 ```
 
 The embedded filesystem is then available at runtime:

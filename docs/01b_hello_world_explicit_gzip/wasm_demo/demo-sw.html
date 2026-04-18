@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+</head>
+<body>
+  <p>Redirecting to <a href="./sw/">./sw/</a>...</p>
+  <script>
+    // Defensive recovery stub: lives at wasm_demo/demo-sw.html, OUTSIDE the
+    // sw/ scope where the real service worker is registered. If a future
+    // reorg leaves a stale SW registered at wasm_demo/ (which would
+    // intercept every subpath including sw/), this stub is served by the
+    // static host — it unregisters any SW whose scope is a prefix of the
+    // current URL, then redirects to the canonical entry point.
+    (async function() {
+      if ('serviceWorker' in navigator) {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        for (var r of regs) {
+          if (location.href.indexOf(r.scope) === 0) {
+            await r.unregister();
+          }
+        }
+      }
+      window.location.replace('./sw/');
+    })();
+  </script>
+</body>
+</html>

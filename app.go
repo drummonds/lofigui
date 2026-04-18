@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -16,6 +17,42 @@ import (
 // because the user cancelled the running action (via [App.HandleCancel]),
 // as opposed to the model completing normally.
 var ErrCancelled = errors.New("lofigui: cancelled by user")
+
+// defaultBuildDate returns a short UTC timestamp for App.BuildDate.
+//
+// Preference order:
+//  1. Go build metadata vcs.time (the HEAD commit's timestamp), with a
+//     "+dirty" suffix if vcs.modified=true — present whenever the binary
+//     was built inside a git checkout with -buildvcs=true (the default).
+//  2. time.Now() at process start — for builds without VCS info (e.g.
+//     "go run" without a repo, or -buildvcs=false).
+//
+// Users who want an exact build time can override by setting App.BuildDate
+// after NewApp, e.g. from a package var populated via
+// -ldflags="-X 'main.buildDate=<timestamp>'".
+func defaultBuildDate() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		var vcsTime, modified string
+		for _, s := range info.Settings {
+			switch s.Key {
+			case "vcs.time":
+				vcsTime = s.Value
+			case "vcs.modified":
+				modified = s.Value
+			}
+		}
+		if vcsTime != "" {
+			if t, err := time.Parse(time.RFC3339, vcsTime); err == nil {
+				out := t.UTC().Format("2006-01-02 15:04Z")
+				if modified == "true" {
+					out += " +dirty"
+				}
+				return out
+			}
+		}
+	}
+	return time.Now().UTC().Format("2006-01-02 15:04Z")
+}
 
 // defaultTemplate is the built-in template used when no controller is set.
 const defaultTemplate = `<!DOCTYPE html>
@@ -73,9 +110,15 @@ const defaultTemplate = `<!DOCTYPE html>
 //	}
 //	app.SetController(ctrl)
 type App struct {
-	controller    *Controller
-	Version       string // Version/name of the application
-	actionRunning bool   // Whether an action is currently running (singleton active model)
+	controller *Controller
+	Version    string // Version/name of the application
+	// BuildDate is an optional short string shown in the default template
+	// next to Version (e.g. "2026-04-18 09:42Z"). NewApp defaults it via
+	// [defaultBuildDate] — the VCS commit timestamp if available, otherwise
+	// the current UTC time. Override for an exact build timestamp via
+	// -ldflags="-X main.buildDate=..." and then `app.BuildDate = buildDate`.
+	BuildDate     string
+	actionRunning bool // Whether an action is currently running (singleton active model)
 	polling       bool   // Whether auto-refresh polling is enabled
 	PollCount     int    // Number of polling cycles
 	refreshTime   int    // Seconds between refresh when polling
@@ -97,6 +140,7 @@ type App struct {
 func NewApp() *App {
 	return &App{
 		Version:     "Lofigui",
+		BuildDate:   defaultBuildDate(),
 		refreshTime: 1,
 		displayURL:  "/display",
 		hold:        os.Getenv("LOFIGUI_HOLD") != "",
@@ -107,6 +151,7 @@ func NewApp() *App {
 func NewAppWithController(ctrl *Controller) *App {
 	app := &App{
 		Version:     "Lofigui",
+		BuildDate:   defaultBuildDate(),
 		refreshTime: 1,
 		displayURL:  "/display",
 		hold:        os.Getenv("LOFIGUI_HOLD") != "",
@@ -580,6 +625,7 @@ func (app *App) StateDict(r *http.Request, extraContext TemplateContext) Templat
 	ctx := TemplateContext{
 		"request":         r,
 		"version":         app.Version,
+		"build_date":      app.BuildDate,
 		"controller_name": controllerName,
 		"results":         template.HTML(buffer),
 	}

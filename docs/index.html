@@ -87,13 +87,18 @@
 <tbody>
 <tr>
 <td><a href="01_hello_world/">01</a></td>
-<td>Hello World</td>
-<td>Async with polling</td>
+<td>Hello World (compact)</td>
+<td><code>app.RunWASM()</code> — library auto-generates the SW bootstrap</td>
 </tr>
 <tr>
 <td><a href="01a_hello_world_explicit/">01a</a></td>
 <td>Hello World Explicit</td>
-<td>Explicit handlers + service worker WASM</td>
+<td>Same behaviour as 01, every wire visible: <code>setupRoutes()</code> + hand-written SW bootstrap</td>
+</tr>
+<tr>
+<td><a href="01b_hello_world_explicit_gzip/">01b</a></td>
+<td>Hello World Explicit + gzip</td>
+<td>01a + <code>DecompressionStream</code> layer for gzipped WASM</td>
 </tr>
 <tr>
 <td><a href="02_svg_graph/">02</a></td>

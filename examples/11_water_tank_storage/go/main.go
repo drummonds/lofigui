@@ -19,8 +19,7 @@ func main() {
 		log.Fatalf("Failed to create storage: %v", err)
 	}
 
-	// Determine template directory (one level up from go/)
-	templateDir := filepath.Join("..", "templates")
+	templateDir := "templates"
 
 	// Determine wasm_exec.js path from Go toolchain
 	goRoot := os.Getenv("GOROOT")

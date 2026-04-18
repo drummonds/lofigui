@@ -22,7 +22,7 @@ func TestAppControllerCanBeSetAndRetrieved(t *testing.T) {
 
 	// Create and set controller
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -41,7 +41,7 @@ func TestAppControllerCanBeCleared(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -60,7 +60,7 @@ func TestAppControllerReplacementStopsRunningAction(t *testing.T) {
 	app := NewApp()
 
 	ctrl1, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -75,7 +75,7 @@ func TestAppControllerReplacementStopsRunningAction(t *testing.T) {
 
 	// Replace with new controller
 	ctrl2, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -100,7 +100,7 @@ func TestAppMultipleControllerReplacements(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		ctrl, err := NewController(ControllerConfig{
-			TemplatePath: "examples/01_hello_world/templates/hello.html",
+			TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 		})
 		if err != nil {
 			t.Fatalf("Failed to create controller: %v", err)
@@ -123,7 +123,7 @@ func TestAppMultipleControllerReplacements(t *testing.T) {
 // TestAppControllerInInit tests creating an app with a controller in NewAppWithController
 func TestAppControllerInInit(t *testing.T) {
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -145,7 +145,7 @@ func TestAppControllerNoneToController(t *testing.T) {
 	}
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -163,7 +163,7 @@ func TestAppControllerToNoneStopsAction(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -199,7 +199,7 @@ func TestAppThreadSafety(t *testing.T) {
 			defer wg.Done()
 
 			ctrl, err := NewController(ControllerConfig{
-				TemplatePath: "examples/01_hello_world/templates/hello.html",
+				TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 			})
 			if err != nil {
 				t.Errorf("Failed to create controller: %v", err)
@@ -244,7 +244,7 @@ func TestAppStartActionManagesState(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -268,7 +268,7 @@ func TestAppEndActionManagesState(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)
@@ -293,7 +293,7 @@ func TestAppSetControllerIsIdempotent(t *testing.T) {
 	app := NewApp()
 
 	ctrl, err := NewController(ControllerConfig{
-		TemplatePath: "examples/01_hello_world/templates/hello.html",
+		TemplatePath: "examples/01a_hello_world_explicit/go/templates/hello.html",
 	})
 	if err != nil {
 		t.Fatalf("Failed to create controller: %v", err)

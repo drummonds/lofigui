@@ -10,9 +10,14 @@
 If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — `Print()`, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.
 
 <div class="buttons">
-<a href="demo.html" class="button is-primary">Launch Demo</a>
-<a href="demo-gz.html" class="button is-primary is-outlined">Launch Demo (gzipped)</a>
+<a href="wasm_demo/" class="button is-primary">Launch 01 (compact)</a>
+<a href="../01a_hello_world_explicit/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01a (explicit)</a>
+<a href="../01b_hello_world_explicit_gzip/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01b (explicit + gzip)</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
+</div>
+
+<div class="annotation">
+<strong>Three variants of the same app:</strong> 01 uses the compact <code>app.RunWASM(model)</code> call — the library auto-generates the SW bootstrap so the example itself has no <code>templates/</code> directory. <a href="../01a_hello_world_explicit/">01a</a> is the same behaviour with every wire visible (explicit <code>setupRoutes()</code>, hand-written SW bootstrap). <a href="../01b_hello_world_explicit_gzip/">01b</a> adds gzipped WASM on top of 01a, showing the <code>DecompressionStream</code> + cache plumbing.
 </div>
 
 <div class="columns is-vcentered">
@@ -120,7 +125,7 @@ See [technical details](../research-technical.html) for the full cancel flow.
 
 ## WASM: running in the browser
 
-The [live demo](demo.html) runs the same `model()` function compiled to WebAssembly — entirely in your browser, no server required. A service worker intercepts HTTP requests and routes them to Go's `net/http` handlers running inside the WASM binary. The browser sees real HTTP responses — forms, redirects, Refresh headers — identical to the server version.
+The [live demo](wasm_demo/) runs the same `model()` function compiled to WebAssembly — entirely in your browser, no server required. A service worker intercepts HTTP requests and routes them to Go's `net/http` handlers running inside the WASM binary. The browser sees real HTTP responses — forms, redirects, Refresh headers — identical to the server version.
 
 Because the model lives in its own file (`model.go`), both the server and WASM builds share it unchanged. A separate `main_wasm.go` file (build-tagged `js && wasm`) replaces the server with a single call:
 
@@ -149,16 +154,7 @@ func main() {
 
 ### Gzipped WASM
 
-The [gzipped demo](demo-gz.html) loads `main.wasm.gz` (~2.1 MB) instead of the uncompressed `main.wasm` (~4.8 MB). The bootstrap page decompresses it using the browser's `DecompressionStream` API and caches the result, so the service worker picks up the decompressed binary from cache. The `docs:build-wasm` task creates both files automatically:
-
-```bash
-# Build step (Taskfile.yml)
-find docs -name "main.wasm" -exec gzip -9 -k {} \;
-```
-
-<div class="annotation">
-<strong>Why not serve gzip transparently?</strong> Most production static hosts (GitHub Pages, Cloudflare Pages, Netlify) automatically compress responses with gzip or brotli. The explicit <code>.wasm.gz</code> approach is for hosts that don't, or for demonstrating the size difference. <code>DecompressionStream</code> is supported in all modern browsers.
-</div>
+Example 01 itself only ships the plain (~11 MB) WASM binary — the compact API accepts that trade for a one-line deployment. Projects that want a smaller download follow [example 01b](../01b_hello_world_explicit_gzip/), which layers `DecompressionStream` + a cached decompressed binary on top of 01a's explicit SW wiring. The decompression plumbing is visible enough that it's worth reading as its own tutorial rather than hidden behind a flag.
 
 ### Server vs WASM lifecycle
 

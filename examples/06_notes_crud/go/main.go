@@ -98,7 +98,7 @@ func main() {
 	// Create controller with custom template directory
 	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 		Name:         "Notes CRUD Controller",
-		TemplatePath: "../templates/notes.html",
+		TemplatePath: "templates/notes.html",
 	})
 	if err != nil {
 		log.Fatalf("Failed to create controller: %v", err)

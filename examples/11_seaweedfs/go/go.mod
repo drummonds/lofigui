@@ -1,6 +1,6 @@
 module codeberg.org/hum3/lofigui/examples/11_seaweedfs
 
-go 1.21
+go 1.22
 
 require codeberg.org/hum3/lofigui v0.17.0
 
