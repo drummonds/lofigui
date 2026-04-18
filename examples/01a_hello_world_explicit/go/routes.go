@@ -1,55 +1,27 @@
 package main
 
 import (
+	_ "embed"
 	"net/http"
 
 	"codeberg.org/hum3/lofigui"
 )
 
-// helloTemplate is the page template, embedded as a string so it works
-// in both server and WASM builds (WASM has no filesystem access).
-const helloTemplate = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{.version}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-</head>
-<body>
-  <nav class="navbar is-primary" role="navigation">
-    <div class="navbar-brand">
-      <span class="navbar-item has-text-weight-bold">{{.version}}</span>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        {{if eq .polling "Running"}}
-        <span class="tag is-warning">Running</span>
-        <form action="/cancel" method="post" style="display:inline" class="ml-1">
-          <button class="tag is-danger is-light" type="submit" style="cursor:pointer;border:none">Cancel</button>
-        </form>
-        {{else}}
-        <span class="tag is-success">Ready</span>
-        {{end}}
-      </div>
-    </div>
-  </nav>
-  <section class="section">
-    <div class="container content">
-      {{.results}}
-      {{if ne .polling "Running"}}
-      <form action="/start" method="post" class="mt-4">
-        <button class="button is-success" type="submit">Start</button>
-      </form>
-      {{end}}
-    </div>
-  </section>
-</body>
-</html>`
+// helloTemplate is loaded from templates/hello.html via go:embed so the
+// same Go binary works for the server and WASM builds (WASM has no
+// filesystem at runtime — the embed captures the bytes at build time).
+//
+//go:embed templates/hello.html
+var helloTemplate string
 
 // setupRoutes registers all HTTP handlers on a new ServeMux.
 // Used by both the server (main.go) and WASM (main_wasm.go) builds.
-func setupRoutes(app *lofigui.App) *http.ServeMux {
+//
+// redirectPath is the URL that POST /start and POST /cancel redirect to
+// after their action completes. For the server build it's "/"; for the
+// WASM build it's the SW scope path (e.g. "/01a_…/wasm_demo/sw/") so the
+// redirect stays inside the service worker's scope.
+func setupRoutes(app *lofigui.App, redirectPath string) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// GET / — display current state (results + start button or running indicator)
@@ -57,13 +29,20 @@ func setupRoutes(app *lofigui.App) *http.ServeMux {
 		app.HandleDisplay(w, r)
 	})
 
-	// POST /start — reset buffer, start model in background, redirect to /
+	// POST /start — reset buffer, run model in background, redirect to redirectPath.
 	mux.HandleFunc("POST /start", func(w http.ResponseWriter, r *http.Request) {
-		app.HandleRoot(w, r, model, true)
+		wrapped := func(a *lofigui.App) {
+			model(a)
+			// EndAction flips .polling back to "Stopped" so the template
+			// re-shows the Start button. app.RunWASM does this wrap for
+			// you; the explicit build does it here so it's visible.
+			a.EndAction()
+		}
+		app.HandleRoot(w, r, wrapped, true)
 	})
 
-	// POST /cancel — cancel running action, redirect to /
-	mux.HandleFunc("POST /cancel", app.HandleCancel("/"))
+	// POST /cancel — cancel running action, redirect to redirectPath
+	mux.HandleFunc("POST /cancel", app.HandleCancel(redirectPath))
 
 	mux.HandleFunc("GET /favicon.ico", lofigui.ServeFavicon)
 

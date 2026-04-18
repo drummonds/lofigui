@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 01b — WASM Demo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">01b — Hello World Explicit + gzip — WASM Demo</h1>
+      <p class="mb-4">
+        Hand-written service worker bootstrap that decompresses a gzipped WASM
+        binary in the browser before handing it to the runtime. Isolated in its
+        own <code>sw/</code> subdirectory so the SW scope and WASM cache can't
+        collide with anything else.
+      </p>
+      <div class="buttons">
+        <a href="sw/" class="button is-primary">Launch gzipped demo</a>
+      </div>
+      <p class="is-size-7 has-text-grey">
+        <a href="../">← back to example 01b docs</a>
+      </p>
+    </div>
+  </section>
+</body>
+</html>

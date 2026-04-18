@@ -54,7 +54,7 @@ func main() {
 
 	ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 		Name:         "Batch Yield Demo",
-		TemplatePath: "../templates/batch.html",
+		TemplatePath: "templates/batch.html",
 	})
 	if err != nil {
 		log.Fatalf("Failed to create controller: %v", err)

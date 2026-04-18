@@ -23,7 +23,7 @@ func main() {
 	}
 	app.SetController(ctrl)
 
-	mux := setupRoutes(app)
+	mux := setupRoutes(app, "/")
 
 	addr := ":1341"
 	log.Printf("Starting on http://localhost%s", addr)

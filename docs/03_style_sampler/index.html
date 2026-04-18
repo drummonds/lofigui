@@ -110,13 +110,11 @@ style_three_panel_nav.html → extends base: yellow navbar + columns layout
 <hr>
 <h2 id="technical-wasm--pongo2-templates">Technical: WASM + pongo2 templates</h2>
 <p><strong>The key insight: pongo2 is pure Go and compiles to WASM.</strong> Template inheritance — <code>{% extends %}</code>, <code>{% block %}</code>, <code>{% include %}</code> — works identically in the browser.</p>
-<h3 id="the-problem">The problem</h3>
-<p><code>go:embed</code> cannot use <code>..</code> paths. The templates live in <code>../templates/</code> relative to the Go source, but embed only looks within or below the source directory.</p>
-<h3 id="the-solution">The solution</h3>
-<p>The build script copies templates into <code>go/templates/</code> before compilation:</p>
-<pre><code class="language-bash">cp -r ../templates .
-GOOS=js GOARCH=wasm go build -o main.wasm .
-rm -rf templates
+<h3 id="the-layout">The layout</h3>
+<p><code>go:embed</code> can only reach paths within or below the Go source directory, so
+the templates live alongside the Go code at <code>go/templates/</code>. No copy step
+needed — the build picks them up directly:</p>
+<pre><code class="language-bash">GOOS=js GOARCH=wasm go build -o main.wasm .
 </code></pre>
 <p>The embedded filesystem is then available at runtime:</p>
 <pre><code class="language-go">//go:embed templates

@@ -55,7 +55,7 @@
 <h1 id="01a--hello-world-explicit">01a — Hello World Explicit</h1>
 <p>Same model as <a href="../01_hello_world/index.html">example 01</a>, but with everything unbundled. Where 01 uses <code>app.Run()</code> (one call does everything), this example shows the explicit wiring: custom template, separate route handlers, and a service worker for the WASM build.</p>
 <div class="buttons">
-<a href="demo-sw.html" class="button is-primary">Launch Service Worker Demo</a>
+<a href="wasm_demo/sw/" class="button is-primary">Launch Service Worker Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>
 </div>
 <hr>
@@ -101,7 +101,13 @@
 </div>
 <hr>
 <h2 id="custom-template">Custom template</h2>
-<p>The template is defined as a Go string constant in <code>routes.go</code> (so it works in both server and WASM builds). It uses Go's <code>html/template</code> syntax with the standard lofigui variables:</p>
+<p>The template lives at <code>go/templates/hello.html</code> and is pulled into the Go binary with <code>//go:embed</code>:</p>
+<pre><code class="language-go">import _ &quot;embed&quot;
+
+//go:embed templates/hello.html
+var helloTemplate string
+</code></pre>
+<p>Embedding means the same binary works for server and WASM — WASM has no filesystem at runtime, so <code>os.ReadFile</code> wouldn't work, but bytes captured at build time do. The template itself is ordinary <code>html/template</code>:</p>
 <pre><code class="language-html">&lt;nav class=&quot;navbar is-primary&quot;&gt;
   &lt;div class=&quot;navbar-brand&quot;&gt;
     &lt;span class=&quot;navbar-item has-text-weight-bold&quot;&gt;{{.version}}&lt;/span&gt;
@@ -109,7 +115,7 @@
   &lt;div class=&quot;navbar-end&quot;&gt;
     {{if eq .polling &quot;Running&quot;}}
       &lt;span class=&quot;tag is-warning&quot;&gt;Running&lt;/span&gt;
-      &lt;form action=&quot;/cancel&quot; method=&quot;post&quot;&gt;
+      &lt;form action=&quot;cancel&quot; method=&quot;post&quot;&gt;
         &lt;button class=&quot;tag is-danger is-light&quot; type=&quot;submit&quot;&gt;Cancel&lt;/button&gt;
       &lt;/form&gt;
     {{else}}
@@ -121,7 +127,7 @@
   &lt;div class=&quot;container content&quot;&gt;
     {{.results}}
     {{if ne .polling &quot;Running&quot;}}
-      &lt;form action=&quot;/start&quot; method=&quot;post&quot;&gt;
+      &lt;form action=&quot;start&quot; method=&quot;post&quot;&gt;
         &lt;button class=&quot;button is-success&quot; type=&quot;submit&quot;&gt;Start&lt;/button&gt;
       &lt;/form&gt;
     {{end}}
@@ -192,17 +198,20 @@ cancelBtn.addEventListener('click', function() { goCancel(); });
 <div class="annotation">
 <strong>01 pattern</strong>: JavaScript is the driver. It calls Go functions on a timer, manages button state, and renders HTML from Go's buffer. The page never makes HTTP requests — everything happens through direct function calls between JS and WASM.
 </div>
-<h3 id="example-01a--service-worker-swjs--demo-swhtml">Example 01a — service worker (sw.js + demo-sw.html)</h3>
-<pre><code class="language-js">// sw.js — the entire WASM integration:
+<h3 id="example-01a--service-worker-gotemplatessw">Example 01a — service worker (<code>go/templates/sw/</code>)</h3>
+<p>The <code>sw/</code> subdirectory holds the whole SW integration — each file is hand-written and visible. The <code>sw.js</code> vendors the go-wasm-http-server runtime as a local <code>wasmhttp_sw.js</code> (not fetched from a CDN) so that Firefox's strict CSP and Enhanced Tracking Protection can't block it:</p>
+<pre><code class="language-js">// sw.js
 importScripts('wasm_exec.js');
-importScripts('https://cdn.jsdelivr.net/.../sw.js');
+importScripts('wasmhttp_sw.js');   // local copy, not CDN
+
+self.addEventListener('install',  () =&gt; self.skipWaiting());
+self.addEventListener('activate', e =&gt; e.waitUntil(clients.claim()));
 
 registerWasmHTTPListener('main.wasm', {
-    base: scope,
     passthrough: function(request) {
-        // External CDN resources pass through to network
+        var url = new URL(request.url);
         if (url.hostname !== self.location.hostname) return true;
-        if (url.pathname.endsWith('demo-sw.html')) return true;
+        if (url.pathname.endsWith('/index.html')) return true;
         return false;
     }
 });
@@ -242,7 +251,7 @@ task go-example:01a
 # WASM demo (via docs)
 task docs:build-wasm
 tp pages
-# Navigate to 01a_hello_world_explicit/demo-sw.html
+# Navigate to http://localhost:8080/01a_hello_world_explicit/wasm_demo/sw/
 </code></pre>
 
             </div>

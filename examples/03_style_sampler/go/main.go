@@ -22,7 +22,7 @@ func handleStyle(w http.ResponseWriter, r *http.Request, templateName string) {
 }
 
 func main() {
-	tplDir := "../templates"
+	tplDir := "templates"
 	controllers = make(map[string]*lofigui.Controller)
 
 	templates := []string{

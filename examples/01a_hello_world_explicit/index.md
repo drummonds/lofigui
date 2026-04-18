@@ -8,7 +8,7 @@
 Same model as [example 01](../01_hello_world/index.html), but with everything unbundled. Where 01 uses `app.Run()` (one call does everything), this example shows the explicit wiring: custom template, separate route handlers, and a service worker for the WASM build.
 
 <div class="buttons">
-<a href="demo-sw.html" class="button is-primary">Launch Service Worker Demo</a>
+<a href="wasm_demo/sw/" class="button is-primary">Launch Service Worker Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>
 </div>
 
@@ -69,7 +69,16 @@ func setupRoutes(app *lofigui.App) *http.ServeMux {
 
 ## Custom template
 
-The template is defined as a Go string constant in `routes.go` (so it works in both server and WASM builds). It uses Go's `html/template` syntax with the standard lofigui variables:
+The template lives at `go/templates/hello.html` and is pulled into the Go binary with `//go:embed`:
+
+```go
+import _ "embed"
+
+//go:embed templates/hello.html
+var helloTemplate string
+```
+
+Embedding means the same binary works for server and WASM — WASM has no filesystem at runtime, so `os.ReadFile` wouldn't work, but bytes captured at build time do. The template itself is ordinary `html/template`:
 
 ```html
 <nav class="navbar is-primary">
@@ -79,7 +88,7 @@ The template is defined as a Go string constant in `routes.go` (so it works in b
   <div class="navbar-end">
     {{if eq .polling "Running"}}
       <span class="tag is-warning">Running</span>
-      <form action="/cancel" method="post">
+      <form action="cancel" method="post">
         <button class="tag is-danger is-light" type="submit">Cancel</button>
       </form>
     {{else}}
@@ -91,7 +100,7 @@ The template is defined as a Go string constant in `routes.go` (so it works in b
   <div class="container content">
     {{.results}}
     {{if ne .polling "Running"}}
-      <form action="/start" method="post">
+      <form action="start" method="post">
         <button class="button is-success" type="submit">Start</button>
       </form>
     {{end}}
@@ -182,19 +191,23 @@ cancelBtn.addEventListener('click', function() { goCancel(); });
 <strong>01 pattern</strong>: JavaScript is the driver. It calls Go functions on a timer, manages button state, and renders HTML from Go's buffer. The page never makes HTTP requests — everything happens through direct function calls between JS and WASM.
 </div>
 
-### Example 01a — service worker (sw.js + demo-sw.html)
+### Example 01a — service worker (`go/templates/sw/`)
+
+The `sw/` subdirectory holds the whole SW integration — each file is hand-written and visible. The `sw.js` vendors the go-wasm-http-server runtime as a local `wasmhttp_sw.js` (not fetched from a CDN) so that Firefox's strict CSP and Enhanced Tracking Protection can't block it:
 
 ```js
-// sw.js — the entire WASM integration:
+// sw.js
 importScripts('wasm_exec.js');
-importScripts('https://cdn.jsdelivr.net/.../sw.js');
+importScripts('wasmhttp_sw.js');   // local copy, not CDN
+
+self.addEventListener('install',  () => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 
 registerWasmHTTPListener('main.wasm', {
-    base: scope,
     passthrough: function(request) {
-        // External CDN resources pass through to network
+        var url = new URL(request.url);
         if (url.hostname !== self.location.hostname) return true;
-        if (url.pathname.endsWith('demo-sw.html')) return true;
+        if (url.pathname.endsWith('/index.html')) return true;
         return false;
     }
 });
@@ -225,5 +238,5 @@ task go-example:01a
 # WASM demo (via docs)
 task docs:build-wasm
 tp pages
-# Navigate to 01a_hello_world_explicit/demo-sw.html
+# Navigate to http://localhost:8080/01a_hello_world_explicit/wasm_demo/sw/
 ```

@@ -1,6 +1,6 @@
 module codeberg.org/hum3/lofigui
 
-go 1.21
+go 1.22
 
 require (
 	github.com/nlepage/go-wasm-http-server/v2 v2.2.1

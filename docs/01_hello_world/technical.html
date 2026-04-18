@@ -39,7 +39,29 @@
 
         <h1 class="title">01 Hello World — Technical Details</h1>
 
-        <p>This page covers the internals of how the simplest lofigui app works: the request lifecycle, polling mechanism, and graceful shutdown.</p>
+        <p>This page covers the internals of how the simplest lofigui app works: the request lifecycle, polling mechanism, graceful shutdown, and the WASM service worker bootstrap.</p>
+
+        <hr>
+
+        <h2 class="title is-4">Service worker WASM bootstrap</h2>
+
+        <p>When the WASM demo runs in the browser, a service worker intercepts HTTP requests and routes them to Go's <code>net/http</code> handlers running inside the WASM binary. The bootstrap sequence has several async phases:</p>
+
+        <figure class="image">
+          <img src="01_sw_bootstrap.svg" alt="Swimlane diagram: service worker WASM bootstrap flow showing page, SW, WASM, and static server interactions">
+        </figure>
+
+        <div class="annotation">
+          <strong>Key insight: handlerPromise.</strong> The <code>go-wasm-http-server</code> library registers a fetch event listener synchronously, but the WASM binary loads asynchronously. All intercepted requests call <code>event.respondWith(handlerPromise.then(handler))</code> — they are <strong>queued</strong> until the Go code calls <code>wasmhttp.Serve(mux)</code>, which resolves the promise. There is no timeout: if the WASM fails to compile, requests hang indefinitely.
+        </div>
+
+        <div class="annotation">
+          <strong>skipWaiting + clients.claim.</strong> By default, a new service worker waits for all tabs using the old worker to close. <code>skipWaiting()</code> activates immediately; <code>clients.claim()</code> takes control of the bootstrap page so that <code>fetch()</code> calls from JavaScript go through the SW rather than directly to the static server.
+        </div>
+
+        <div class="annotation">
+          <strong>Stale SW cleanup.</strong> The bootstrap page calls <code>getRegistrations()</code> and unregisters all existing service workers before registering the new one. Without this, a stale SW from a previous directory layout can intercept requests and serve incorrect responses.
+        </div>
 
         <hr>
 

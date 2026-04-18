@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>01b — Hello World Explicit &#43; gzip - lofigui</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        pre {
+            background-color: #2b2b2b;
+            color: #f8f8f2;
+            padding: 1.25em 1.5em;
+            overflow-x: auto;
+        }
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+            font-size: 0.875em;
+        }
+        code {
+            background-color: #f5f5f5;
+            color: #e83e8c;
+            padding: 0.125em 0.375em;
+            border-radius: 3px;
+        }
+        pre.mermaid {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="is-active"><a href="#" aria-current="page">01b — Hello World Explicit &#43; gzip</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+</style>
+<h1 id="01b--hello-world-explicit--gzip">01b — Hello World Explicit + gzip</h1>
+<p>Same as <a href="../01a_hello_world_explicit/index.html">01a</a> — explicit routes, hand-written service worker — plus one optimisation: the WASM binary is shipped gzipped and decompressed in the browser. The Go code is byte-identical to 01a; all the interesting work happens in the SW bootstrap.</p>
+<div class="buttons">
+<a href="wasm_demo/sw/" class="button is-primary">Launch Demo</a>
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01b_hello_world_explicit_gzip" class="button is-light">Source on Codeberg</a>
+</div>
+<hr>
+<h2 id="why-do-this">Why do this?</h2>
+<p>A Go WASM &quot;hello world&quot; is ~11 MB uncompressed and ~2.8 MB gzipped. Production static hosts (GitHub Pages, Cloudflare Pages, Netlify) negotiate <code>Content-Encoding: gzip</code> for you and you don't have to care. Hosts that don't — or when you want explicit control over which variant the client gets — this pattern serves a raw <code>.wasm.gz</code>, decompresses it client-side, and feeds the bytes to the SW.</p>
+<div class="annotation">
+<strong>Why layer this on top of 01a rather than hide it behind an option?</strong> The decompression step has real moving parts: <code>DecompressionStream</code>, a named Cache entry whose URL must match the SW's resolved <code>main.wasm</code> path, and a hand-set <code>Content-Type</code>. Hiding those behind a flag makes debugging awful; showing them turns them into exhibits. If any of the pieces goes wrong, the symptom (usually a stuck "Compiling WASM..." spinner) is much easier to diagnose when you can read the five-step promise chain in front of you.
+</div>
+<hr>
+<h2 id="the-five-step-bootstrap">The five-step bootstrap</h2>
+<p>Read <code>go/templates/sw/index.html</code> alongside this. Each numbered comment in that file corresponds to one step below:</p>
+<ol>
+<li><strong>Fetch <code>main.wasm.gz</code> as-is.</strong> The file is served with <code>Content-Type: application/gzip</code> (not <code>application/wasm</code> + <code>Content-Encoding: gzip</code>), so the browser hands us the raw compressed bytes instead of auto-decoding.</li>
+<li><strong>Pipe through <code>DecompressionStream('gzip')</code>.</strong> The browser's native streaming decompressor. Output is a <code>ReadableStream</code> of raw WASM bytes, consumed via <code>new Response(...).blob()</code>.</li>
+<li><strong>Cache the decompressed blob.</strong> Open <code>caches.open('wasm-gz-01b')</code>, <code>cache.put(wasmUrl, new Response(blob, {headers: {'Content-Type': 'application/wasm'}}))</code>. Two details matter here:
+<ul>
+<li>The cache name is example-scoped (<code>wasm-gz-01b</code>) so other gzipped examples can't collide.</li>
+<li>The URL key is resolved from <code>location.href</code>, so it matches whatever <code>registerWasmHTTPListener('main.wasm', …)</code> asks for at runtime.</li>
+</ul>
+</li>
+<li><strong>Register the service worker</strong> with <code>cacheName: 'wasm-gz-01b'</code>. The go-wasm-http-server runtime reads from the named cache first and only falls back to the network if that's a miss. Because step 3 just wrote a match, the SW finds the bytes instantly.</li>
+<li><strong>Poll <code>./favicon.ico</code>.</strong> The SW needs one fetch to instantiate the WASM and register its handler. Favicon is the cheapest probe; when it comes back 200, redirect to <code>./</code> which the SW now serves from the Go app.</li>
+</ol>
+<pre><code class="language-js">// go/templates/sw/index.html — the core promise chain
+fetch('main.wasm.gz')
+  .then(resp =&gt; {
+    const ds = new DecompressionStream('gzip');
+    return new Response(resp.body.pipeThrough(ds)).blob();
+  })
+  .then(blob =&gt; caches.open('wasm-gz-01b').then(cache =&gt; {
+    const wasmUrl = new URL('main.wasm', location.href).href;
+    return cache.put(wasmUrl, new Response(blob, {
+      headers: {'Content-Type': 'application/wasm'}
+    }));
+  }))
+  .then(() =&gt; navigator.serviceWorker.register('sw.js'))
+  .then(() =&gt; navigator.serviceWorker.ready)
+  .then(() =&gt; waitForWasm());
+</code></pre>
+<hr>
+<h2 id="what-the-sw-itself-looks-like">What the SW itself looks like</h2>
+<p>Almost the same as 01a — just two lines different (the <code>cacheName</code> and the variant-specific cache scope):</p>
+<pre><code class="language-js">// go/templates/sw/sw.js
+importScripts('wasm_exec.js');
+importScripts('wasmhttp_sw.js');
+
+self.addEventListener('install',  () =&gt; self.skipWaiting());
+self.addEventListener('activate', e =&gt; e.waitUntil(clients.claim()));
+
+registerWasmHTTPListener('main.wasm', {
+    cacheName: 'wasm-gz-01b',   // ← the one meaningful line vs 01a
+    passthrough: function(request) {
+        var url = new URL(request.url);
+        if (url.hostname !== self.location.hostname) return true;
+        if (url.pathname.endsWith('/index.html')) return true;
+        return false;
+    }
+});
+</code></pre>
+<hr>
+<h2 id="recovering-from-a-stuck-service-worker">Recovering from a stuck service worker</h2>
+<p>Every SW-based demo in this repo ships a tiny recovery stub next to its main entry point. For 01b that's <code>wasm_demo/demo-sw.html</code> — a static HTML page served by the host (not the SW), which runs a short script to unregister any SW whose scope is a prefix of the current URL and then redirects to the canonical <code>./sw/</code> entry.</p>
+<p>If the demo gets stuck (&quot;Compiling WASM...&quot; spinning indefinitely, or a blank page), navigate to:</p>
+<pre><code>/01b_hello_world_explicit_gzip/wasm_demo/demo-sw.html
+</code></pre>
+<p>That path is outside the SW's <code>sw/</code> scope, so the static host serves it unconditionally. It cleans up any ancestor-scoped registration and redirects — the bootstrap page it lands on does its own unregister-before-register, so a child-scoped stale SW gets replaced too. If even that fails, you're in DevTools territory (Application → Service Workers → Unregister + Cache Storage → Delete <code>wasm-gz-01b</code>).</p>
+<hr>
+<h2 id="failure-modes-to-know-about">Failure modes to know about</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Usual cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stuck &quot;Compiling WASM...&quot; forever</td>
+<td>Cache URL mismatch. The SW is asking for <code>…/main.wasm</code> but the bootstrap wrote to a different URL. Make sure <code>new URL('main.wasm', location.href).href</code> resolves the same way in both places.</td>
+</tr>
+<tr>
+<td>&quot;Incorrect response MIME type&quot; error</td>
+<td>Forgot to set <code>Content-Type: application/wasm</code> on the cached <code>Response</code>. <code>WebAssembly.instantiateStreaming</code> refuses to parse non-wasm content types.</td>
+</tr>
+<tr>
+<td>Works once, fails after reload</td>
+<td>Stale cached blob from a previous build. Bump the cache name (append a version), or clear site data in DevTools.</td>
+</tr>
+<tr>
+<td>Works in Chrome, stuck in Firefox</td>
+<td>Usually a loading-order issue — register the SW only AFTER <code>cache.put</code> resolves, and use <code>updateViaCache: 'none'</code> to prevent HTTP-cache shadowing.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="running">Running</h2>
+<pre><code class="language-bash"># Server mode (no gzip involved — server serves the normal binary)
+task go-example:01b
+# Opens http://localhost:1342
+
+# WASM demo (via docs)
+task docs:build-wasm
+tp pages
+# Navigate to http://localhost:8080/01b_hello_world_explicit_gzip/wasm_demo/sw/
+</code></pre>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

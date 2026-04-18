@@ -35,8 +35,9 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 
 | # | Name | Description |
 |---|------|-------------|
-| [01](01_hello_world/) | Hello World | Async with polling |
-| [01a](01a_hello_world_explicit/) | Hello World Explicit | Explicit handlers + service worker WASM |
+| [01](01_hello_world/) | Hello World (compact) | `app.RunWASM()` — library auto-generates the SW bootstrap |
+| [01a](01a_hello_world_explicit/) | Hello World Explicit | Same behaviour as 01, every wire visible: `setupRoutes()` + hand-written SW bootstrap |
+| [01b](01b_hello_world_explicit_gzip/) | Hello World Explicit + gzip | 01a + `DecompressionStream` layer for gzipped WASM |
 | [02](02_svg_graph/) | Output Showcase | All output types: Print, Markdown, HTML, Table, SVG |
 | [03](03_style_sampler/) | Style Sampler | WASM with template inheritance |
 | [06](06_notes.svg) | Notes CRUD | Form POST handlers |

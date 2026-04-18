@@ -273,6 +273,7 @@ tasks:
       # Example documentation pages (from examples/NN_name/docs.md)
       - task-plus md2html --file examples/01_hello_world/index.md --dst docs/01_hello_world
       - task-plus md2html --file examples/01a_hello_world_explicit/index.md --dst docs/01a_hello_world_explicit
+      - task-plus md2html --file examples/01b_hello_world_explicit_gzip/index.md --dst docs/01b_hello_world_explicit_gzip
       - task-plus md2html --file examples/02_svg_graph/index.md --dst docs/02_svg_graph
       - task-plus md2html --file examples/03_style_sampler/index.md --dst docs/03_style_sampler
       - task-plus md2html --file examples/05_demo_app/index.md --dst docs/05_demo_app
@@ -306,94 +307,103 @@ tasks:
       WASM_EXEC_JS:
         sh: find $(go env GOROOT) -name wasm_exec.js -print -quit
     cmds:
-      # 01 Hello World
-      - mkdir -p docs/01_hello_world
+      # 01 Hello World (compact plain — library CLI generates the SW bootstrap)
+      - rm -rf docs/01_hello_world/wasm_demo
       - cd examples/01_hello_world/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
-      - cp "{{.WASM_EXEC_JS}}" docs/01_hello_world/
-      - cp examples/01_hello_world/go/main.wasm docs/01_hello_world/
-      - cp examples/01_hello_world/templates/demo.html docs/01_hello_world/demo.html
-      - cp examples/01_hello_world/templates/demo-gz.html docs/01_hello_world/demo-gz.html
-      - cp examples/01_hello_world/templates/sw.js docs/01_hello_world/sw.js
-      - cp examples/01_hello_world/templates/sw-gz.js docs/01_hello_world/sw-gz.js
+      - go run ./cmd/wasm-deploy --dir=docs/01_hello_world/wasm_demo --title="01 — Hello World" --wasm=examples/01_hello_world/go/main.wasm --recovery-stubs=demo.html,demo-gz.html
       - rm examples/01_hello_world/go/main.wasm
-      # 01a Hello World Explicit (service worker)
-      - mkdir -p docs/01a_hello_world_explicit
+      # 01a Hello World Explicit (service worker — hand-written templates/sw/)
+      - rm -rf docs/01a_hello_world_explicit/wasm_demo
+      - mkdir -p docs/01a_hello_world_explicit/wasm_demo/sw
       - cd examples/01a_hello_world_explicit/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
-      - cp "{{.WASM_EXEC_JS}}" docs/01a_hello_world_explicit/
-      - cp examples/01a_hello_world_explicit/go/main.wasm docs/01a_hello_world_explicit/
-      - cp examples/01a_hello_world_explicit/templates/index.html docs/01a_hello_world_explicit/demo.html
-      - cp examples/01a_hello_world_explicit/templates/sw.js docs/01a_hello_world_explicit/
-      - cp examples/01a_hello_world_explicit/templates/demo-sw.html docs/01a_hello_world_explicit/
+      - cp examples/01a_hello_world_explicit/go/templates/wasm_demo_index.html docs/01a_hello_world_explicit/wasm_demo/index.html
+      - cp examples/01a_hello_world_explicit/go/templates/demo-sw.html docs/01a_hello_world_explicit/wasm_demo/demo-sw.html
+      - cp "{{.WASM_EXEC_JS}}" docs/01a_hello_world_explicit/wasm_demo/sw/
+      - cp examples/01a_hello_world_explicit/go/main.wasm docs/01a_hello_world_explicit/wasm_demo/sw/
+      - cp examples/01a_hello_world_explicit/go/templates/sw/index.html docs/01a_hello_world_explicit/wasm_demo/sw/
+      - cp examples/01a_hello_world_explicit/go/templates/sw/sw.js docs/01a_hello_world_explicit/wasm_demo/sw/
+      - cp examples/01a_hello_world_explicit/go/templates/sw/wasmhttp_sw.js docs/01a_hello_world_explicit/wasm_demo/sw/
       - rm examples/01a_hello_world_explicit/go/main.wasm
+      # 01b Hello World Explicit + gzip (hand-written bootstrap with DecompressionStream)
+      - rm -rf docs/01b_hello_world_explicit_gzip/wasm_demo
+      - mkdir -p docs/01b_hello_world_explicit_gzip/wasm_demo/sw
+      - cd examples/01b_hello_world_explicit_gzip/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
+      - cp examples/01b_hello_world_explicit_gzip/go/templates/wasm_demo_index.html docs/01b_hello_world_explicit_gzip/wasm_demo/index.html
+      - cp examples/01b_hello_world_explicit_gzip/go/templates/demo-sw.html docs/01b_hello_world_explicit_gzip/wasm_demo/demo-sw.html
+      - cp "{{.WASM_EXEC_JS}}" docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
+      - cp examples/01b_hello_world_explicit_gzip/go/main.wasm docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
+      - cp examples/01b_hello_world_explicit_gzip/go/templates/sw/index.html docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
+      - cp examples/01b_hello_world_explicit_gzip/go/templates/sw/sw.js docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
+      - cp examples/01b_hello_world_explicit_gzip/go/templates/sw/wasmhttp_sw.js docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
+      - rm examples/01b_hello_world_explicit_gzip/go/main.wasm
       # 02 Output Showcase
       - mkdir -p docs/02_svg_graph
       - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/02_svg_graph/
       - cp examples/02_svg_graph/go/main.wasm docs/02_svg_graph/
-      - cp examples/02_svg_graph/templates/index.html docs/02_svg_graph/demo.html
-      - cp examples/02_svg_graph/templates/app.js docs/02_svg_graph/
+      - cp examples/02_svg_graph/go/templates/index.html docs/02_svg_graph/demo.html
+      - cp examples/02_svg_graph/go/templates/app.js docs/02_svg_graph/
       - rm examples/02_svg_graph/go/main.wasm
-      # 03 Style Sampler (needs template copy for embed)
+      # 03 Style Sampler (templates embedded via go:embed from go/templates/)
       - mkdir -p docs/03_style_sampler
-      - cp -r examples/03_style_sampler/templates examples/03_style_sampler/go/templates
       - cd examples/03_style_sampler/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/03_style_sampler/
       - cp examples/03_style_sampler/go/main.wasm docs/03_style_sampler/
-      - cp examples/03_style_sampler/templates/index.html docs/03_style_sampler/demo.html
-      - cp examples/03_style_sampler/templates/app.js docs/03_style_sampler/
-      - rm -rf examples/03_style_sampler/go/templates examples/03_style_sampler/go/main.wasm
+      - cp examples/03_style_sampler/go/templates/index.html docs/03_style_sampler/demo.html
+      - cp examples/03_style_sampler/go/templates/app.js docs/03_style_sampler/
+      - rm examples/03_style_sampler/go/main.wasm
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/07_water_tank/
       - cp examples/07_water_tank/go/main.wasm docs/07_water_tank/
-      - cp examples/07_water_tank/templates/index.html docs/07_water_tank/demo.html
-      - cp examples/07_water_tank/templates/app.js docs/07_water_tank/
+      - cp examples/07_water_tank/go/templates/index.html docs/07_water_tank/demo.html
+      - cp examples/07_water_tank/go/templates/app.js docs/07_water_tank/
       - rm examples/07_water_tank/go/main.wasm
       # 08 Water Tank Multi-Page
       - mkdir -p docs/08_water_tank_multi
       - cd examples/08_water_tank_multi/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/08_water_tank_multi/
       - cp examples/08_water_tank_multi/go/main.wasm docs/08_water_tank_multi/
-      - cp examples/08_water_tank_multi/templates/index.html docs/08_water_tank_multi/demo.html
-      - cp examples/08_water_tank_multi/templates/app.js docs/08_water_tank_multi/
+      - cp examples/08_water_tank_multi/go/templates/index.html docs/08_water_tank_multi/demo.html
+      - cp examples/08_water_tank_multi/go/templates/app.js docs/08_water_tank_multi/
       - rm examples/08_water_tank_multi/go/main.wasm
       # 09 Water Tank HTMX
       - mkdir -p docs/09_water_tank_htmx
       - cd examples/09_water_tank_htmx/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/09_water_tank_htmx/
       - cp examples/09_water_tank_htmx/go/main.wasm docs/09_water_tank_htmx/
-      - cp examples/09_water_tank_htmx/templates/index.html docs/09_water_tank_htmx/demo.html
-      - cp examples/09_water_tank_htmx/templates/app.js docs/09_water_tank_htmx/
-      - cp examples/09_water_tank_htmx/templates/sw.js docs/09_water_tank_htmx/
-      - cp examples/09_water_tank_htmx/templates/demo-sw.html docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/go/templates/index.html docs/09_water_tank_htmx/demo.html
+      - cp examples/09_water_tank_htmx/go/templates/app.js docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/go/templates/sw.js docs/09_water_tank_htmx/
+      - cp examples/09_water_tank_htmx/go/templates/demo-sw.html docs/09_water_tank_htmx/
       - rm examples/09_water_tank_htmx/go/main.wasm
       # 10 Water Tank Maintenance
       - mkdir -p docs/10_water_tank_maintenance
       - cd examples/10_water_tank_maintenance/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/10_water_tank_maintenance/
       - cp examples/10_water_tank_maintenance/go/main.wasm docs/10_water_tank_maintenance/
-      - cp examples/10_water_tank_maintenance/templates/index.html docs/10_water_tank_maintenance/demo.html
-      - cp examples/10_water_tank_maintenance/templates/app.js docs/10_water_tank_maintenance/
+      - cp examples/10_water_tank_maintenance/go/templates/index.html docs/10_water_tank_maintenance/demo.html
+      - cp examples/10_water_tank_maintenance/go/templates/app.js docs/10_water_tank_maintenance/
       - rm examples/10_water_tank_maintenance/go/main.wasm
       # 11 Water Tank Storage
       - mkdir -p docs/11_water_tank_storage
       - cd examples/11_water_tank_storage/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/11_water_tank_storage/
       - cp examples/11_water_tank_storage/go/main.wasm docs/11_water_tank_storage/
-      - cp examples/11_water_tank_storage/templates/index.html docs/11_water_tank_storage/demo.html
-      - cp examples/11_water_tank_storage/templates/app.js docs/11_water_tank_storage/
+      - cp examples/11_water_tank_storage/go/templates/index.html docs/11_water_tank_storage/demo.html
+      - cp examples/11_water_tank_storage/go/templates/app.js docs/11_water_tank_storage/
       - rm examples/11_water_tank_storage/go/main.wasm
       # 12 Batch Yield
       - mkdir -p docs/12_batch_yield
       - cd examples/12_batch_yield/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - cp "{{.WASM_EXEC_JS}}" docs/12_batch_yield/
       - cp examples/12_batch_yield/go/main.wasm docs/12_batch_yield/
-      - cp examples/12_batch_yield/templates/index.html docs/12_batch_yield/demo.html
-      - cp examples/12_batch_yield/templates/app.js docs/12_batch_yield/
+      - cp examples/12_batch_yield/go/templates/index.html docs/12_batch_yield/demo.html
+      - cp examples/12_batch_yield/go/templates/app.js docs/12_batch_yield/
       - rm examples/12_batch_yield/go/main.wasm
       # Gzip all WASM binaries for hosts that support pre-compressed assets
-      - find docs -name "main.wasm" -exec gzip -9 -k {} \;
+      - find docs -name "main.wasm" -exec gzip -9 -f -k {} \;
 
 
   go-example:11:
