@@ -118,7 +118,7 @@ type App struct {
 	// the current UTC time. Override for an exact build timestamp via
 	// -ldflags="-X main.buildDate=..." and then `app.BuildDate = buildDate`.
 	BuildDate     string
-	actionRunning bool // Whether an action is currently running (singleton active model)
+	actionRunning bool   // Whether an action is currently running (singleton active model)
 	polling       bool   // Whether auto-refresh polling is enabled
 	PollCount     int    // Number of polling cycles
 	refreshTime   int    // Seconds between refresh when polling
