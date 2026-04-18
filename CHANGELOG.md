@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.35] - 2026-04-18
+
+ - 01 graphics!
+
 ## [0.17.34] - 2026-04-14
 
  - Add App.RunWASM() for service worker WASM and switch example 01 to use it
