@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Research: Philosophy - lofigui</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="/assets/bulma.min.css">
     <style>
         pre {
             background-color: #2b2b2b;
@@ -35,7 +35,7 @@
 <body>
     <nav class="navbar is-primary">
         <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
+            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
         </div>
     </nav>
     <section class="section">
@@ -127,7 +127,7 @@
 <td>Teletype</td>
 <td>Full (App + polling)</td>
 <td>None/WASM low</td>
-<td><a href="01_hello_world/">01</a> (Hello World), <a href="02_chart.svg">02</a> (Output Showcase)</td>
+<td><a href="01_hello_world/">01</a> (Hello World), <a href="01a_hello_world_explicit/">01a</a> (Explicit), <a href="01b_hello_world_explicit_gzip/">01b</a> (Explicit + gzip), <a href="02_svg_graph/">02</a> (Output Showcase)</td>
 </tr>
 <tr>
 <td>2</td>
@@ -163,7 +163,7 @@
 <h3 id="1-teletype">1. Teletype</h3>
 <p><img src="teletype.svg" alt="Animated teletype"></p>
 <p>Named after old-fashioned teletypes that print on continuous rolls of paper. You start a process, it prints output until it finishes — there is no interactivity until the end. You can stop it, but you cannot steer it. The server renders the complete page and the browser reloads via polling, but the user is purely a spectator.</p>
-<p><em>lofigui examples: 01 (Hello World), 02 (SVG Graph output showcase).</em></p>
+<p><em>lofigui examples: 01 (Hello World), 01a (Hello World Explicit), 01b (Hello World Explicit + gzip), 02 (Output Showcase).</em></p>
 <h3 id="2-teletype-web">2. Teletype+ web</h3>
 <p><img src="teletype-web.svg" alt="Teletype in a web page"></p>
 <p>Where Level 1 is like running a CLI program, Level 2 embeds that teletype in a web application. The command line gets a configurable UI — dialog forms for parameters, navigation between pages, and the full range of HTML form elements. Think of it as wrapping a CLI tool in a web-based front end.</p>

@@ -1,3 +1,7 @@
+// Hand-rolled SVG chart helpers — kept minimal for the demo so the example
+// has zero charting dependencies. For production use, reach for a real
+// charting library such as codeberg.org/hum3/gogal (used in model.go for
+// the line chart) — gogal handles axes, scales, and theming properly.
 package main
 
 import (

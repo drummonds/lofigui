@@ -10,62 +10,37 @@ import (
 	"codeberg.org/hum3/lofigui"
 )
 
-var controllers map[string]*lofigui.Controller
-
-func handleStyle(w http.ResponseWriter, r *http.Request, templateName string) {
-	ctrl := controllers[templateName]
-	content := sampleOutput()
-	ctrl.RenderTemplate(w, lofigui.TemplateContext{
-		"results":      template.HTML(content),
-		"current_path": r.URL.Path,
-	})
+// pathToTemplate maps HTTP URL paths to the layout template that serves them.
+// The same map is mirrored in templates/app.js so the WASM build routes
+// in-page links without reloading.
+var pathToTemplate = map[string]string{
+	"/":                          "home.html",
+	"/style/scrolling":           "style_scrolling.html",
+	"/style/fixed":               "style_fixed.html",
+	"/style/three-panel-nav":     "style_three_panel_nav.html",
+	"/style/three-panel-controls": "style_three_panel_controls.html",
+	"/style/fullwidth":           "style_fullwidth.html",
 }
 
 func main() {
-	tplDir := "templates"
-	controllers = make(map[string]*lofigui.Controller)
+	controllers := loadControllers()
 
-	templates := []string{
-		"home.html",
-		"style_scrolling.html",
-		"style_fixed.html",
-		"style_three_panel_nav.html",
-		"style_three_panel_controls.html",
-		"style_fullwidth.html",
+	for path, name := range pathToTemplate {
+		tpl := name
+		http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+			if path == "/" && r.URL.Path != "/" {
+				http.NotFound(w, r)
+				return
+			}
+			controllers[tpl].RenderTemplate(w, lofigui.TemplateContext{
+				"results":      template.HTML(sampleOutput()),
+				"current_path": r.URL.Path,
+			})
+		})
 	}
-
-	for _, name := range templates {
-		ctrl, err := lofigui.NewControllerFromDir(tplDir, name)
-		if err != nil {
-			panic(fmt.Sprintf("template %s: %v", name, err))
-		}
-		controllers[name] = ctrl
-	}
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		handleStyle(w, r, "home.html")
-	})
-	http.HandleFunc("/style/scrolling", func(w http.ResponseWriter, r *http.Request) {
-		handleStyle(w, r, "style_scrolling.html")
-	})
-	http.HandleFunc("/style/fixed", func(w http.ResponseWriter, r *http.Request) {
-		handleStyle(w, r, "style_fixed.html")
-	})
-	http.HandleFunc("/style/three-panel-nav", func(w http.ResponseWriter, r *http.Request) {
-		handleStyle(w, r, "style_three_panel_nav.html")
-	})
-	http.HandleFunc("/style/three-panel-controls", func(w http.ResponseWriter, r *http.Request) {
-		handleStyle(w, r, "style_three_panel_controls.html")
-	})
-	http.HandleFunc("/style/fullwidth", func(w http.ResponseWriter, r *http.Request) {
-		handleStyle(w, r, "style_fullwidth.html")
-	})
 
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
+	http.HandleFunc("/assets/bulma.min.css", lofigui.ServeBulma)
 
 	fmt.Println("Style Sampler running at http://localhost:1340")
 	http.ListenAndServe(":1340", nil)
