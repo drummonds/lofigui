@@ -330,14 +330,17 @@ func testGoExampleStructure(t *testing.T) {
 			},
 		},
 		{
+			// 03 uses the service-worker WASM pattern (like 01/02) — no
+			// JS bridge, no templates/index.html or templates/app.js.
 			name: "03_style_sampler",
 			path: "examples/03_style_sampler",
 			requiredFiles: []string{
 				"go/main.go",
+				"go/main_wasm.go",
+				"go/model.go",
 				"go/go.mod",
-				"go/build.sh",
-				"go/templates/index.html",
-				"go/templates/app.js",
+				"go/templates/base.html",
+				"go/templates/home.html",
 				"README.md",
 			},
 		},

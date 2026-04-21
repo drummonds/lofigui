@@ -366,14 +366,16 @@ tasks:
       - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
       - go run ./cmd/wasm-deploy --dir=docs/02_svg_graph/wasm_demo --title="02 — Output Showcase" --wasm=examples/02_svg_graph/go/main.wasm --recovery-stubs=demo.html
       - rm examples/02_svg_graph/go/main.wasm
-      # 03 Style Sampler (templates embedded via go:embed from go/templates/)
-      - mkdir -p docs/03_style_sampler
+      # 03 Style Sampler (compact — library CLI generates the SW bootstrap).
+      # Multi-route SW demo: templates use <base href> + relative links so the
+      # SW scope ("/03_style_sampler/wasm_demo/") routes every navigation to
+      # the Go mux.
+      - rm -rf docs/03_style_sampler/wasm_demo
       - cd examples/03_style_sampler/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
-      - cp "{{.WASM_EXEC_JS}}" docs/03_style_sampler/
-      - cp examples/03_style_sampler/go/main.wasm docs/03_style_sampler/
-      - cp examples/03_style_sampler/go/templates/index.html docs/03_style_sampler/demo.html
-      - cp examples/03_style_sampler/go/templates/app.js docs/03_style_sampler/
+      - go run ./cmd/wasm-deploy --dir=docs/03_style_sampler/wasm_demo --title="03 — Style Sampler" --wasm=examples/03_style_sampler/go/main.wasm --recovery-stubs=demo.html
       - rm examples/03_style_sampler/go/main.wasm
+      # Drop the pre-SW artifacts from the previous flat layout
+      - rm -f docs/03_style_sampler/main.wasm docs/03_style_sampler/main.wasm.gz docs/03_style_sampler/app.js docs/03_style_sampler/wasm_exec.js docs/03_style_sampler/demo.html
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
