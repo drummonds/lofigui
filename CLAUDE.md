@@ -2,7 +2,9 @@
 
 ## What is lofigui
 
-lofigui is a lightweight web-UI framework with dual Python and Go implementations. It provides a **print-like interface** for building server-side rendered HTML applications: you call `print()`, `markdown()`, `html()`, and `table()` to accumulate HTML in a buffer, then render it into a template. It uses **Bulma CSS** for styling, **Jinja2** (Python) or **html/template** (Go) for templates, and **FastAPI** (Python) or **net/http** (Go) as the web server.
+lofigui is a lightweight web-UI framework with dual Python and Go implementations. It provides a **print-like interface** for building server-side rendered HTML applications: you call `print()`, `markdown()`, `html()`, and `table()` to accumulate HTML in a buffer, then render it into a template. It uses **Bulma CSS** for styling (vendored at `/assets/bulma.min.css` — no CDN), **Jinja2** (Python) or **html/template** (Go) for templates, and **FastAPI** (Python) or **net/http** (Go) as the web server.
+
+**For WASM, lofigui runs `net/http` handlers inside a service worker** via `go-wasm-http-server`. The same `*http.ServeMux` handles both the server and WASM builds — see the "Standard WASM pattern" section below. This is the intended way to build any Go lofigui example that has a browser-only demo.
 
 ## Project structure
 
@@ -11,10 +13,13 @@ lofigui/
   lofigui.go              # Go: Print, Markdown, HTML, Table, Buffer, Reset, Context
   controller.go           # Go: Controller (html/template wrapper)
   app.go                  # Go: App (controller lifecycle, polling, action state)
-  app_wasm.go             # Go: App.RunWASM (WASM-only entry point)
+  app_wasm.go             # Go: App.RunWASM + WASMScopePath (WASM-only entry point)
   favicon.go              # Go: ServeFavicon handler
+  bulma.go                # Go: BulmaCSS (vendored) + ServeBulma handler
+  bulma.min.css           # Vendored Bulma 1.0.4 (MIT) — single source of truth,
+                          # embedded via go:embed + mirrored into docs/assets/ by docs:build
   wasmassets/             # Embedded WASM SW bootstrap (bootstrap.html, sw.js, wasmhttp_sw.js)
-    wasmassets.go          #   Deploy(cfg) API — emits bootstrap + SW into a dir
+    wasmassets.go          #   Deploy(cfg) API — emits bootstrap + SW + bulma.min.css into a dir
     templates/             #   Template sources embedded via go:embed
   cmd/
     wasm-deploy/           # Thin CLI wrapping wasmassets.Deploy. Used from Taskfile.
@@ -40,8 +45,11 @@ lofigui/
     01b_hello_world_explicit_gzip/ # 01a + DecompressionStream layer: ships main.wasm.gz,
                                    # decompresses client-side into cache 'wasm-gz-01b',
                                    # SW reads from that cache.
-    02_svg_graph/          # Level 2: Scrolling output showcase (Python + Go)
-    03_style_sampler/      # Level 6: WASM with template inheritance
+    02_svg_graph/          # Level 2: Scrolling output showcase. Compact app.Run/RunWASM.
+    03_style_sampler/      # Level 6: Multi-route SW WASM app. model.go exposes a shared
+                           # buildMux(basePrefix); main.go + main_wasm.go are one-liner
+                           # entry points. Templates use <base href="{{.base}}"> so the
+                           # same markup works at "/" (server) and under the SW scope.
     05_demo_app/           # Python template inheritance
     06_notes_crud/         # Level 4: CRUD app (Python + Go)
     07_water_tank/         # Level 3: SVG schematic, simulation goroutine, WASM-compatible
@@ -52,10 +60,10 @@ lofigui/
 
 ## Example documentation
 
-Each example has two separate pages in `docs/NN_name/`:
+Each example has two separate locations under `docs/NN_name/`:
 
 - **`index.html`** — documentation page, rendered from `examples/NN_name/index.md` via `task-plus md2html`. Contains screenshots, annotated code walkthrough, explanation. **Never overwritten by `docs:build-wasm`.**
-- **`demo.html`** — WASM demo page, copied from `examples/NN_name/templates/index.html`. Clean standalone page with Start/Cancel buttons.
+- **`wasm_demo/`** — self-contained service-worker demo directory emitted by `go run ./cmd/wasm-deploy`. Contains the SW bootstrap (`index.html`), `sw.js`, `wasmhttp_sw.js`, `main.wasm`, `wasm_exec.js`, vendored `bulma.min.css`, and one or more recovery stubs (`demo.html`, `demo-gz.html`). The docs `index.html` links to `wasm_demo/` from its "Launch Demo" button.
 
 See `docs/examples.md` for the full standard: required sections, CSS classes, build process, and interactivity spectrum mapping.
 
@@ -207,15 +215,190 @@ app.Sleep(1 * time.Second)  // cancellation-aware sleep
 ctx := app.Context()         // get raw context for database calls, HTTP clients, etc.
 ```
 
-### RunModel (WASM support)
+### WASM — `App.RunWASM` and the compact pattern
 
-`RunModel` is the WASM-friendly equivalent of `Handle` — same lifecycle (reset, start action, recover cancellation, end action) without HTTP:
+For apps that just need one model rendered into the default template, `App.RunWASM(model)` is the WASM equivalent of `App.Run`. It wires display/start/cancel/favicon/bulma routes on an `http.ServeMux` and serves them through a service worker via `go-wasm-http-server`:
 
 ```go
-app.RunModel(model)  // resets buffer, starts action, runs model in goroutine
+//go:build js && wasm
+
+func main() {
+    app := lofigui.NewApp()
+    app.Version = "Output Showcase v1.0"
+    app.RunWASM(model)
+}
 ```
 
-This allows the same `model(app *lofigui.App)` function to be shared between server and WASM builds (see example 01 `model.go`).
+This is what examples 01 and 02 use. For anything with custom routes, multiple layouts, or a shared mux across server and WASM, use the pattern in the next section.
+
+### Standard WASM pattern — shared mux, server + service-worker entrypoints
+
+**Prescribed for any new Go lofigui example that has both a server build and a browser-only WASM demo.** Don't reach for `syscall/js` / `goRenderPage` JS bridges — route everything through `net/http` and let the service worker be the only JS/Go integration point. The WASM binary ends up a bit larger, but the model and routing code are literally the same source as the server build.
+
+#### Three-file layout
+
+```
+examples/NN_name/go/
+  main.go        // +build !(js && wasm)  — server entry point
+  main_wasm.go   // +build js && wasm     — WASM entry point
+  model.go       // shared: //go:embed templates, routes, handlers
+  templates/
+    base.html    // <base href="{{.base}}"> + Bulma + block placeholders
+    home.html    // {{define "title"}}, {{define "content"}}, …
+    …
+```
+
+#### `model.go` owns everything shared
+
+Route table, template loader, and the `*http.ServeMux` builder all live here. Both entry points consume it:
+
+```go
+package main
+
+import (
+    "embed"
+    "html/template"
+    "net/http"
+
+    "codeberg.org/hum3/lofigui"
+)
+
+//go:embed templates
+var templateFS embed.FS
+
+var pathToTemplate = map[string]string{
+    "/":                "home.html",
+    "/style/scrolling": "style_scrolling.html",
+    // …
+}
+
+func loadControllers() map[string]*lofigui.Controller {
+    ctrls := make(map[string]*lofigui.Controller, len(pathToTemplate))
+    for _, name := range pathToTemplate {
+        if _, seen := ctrls[name]; seen { continue }
+        ctrl, err := lofigui.NewControllerFromFS(templateFS, "templates", name)
+        if err != nil { panic(err) }
+        ctrls[name] = ctrl
+    }
+    return ctrls
+}
+
+// buildMux is the real app. main.go and main_wasm.go just hand the returned
+// mux to their respective serving runtime.
+//
+// basePrefix is rendered into <base href="..."> so relative links in the
+// templates resolve correctly whether the app is hosted at the site root
+// ("/") or under a service-worker scope ("/NN_name/wasm_demo/").
+func buildMux(basePrefix string) *http.ServeMux {
+    controllers := loadControllers()
+    mux := http.NewServeMux()
+
+    for p, name := range pathToTemplate {
+        tpl := name
+        pattern := "GET " + p
+        if p == "/" { pattern = "GET /{$}" } // exact-match "/", not a prefix
+        mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+            controllers[tpl].RenderTemplate(w, lofigui.TemplateContext{
+                "results":      template.HTML(sampleOutput()),
+                "current_path": r.URL.Path,
+                "base":         basePrefix,
+            })
+        })
+    }
+
+    mux.HandleFunc("GET /favicon.ico",          lofigui.ServeFavicon)
+    mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
+    return mux
+}
+```
+
+#### `main.go` — server entry point
+
+```go
+//go:build !(js && wasm)
+
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    fmt.Println("Running at http://localhost:1340")
+    http.ListenAndServe(":1340", buildMux("/"))
+}
+```
+
+#### `main_wasm.go` — WASM entry point
+
+```go
+//go:build js && wasm
+
+package main
+
+import (
+    "strings"
+
+    "codeberg.org/hum3/lofigui"
+    wasmhttp "github.com/nlepage/go-wasm-http-server/v2"
+)
+
+func main() {
+    // lofigui.WASMScopePath reads the SW scope from wasmhttp's JS global.
+    // Normalise to a single trailing slash for <base href>.
+    base := strings.TrimSuffix(lofigui.WASMScopePath(), "/") + "/"
+
+    if _, err := wasmhttp.Serve(buildMux(base)); err != nil { panic(err) }
+    select {} // keep the Go runtime alive to service SW fetches
+}
+```
+
+#### `<base href>` — why and how
+
+The service worker is registered with a scope like `/NN_name/wasm_demo/`. Anything the browser fetches **outside** that scope bypasses the SW and hits the network. To keep in-page navigation inside the scope without rewriting templates per-target, use `<base href="{{.base}}">`:
+
+```html
+<!-- base.html -->
+<head>
+  <meta charset="utf-8">
+  <base href="{{.base}}">
+  <link rel="stylesheet" href="/assets/bulma.min.css">
+  <title>{{block "title" .}}default{{end}}</title>
+</head>
+```
+
+Template hrefs become base-relative, **no leading slash**:
+
+- `href=""` → home (resolves to base)
+- `href="style/scrolling"` → `{base}style/scrolling`
+
+With `base="/"` (server) these resolve to `/` and `/style/scrolling`. With `base="/NN_name/wasm_demo/"` (WASM) they resolve to `/NN_name/wasm_demo/` and `/NN_name/wasm_demo/style/scrolling` — both inside the SW scope. `/assets/bulma.min.css` keeps its leading slash; absolute URLs ignore `<base>`.
+
+#### Taskfile — generating the SW demo
+
+In `docs:build-wasm`, each example adds a block like this (compact pattern, matches 01/02/03):
+
+```yaml
+- rm -rf docs/NN_name/wasm_demo
+- cd examples/NN_name/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
+- go run ./cmd/wasm-deploy --dir=docs/NN_name/wasm_demo --title="NN — Name" --wasm=examples/NN_name/go/main.wasm --recovery-stubs=demo.html
+- rm examples/NN_name/go/main.wasm
+```
+
+`wasm-deploy` emits the SW bootstrap (`index.html`), `sw.js`, `wasmhttp_sw.js`, `main.wasm`, `wasm_exec.js`, `bulma.min.css`, and each recovery stub into the output directory. No custom `build.sh`, no hand-written bootstrap, no `go/templates/index.html` WASM wrapper file.
+
+#### Running locally
+
+- `task go-example:NN` runs the server build on `:1340`.
+- `tp pages` serves the docs site (including `docs/NN_name/wasm_demo/`) on `:8080`; click **Launch Demo** on the example's docs page to exercise the WASM build.
+
+#### What to avoid
+
+- **Don't expose Go functions to JS via `syscall/js`** for navigation — use `net/http` handlers on the shared mux. The SW is the only JS/Go boundary.
+- **Don't create `examples/NN_name/go/templates/index.html`** as a WASM demo wrapper — the wasmassets bootstrap is the wrapper.
+- **Don't add `build.sh`** — the Taskfile builds WASM; adding a `build.sh` flips `task go-example:NN` into WASM-only mode.
+- **Don't hardcode Bulma CDN URLs** — use `/assets/bulma.min.css`; `lofigui.ServeBulma` is registered on the mux.
 
 ### Hold mode (screenshots)
 
@@ -244,7 +427,7 @@ const htmxLayout = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <link rel="stylesheet" href="/assets/bulma.min.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
@@ -322,9 +505,9 @@ Model runs in background like example 01, printing all output types (Markdown, H
 GET / -> same as pattern 1 (async polling), model prints progressively
 ```
 
-### 3. WASM (example 03)
+### 3. WASM with multi-route navigation (example 03)
 
-Go compiled to WASM, served via `build.sh`. No server-side app.
+Go compiled to WASM, served **inside a service worker** via `go-wasm-http-server`. Same `*http.ServeMux` as the server build (see "Standard WASM pattern"). The SW intercepts fetches under its scope and routes them to Go's `net/http` handlers — browser navigation uses plain HTTP, no JS bridge. Templates use `<base href="{{.base}}">` so base-relative links resolve correctly inside the SW scope.
 
 ### 4. CRUD (example 06)
 
@@ -463,7 +646,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 | 01a | Hello World Explicit | Same behaviour, every wire visible: `setupRoutes()` + explicit `wasmhttp.Serve()`; hand-written `templates/sw/` bootstrap; `helloTemplate` extracted to `templates/hello.html` + `go:embed`. | Async polling |
 | 01b | Hello World Explicit + gzip | 01a plus `DecompressionStream` + named cache. Ships `main.wasm.gz` (~2.8 MB), decompresses client-side into cache `wasm-gz-01b`, SW reads from that cache. | Async polling |
 | 02 | Output Showcase | All output types: `Print`, `Printf`, `Markdown`, `HTML`, `Table`, inline SVG charts | Async polling |
-| 03 | Style Sampler | Template inheritance in WASM, `NewControllerFromFS`, multiple page layouts | WASM |
+| 03 | Style Sampler | Shared `buildMux(basePrefix)` + `<base href>`, SW-served multi-route WASM, template inheritance, `NewControllerFromFS` | Standard WASM pattern |
 | 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
 | 06 | Notes CRUD | Form POST handlers, `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly (no App), redirect-after-POST | CRUD |
 | 07 | Water Tank | Generated SVG schematic (`buildSVG()`), simulation goroutine, clickable SVG `<a>` links, dual server/WASM build | Dashboard |
@@ -477,15 +660,16 @@ Each example builds on previous ones. Study them in order to learn the framework
 - **CRUD / forms** — start from 06
 - **Real-time dashboard** — start from 08 (HTTP Refresh) or 09 (HTMX)
 - **Background tasks with progress** — start from 10
-- **Browser-only (no server)** — start from 03 (WASM)
-- **WASM in the browser** — 01 is the minimum (library CLI deploys for you); 01a if you need to customise routes/templates; 01b if you care about download size
+- **Browser-only (no server)** — start from 03 (multi-route SW WASM)
+- **WASM in the browser** — 01 is the minimum for a single-route app (compact `App.Run` / `App.RunWASM`); 03 is the template when you need custom routes or want server and WASM to share a mux; 01a/01b expose the internals when you need to customise routes/templates or ship gzipped WASM
 
 ### WASM service worker notes
 
-- **Auto-generated bootstrap** (01): the library ships bootstrap + SW templates in `wasmassets/`. `cmd/wasm-deploy` emits them into `docs/NN/wasm_demo/` at build time. Each example with a compact WASM demo adds one `wasm-deploy` call to its Taskfile block.
+- **Auto-generated bootstrap** (01, 02, 03): the library ships bootstrap + SW templates in `wasmassets/`. `cmd/wasm-deploy` emits them into `docs/NN/wasm_demo/` at build time, alongside a vendored `bulma.min.css`. Each example with a compact WASM demo adds one `wasm-deploy` call to its Taskfile block. This is the default — reach for a hand-written bootstrap only when you need to demonstrate the mechanics (01a) or ship custom bootstrap logic (01b).
 - **Hand-written bootstrap** (01a, 01b): kept visible under `go/templates/sw/` so readers can see the mechanics. The SW scope is a dedicated subdirectory (`sw/`) so its cache and scope can't collide with other SW demos on the same origin.
 - **Recovery stubs**: every SW demo ships a small HTML page (`demo.html`, `demo-gz.html`, or `demo-sw.html`) *outside* the SW scope. Visiting it unregisters ancestor-scoped SWs and redirects to the canonical entry. Use this when a demo is stuck; fall back to DevTools Application → Service Workers only if the stub itself can't load.
 - **Gzip caveat** (01b): production hosts like GitHub Pages negotiate `Content-Encoding: gzip` transparently. The explicit gzip pattern is for hosts that don't, or when you want client-side control over which variant loads. Don't add gzip behind a one-line option — the moving parts (`DecompressionStream`, named cache, content-type, scope-relative URL key) are worth seeing.
+- **Multi-route navigation**: if the app has more than one page, use the "Standard WASM pattern" (example 03). Shared `buildMux(basePrefix)`, `<base href="{{.base}}">`, base-relative hrefs. The SW handles fetches inside its scope; `/assets/bulma.min.css` (absolute) falls through to the network and hits the vendored file at `docs/assets/`.
 
 ## Running examples / Development commands
 
@@ -509,20 +693,21 @@ task go-example:01       # Hello World (net/http, compact API)
 task go-example:01a      # Hello World Explicit (net/http, explicit setupRoutes)
 task go-example:01b      # Hello World Explicit + gzip (net/http; dev server doesn't gzip)
 task go-example:02       # SVG Graph
-task go-wasm:03          # Style Sampler WASM
+task go-example:03       # Style Sampler (server on :1340). WASM demo is under docs/.
 task go-example:06       # Notes CRUD
 task go-example:07       # Water Tank (SVG dashboard)
 task go-example:08       # Water Tank Multi-Page (HTTP Refresh)
 task go-example:09       # Water Tank HTMX (partial updates)
 task go-example:10       # Water Tank Maintenance (background operations)
-task build-wasm:03       # Build WASM binary only (no serve)
 
 # WASM demos (via the docs static host) — served under docs/NN_*/wasm_demo/
 task docs:build-wasm     # Build all WASM binaries + stage into docs/
 tp pages                 # Serve docs/ on http://localhost:8080
-# Then visit:
-#   /01_hello_world/wasm_demo/                        (compact)
-#   /01a_hello_world_explicit/wasm_demo/sw/           (explicit)
+# Then visit (all served through the SW bootstrap):
+#   /01_hello_world/wasm_demo/                        (compact, App.RunWASM)
+#   /02_svg_graph/wasm_demo/                          (compact, App.RunWASM)
+#   /03_style_sampler/wasm_demo/                      (standard WASM pattern, shared buildMux)
+#   /01a_hello_world_explicit/wasm_demo/sw/           (explicit, hand-written bootstrap)
 #   /01b_hello_world_explicit_gzip/wasm_demo/sw/      (explicit + gzip)
 
 # Go module maintenance
