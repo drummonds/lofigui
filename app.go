@@ -593,30 +593,37 @@ func (app *App) StatusControls(basePrefix string) template.HTML {
 //
 //   - /start  — if no action is running, resets the buffer and launches
 //     modelFunc in a goroutine (via [App.RunModel]), then redirects to the
-//     referrer (or "/" if none).
+//     Referer page (or basePrefix if the Referer is missing).
 //   - /cancel — calls [App.EndAction] to stop the running model and redirects
 //     the same way. Unlike [App.HandleCancel], this does NOT shut the server
 //     down, so it is suitable for long-running multi-page apps.
-func (app *App) RegisterLifecycle(mux *http.ServeMux, modelFunc func(*App)) {
+//
+// basePrefix must match the prefix passed to [App.StatusControls] (e.g. "/"
+// for a server build, or the service-worker scope for a WASM build). It is
+// used as the fallback redirect target when no Referer is available, so
+// lifecycle links stay inside the SW scope.
+func (app *App) RegisterLifecycle(mux *http.ServeMux, modelFunc func(*App), basePrefix string) {
+	fallback := strings.TrimSuffix(basePrefix, "/") + "/"
 	mux.HandleFunc("GET /start", func(w http.ResponseWriter, r *http.Request) {
 		if !app.IsActionRunning() {
 			app.RunModel(modelFunc)
 		}
-		lifecycleRedirect(w, r)
+		lifecycleRedirect(w, r, fallback)
 	})
 	mux.HandleFunc("GET /cancel", func(w http.ResponseWriter, r *http.Request) {
 		app.EndAction()
-		lifecycleRedirect(w, r)
+		lifecycleRedirect(w, r, fallback)
 	})
 }
 
-// lifecycleRedirect redirects to the request's Referer, falling back to "/".
-// Only same-origin paths are followed so an external Referer can't be used to
-// steer navigation.
-func lifecycleRedirect(w http.ResponseWriter, r *http.Request) {
-	dest := "/"
+// lifecycleRedirect redirects to the request's Referer path, falling back to
+// the given URL when no Referer is present. Only the Referer's path+query is
+// used, so a cross-origin Referer can at worst steer navigation within the
+// app's own origin.
+func lifecycleRedirect(w http.ResponseWriter, r *http.Request, fallback string) {
+	dest := fallback
 	if ref := r.Header.Get("Referer"); ref != "" {
-		if u, err := r.URL.Parse(ref); err == nil && u.Host == r.Host {
+		if u, err := r.URL.Parse(ref); err == nil && u.Path != "" {
 			dest = u.RequestURI()
 		}
 	}
