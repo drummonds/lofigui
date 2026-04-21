@@ -11,6 +11,8 @@ One Go codebase, six page layouts, two deployment targets. The same templates re
 
 The `model` function is the **same five-lines-of-teletype** used in [example 01](../01_hello_world/) — `Print("Hello world.")`, a five-count loop with one-second sleeps, `Print("Done.")`. Every layout renders the current lofigui buffer, so whichever style you click into auto-refreshes in place while the counter ticks up. The point of this example is to show that **adding layout variety on top of the same model is a matter of templates, not plumbing**.
 
+Every page's navbar carries a **Start / Cancel** widget driven by the library — the model runs on demand, cancellable mid-flight, and the page you're looking at keeps polling until the buffer stops growing.
+
 **Interactivity level:** 6 — WASM (browser-only, service worker)
 
 <div class="buttons">
@@ -40,12 +42,13 @@ The `model` function is the **same five-lines-of-teletype** used in [example 01]
 
 ## How lofigui helps here
 
-lofigui is deliberately small. For this example it contributes four things:
+lofigui is deliberately small. For this example it contributes five things:
 
 1. **A print-style output buffer** — `lofigui.Print` / `Printf` accumulate HTML in the global lofigui buffer. Every layout's handler reads `lofigui.Buffer()` on each request, so the teletype content is identical in every layout and grows in place as the model runs.
 2. **A template-inheritance loader** — `lofigui.NewControllerFromFS` parses `base.html` alongside the named child template, so Go stdlib `{{block}}`/`{{define}}` works with embedded filesystems — the only source a WASM build can reach.
 3. **One render call, same shape in both builds** — `ctrl.RenderTemplate(w, ctx)` writes to an `http.ResponseWriter` regardless of whether that writer was handed over by `net/http.ListenAndServe` or by `go-wasm-http-server` inside a service worker.
-4. **Built-in `/assets/bulma.min.css`** — `lofigui.ServeBulma` is registered next to the app's routes so Bulma loads without a CDN round-trip, on server and WASM.
+4. **Lifecycle wiring out of the box** — `app.RegisterLifecycle(mux, model)` installs `GET /start` and `GET /cancel` handlers, and `app.StatusControls(basePrefix)` renders a Running/Stopped tag plus Start/Cancel links as an HTML fragment. Drop `{{.status}}` into any navbar and every page drives the same singleton model.
+5. **Built-in `/assets/bulma.min.css`** — `lofigui.ServeBulma` is registered next to the app's routes so Bulma loads without a CDN round-trip, on server and WASM.
 
 Everything else — the routes, the templates, the navigation — is plain Go standard library.
 
@@ -123,6 +126,39 @@ func model(app *lofigui.App) {
 
 ---
 
+## Start / Cancel — baked into lofigui
+
+Unlike the earlier version of this example, the model isn't kicked off at startup. The page loads in a **Stopped** state; clicking **Start** in the navbar fires the model, and the HTTP Refresh polling takes over. **Cancel** stops it mid-flight without shutting the server down.
+
+Two library calls do all the work:
+
+```go
+// buildMux, in model.go
+app.RegisterLifecycle(mux, model)       // wires GET /start and GET /cancel
+// …
+"status": app.StatusControls(basePrefix), // drops the widget into every page's context
+```
+
+`app.StatusControls` renders a small HTML fragment that every navbar template embeds as `{{.status}}`:
+
+```html
+<!-- style_scrolling.html -->
+<div class="navbar-end">
+  <div class="navbar-item"><span class="tag is-success">Default Navbar</span></div>
+  <div class="navbar-item">{{.status}}</div>
+</div>
+```
+
+When stopped, the fragment is a green "Stopped" tag + a Start link; when running, it flips to a yellow "Running" tag + a Cancel link. The `basePrefix` argument means the generated hrefs stay inside the service-worker scope in WASM (`/03_style_sampler/wasm_demo/start`) and resolve to the site root on the server (`/start`).
+
+`RegisterLifecycle`'s `/cancel` handler is different from the root-level `App.HandleCancel` used by `App.Run`: it calls `EndAction` but does **not** shut the server down, because a multi-page app needs to keep serving after a cancel. Both handlers redirect back to the page you came from via the `Referer` header (falling back to `/`).
+
+<div class="annotation">
+<strong>One singleton model across the whole app.</strong> The App holds a single action-running flag, so hitting Start from any page drives the same model, and the Running/Stopped state in every navbar reflects the same global reality. Hitting Start while one is already running is a no-op.
+</div>
+
+---
+
 ## Shared mux — `model.go`
 
 Both `main.go` and `main_wasm.go` delegate the routing table to `model.go`. It embeds `templates/`, parses every layout against `base.html`, and returns a `*http.ServeMux` with all routes wired up:
@@ -153,9 +189,11 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
                 "results":      template.HTML(lofigui.Buffer()),
                 "current_path": r.URL.Path,
                 "base":         basePrefix,
+                "status":       app.StatusControls(basePrefix), // Running/Stopped + Start/Cancel
             })
         })
     }
+    app.RegisterLifecycle(mux, model) // GET /start, GET /cancel
     mux.HandleFunc("GET /favicon.ico",          lofigui.ServeFavicon)
     mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
     return mux
@@ -180,14 +218,13 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
 func main() {
     app := lofigui.NewApp()
     app.SetRefreshTime(1)
-    app.RunModel(model) // kick off the teletype in a background goroutine
 
     fmt.Println("Style Sampler running at http://localhost:1340")
     http.ListenAndServe(":1340", buildMux(app, "/"))
 }
 ```
 
-Four lines. `app.RunModel(model)` launches the model in a goroutine (with cancellation-aware `Sleep` recovery already wired up inside the library). `buildMux(app, "/")` is handed to `http.ListenAndServe`. Base prefix is `"/"` because the server hosts the app at the site root.
+Three lines. No `RunModel` at startup — the model is kicked off by the user via the navbar's **Start** button, and `RegisterLifecycle` (inside `buildMux`) wires the handler that launches the goroutine. Base prefix is `"/"` because the server hosts the app at the site root.
 
 ---
 
@@ -199,7 +236,6 @@ Four lines. `app.RunModel(model)` launches the model in a goroutine (with cancel
 func main() {
     app := lofigui.NewApp()
     app.SetRefreshTime(1)
-    app.RunModel(model)
 
     base := strings.TrimSuffix(lofigui.WASMScopePath(), "/") + "/"
     if _, err := wasmhttp.Serve(buildMux(app, base)); err != nil { panic(err) }
@@ -207,7 +243,7 @@ func main() {
 }
 ```
 
-Same three lines of setup as `main.go`, then `wasmhttp.Serve` registers every handler in the mux on the service-worker fetch pipeline. `lofigui.WASMScopePath()` returns the scope the SW is registered at (e.g. `/03_style_sampler/wasm_demo/`), which becomes the `<base href>` so the templates' relative links land back inside the scope.
+Same setup as `main.go`, then `wasmhttp.Serve` registers every handler in the mux on the service-worker fetch pipeline. `lofigui.WASMScopePath()` returns the scope the SW is registered at (e.g. `/03_style_sampler/wasm_demo/`), which becomes the `<base href>` so the templates' relative links — including the Start/Cancel links emitted by `StatusControls(base)` — land back inside the scope.
 
 <div class="annotation">
 <strong>Why two files at all?</strong> <code>syscall/js</code> (indirectly imported by <code>go-wasm-http-server</code>) does not link on non-WASM targets, and <code>http.ListenAndServe</code> is a runtime no-op under WASM. <code>//go:build</code> tags pick the right entry point at compile time; no runtime switches, no stubs, no conditional imports.
@@ -220,7 +256,7 @@ Same three lines of setup as `main.go`, then `wasmhttp.Serve` registers every ha
 | Aspect | Server (`main.go`) | WASM (`main_wasm.go`) |
 |--------|--------------------|------------------------|
 | Build tag | `!(js && wasm)` | `js && wasm` |
-| App setup | `NewApp` + `SetRefreshTime(1)` + `RunModel(model)` | identical |
+| App setup | `NewApp` + `SetRefreshTime(1)` (model starts on click) | identical |
 | Routing table | `buildMux(app, "/")` from `model.go` | `buildMux(app, scopePath)` from `model.go` |
 | Serving runtime | `http.ListenAndServe(":1340", mux)` | `wasmhttp.Serve(mux)` + `select{}` |
 | Request shape | `http.Request` / `http.ResponseWriter` | `http.Request` / `http.ResponseWriter` |

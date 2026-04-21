@@ -12,7 +12,6 @@ import (
 func main() {
 	app := lofigui.NewApp()
 	app.SetRefreshTime(1)
-	app.RunModel(model) // kick off the teletype in a background goroutine
 
 	// Links in base.html use <base href="{{.base}}"> so relative hrefs
 	// resolve inside the service-worker scope. Normalise to a single

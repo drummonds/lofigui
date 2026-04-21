@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 )
@@ -553,6 +554,73 @@ func (app *App) HandleCancel(redirectURL string) http.HandlerFunc {
 			app.signalDone()
 		}()
 	}
+}
+
+// StatusControls returns a navbar HTML fragment showing Running/Stopped status
+// with Cancel/Start links. It is intended to be rendered into a template's
+// navbar (e.g. as {{.status}}), giving users a consistent way to drive the
+// model lifecycle from any page.
+//
+// basePrefix is the URL prefix the app is mounted under — "/" for a server
+// build, or the service-worker scope path for a WASM build (e.g.
+// "/03_style_sampler/wasm_demo/"). A missing or trailing-slash-less prefix is
+// normalised to end with a single "/".
+//
+// The rendered links target "<basePrefix>start" and "<basePrefix>cancel";
+// wire those routes with [App.RegisterLifecycle].
+func (app *App) StatusControls(basePrefix string) template.HTML {
+	app.mu.RLock()
+	running := app.actionRunning
+	app.mu.RUnlock()
+
+	prefix := strings.TrimSuffix(basePrefix, "/") + "/"
+	if running {
+		return template.HTML(fmt.Sprintf(
+			`<span class="tag is-warning">Running</span>`+
+				`<a href="%scancel" class="tag is-danger is-light ml-1">Cancel</a>`,
+			prefix,
+		))
+	}
+	return template.HTML(fmt.Sprintf(
+		`<span class="tag is-success">Stopped</span>`+
+			`<a href="%sstart" class="tag is-primary is-light ml-1">Start</a>`,
+		prefix,
+	))
+}
+
+// RegisterLifecycle wires "GET /start" and "GET /cancel" on mux so the UI
+// rendered by [App.StatusControls] can drive the model.
+//
+//   - /start  — if no action is running, resets the buffer and launches
+//     modelFunc in a goroutine (via [App.RunModel]), then redirects to the
+//     referrer (or "/" if none).
+//   - /cancel — calls [App.EndAction] to stop the running model and redirects
+//     the same way. Unlike [App.HandleCancel], this does NOT shut the server
+//     down, so it is suitable for long-running multi-page apps.
+func (app *App) RegisterLifecycle(mux *http.ServeMux, modelFunc func(*App)) {
+	mux.HandleFunc("GET /start", func(w http.ResponseWriter, r *http.Request) {
+		if !app.IsActionRunning() {
+			app.RunModel(modelFunc)
+		}
+		lifecycleRedirect(w, r)
+	})
+	mux.HandleFunc("GET /cancel", func(w http.ResponseWriter, r *http.Request) {
+		app.EndAction()
+		lifecycleRedirect(w, r)
+	})
+}
+
+// lifecycleRedirect redirects to the request's Referer, falling back to "/".
+// Only same-origin paths are followed so an external Referer can't be used to
+// steer navigation.
+func lifecycleRedirect(w http.ResponseWriter, r *http.Request) {
+	dest := "/"
+	if ref := r.Header.Get("Referer"); ref != "" {
+		if u, err := r.URL.Parse(ref); err == nil && u.Host == r.Host {
+			dest = u.RequestURI()
+		}
+	}
+	http.Redirect(w, r, dest, http.StatusSeeOther)
 }
 
 // WriteRefreshHeader sets the HTTP Refresh header when polling is active.
