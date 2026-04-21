@@ -10,12 +10,16 @@ import (
 )
 
 func main() {
+	app := lofigui.NewApp()
+	app.SetRefreshTime(1)
+	app.RunModel(model) // kick off the teletype in a background goroutine
+
 	// Links in base.html use <base href="{{.base}}"> so relative hrefs
 	// resolve inside the service-worker scope. Normalise to a single
 	// trailing slash.
 	base := strings.TrimSuffix(lofigui.WASMScopePath(), "/") + "/"
 
-	if _, err := wasmhttp.Serve(buildMux(base)); err != nil {
+	if _, err := wasmhttp.Serve(buildMux(app, base)); err != nil {
 		panic(err)
 	}
 	select {} // keep the Go runtime alive to service SW fetches

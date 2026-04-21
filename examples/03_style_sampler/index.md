@@ -9,6 +9,8 @@
 
 One Go codebase, six page layouts, two deployment targets. The same templates render a multi-page site either from a classic HTTP server (`main.go`) or entirely inside the browser via a service worker (`main_wasm.go`). Both entry points register the **same `*http.ServeMux`** — navigation, routing, and rendering code paths are identical.
 
+The `model` function is the **same five-lines-of-teletype** used in [example 01](../01_hello_world/) — `Print("Hello world.")`, a five-count loop with one-second sleeps, `Print("Done.")`. Every layout renders the current lofigui buffer, so whichever style you click into auto-refreshes in place while the counter ticks up. The point of this example is to show that **adding layout variety on top of the same model is a matter of templates, not plumbing**.
+
 **Interactivity level:** 6 — WASM (browser-only, service worker)
 
 <div class="buttons">
@@ -28,8 +30,8 @@ One Go codebase, six page layouts, two deployment targets. The same templates re
 </div>
 <div class="column is-5">
 <figure class="image screenshot">
-<img src="../03_working.svg" alt="Working — home page served by WASM via SW">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Working — home served by Go handlers via SW</figcaption>
+<img src="../03_working.svg" alt="Working — scrolling layout after model completion">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Working — Scrolling layout after model completes</figcaption>
 </figure>
 </div>
 </div>
@@ -40,7 +42,7 @@ One Go codebase, six page layouts, two deployment targets. The same templates re
 
 lofigui is deliberately small. For this example it contributes four things:
 
-1. **A print-style output buffer** — `lofigui.Print`, `Markdown`, `Table` accumulate HTML in a shared buffer (`model.go:sampleOutput`). The teletype content is identical in every layout.
+1. **A print-style output buffer** — `lofigui.Print` / `Printf` accumulate HTML in the global lofigui buffer. Every layout's handler reads `lofigui.Buffer()` on each request, so the teletype content is identical in every layout and grows in place as the model runs.
 2. **A template-inheritance loader** — `lofigui.NewControllerFromFS` parses `base.html` alongside the named child template, so Go stdlib `{{block}}`/`{{define}}` works with embedded filesystems — the only source a WASM build can reach.
 3. **One render call, same shape in both builds** — `ctrl.RenderTemplate(w, ctx)` writes to an `http.ResponseWriter` regardless of whether that writer was handed over by `net/http.ListenAndServe` or by `go-wasm-http-server` inside a service worker.
 4. **Built-in `/assets/bulma.min.css`** — `lofigui.ServeBulma` is registered next to the app's routes so Bulma loads without a CDN round-trip, on server and WASM.
@@ -100,6 +102,27 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 
 ---
 
+## The model — identical to example 01
+
+The teletype that every layout displays is the same five-line model 01 uses:
+
+```go
+func model(app *lofigui.App) {
+    lofigui.Print("Hello world.")
+    for i := 0; i < 5; i++ {
+        app.Sleep(1 * time.Second)
+        lofigui.Printf("Count %d", i)
+    }
+    lofigui.Print("Done.")
+}
+```
+
+<div class="annotation">
+<strong>Continuity with example 01.</strong> Nothing about layout changes requires a different model. The point of this example is that <em>templates</em> do the layout work; the app logic is still <code>Print</code> + <code>Sleep</code>, and you can drop it in unchanged from a simpler example.
+</div>
+
+---
+
 ## Shared mux — `model.go`
 
 Both `main.go` and `main_wasm.go` delegate the routing table to `model.go`. It embeds `templates/`, parses every layout against `base.html`, and returns a `*http.ServeMux` with all routes wired up:
@@ -117,7 +140,7 @@ var pathToTemplate = map[string]string{
     "/style/fullwidth":            "style_fullwidth.html",
 }
 
-func buildMux(basePrefix string) *http.ServeMux {
+func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
     controllers := loadControllers()
     mux := http.NewServeMux()
     for p, name := range pathToTemplate {
@@ -125,8 +148,9 @@ func buildMux(basePrefix string) *http.ServeMux {
         pattern := "GET " + p
         if p == "/" { pattern = "GET /{$}" }
         mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+            app.WriteRefreshHeader(w) // HTTP Refresh while model is running
             controllers[tpl].RenderTemplate(w, lofigui.TemplateContext{
-                "results":      template.HTML(sampleOutput()),
+                "results":      template.HTML(lofigui.Buffer()),
                 "current_path": r.URL.Path,
                 "base":         basePrefix,
             })
@@ -142,6 +166,10 @@ func buildMux(basePrefix string) *http.ServeMux {
 <strong>Everything interesting lives here.</strong> Template parsing, route registration, and render calls all use <code>net/http</code> types — no <code>syscall/js</code>, no WASM-only imports. Both the server and WASM builds hand this mux to their respective serving runtimes.
 </div>
 
+<div class="annotation">
+<strong>Auto-refresh while polling.</strong> <code>app.WriteRefreshHeader(w)</code> emits <code>Refresh: 1</code> only while the model is running; once the model returns, the header is absent and the page stops reloading. The handler reads the live <code>lofigui.Buffer()</code> on each request — no snapshotting, no per-handler state — so any layout you're looking at grows in place as the model prints.
+</div>
+
 ---
 
 ## The server — `main.go`
@@ -150,12 +178,16 @@ func buildMux(basePrefix string) *http.ServeMux {
 //go:build !(js && wasm)
 
 func main() {
+    app := lofigui.NewApp()
+    app.SetRefreshTime(1)
+    app.RunModel(model) // kick off the teletype in a background goroutine
+
     fmt.Println("Style Sampler running at http://localhost:1340")
-    http.ListenAndServe(":1340", buildMux("/"))
+    http.ListenAndServe(":1340", buildMux(app, "/"))
 }
 ```
 
-Two lines. `buildMux("/")` is handed straight to `http.ListenAndServe`. Base prefix is `"/"` because the server hosts the app at the site root.
+Four lines. `app.RunModel(model)` launches the model in a goroutine (with cancellation-aware `Sleep` recovery already wired up inside the library). `buildMux(app, "/")` is handed to `http.ListenAndServe`. Base prefix is `"/"` because the server hosts the app at the site root.
 
 ---
 
@@ -165,13 +197,17 @@ Two lines. `buildMux("/")` is handed straight to `http.ListenAndServe`. Base pre
 //go:build js && wasm
 
 func main() {
+    app := lofigui.NewApp()
+    app.SetRefreshTime(1)
+    app.RunModel(model)
+
     base := strings.TrimSuffix(lofigui.WASMScopePath(), "/") + "/"
-    if _, err := wasmhttp.Serve(buildMux(base)); err != nil { panic(err) }
+    if _, err := wasmhttp.Serve(buildMux(app, base)); err != nil { panic(err) }
     select {} // keep the Go runtime alive to service SW fetches
 }
 ```
 
-Three lines of real work. `wasmhttp.Serve` registers every handler in the mux on the service-worker fetch pipeline. `lofigui.WASMScopePath()` returns the scope the SW is registered at (e.g. `/03_style_sampler/wasm_demo/`), which becomes the `<base href>` so the templates' relative links land back inside the scope.
+Same three lines of setup as `main.go`, then `wasmhttp.Serve` registers every handler in the mux on the service-worker fetch pipeline. `lofigui.WASMScopePath()` returns the scope the SW is registered at (e.g. `/03_style_sampler/wasm_demo/`), which becomes the `<base href>` so the templates' relative links land back inside the scope.
 
 <div class="annotation">
 <strong>Why two files at all?</strong> <code>syscall/js</code> (indirectly imported by <code>go-wasm-http-server</code>) does not link on non-WASM targets, and <code>http.ListenAndServe</code> is a runtime no-op under WASM. <code>//go:build</code> tags pick the right entry point at compile time; no runtime switches, no stubs, no conditional imports.
@@ -184,14 +220,15 @@ Three lines of real work. `wasmhttp.Serve` registers every handler in the mux on
 | Aspect | Server (`main.go`) | WASM (`main_wasm.go`) |
 |--------|--------------------|------------------------|
 | Build tag | `!(js && wasm)` | `js && wasm` |
-| Routing table | `buildMux("/")` from `model.go` | `buildMux(scopePath)` from `model.go` |
+| App setup | `NewApp` + `SetRefreshTime(1)` + `RunModel(model)` | identical |
+| Routing table | `buildMux(app, "/")` from `model.go` | `buildMux(app, scopePath)` from `model.go` |
 | Serving runtime | `http.ListenAndServe(":1340", mux)` | `wasmhttp.Serve(mux)` + `select{}` |
 | Request shape | `http.Request` / `http.ResponseWriter` | `http.Request` / `http.ResponseWriter` |
 | Browser navigation | HTTP request → Go handler | `fetch` intercepted by SW → Go handler |
 | Template render | `ctrl.RenderTemplate(w, ctx)` | `ctrl.RenderTemplate(w, ctx)` — same call |
 | `<base href>` | `"/"` | `"/03_style_sampler/wasm_demo/"` |
 
-The model (`sampleOutput`) is unchanged between builds. `buildMux` is shared. The render call is the same function. The only real differences are the entry-point one-liner and the `<base>` prefix.
+The `model` is unchanged between builds — literally the same five lines of Go from example 01. `buildMux` is shared. The render call is the same function. The only real differences are the entry-point setup and the `<base>` prefix.
 
 ---
 

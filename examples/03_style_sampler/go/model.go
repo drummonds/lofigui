@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"sync"
+	"time"
 
 	"codeberg.org/hum3/lofigui"
 )
@@ -27,6 +27,18 @@ var pathToTemplate = map[string]string{
 	"/style/three-panel-nav":      "style_three_panel_nav.html",
 	"/style/three-panel-controls": "style_three_panel_controls.html",
 	"/style/fullwidth":            "style_fullwidth.html",
+}
+
+// model is the same shape as example 01: print, loop + sleep, done. It runs
+// once per App.RunModel call; every layout renders the current lofigui buffer,
+// so the teletype output visibly grows as the browser auto-refreshes.
+func model(app *lofigui.App) {
+	lofigui.Print("Hello world.")
+	for i := 0; i < 5; i++ {
+		app.Sleep(1 * time.Second)
+		lofigui.Printf("Count %d", i)
+	}
+	lofigui.Print("Done.")
 }
 
 // loadControllers parses every layout against base.html via lofigui's
@@ -51,10 +63,14 @@ func loadControllers() map[string]*lofigui.Controller {
 // their respective servers, so the routing and rendering code is identical
 // across the two targets.
 //
+// The App drives the polling lifecycle: WriteRefreshHeader sets an HTTP
+// Refresh while model is running, so whichever layout you're looking at
+// auto-refreshes until `Done.` is printed.
+//
 // basePrefix is rendered into <base href="..."> so relative links in the
 // templates resolve correctly whether the app is hosted at the site root
 // ("/") or under a service-worker scope ("/03_style_sampler/wasm_demo/").
-func buildMux(basePrefix string) *http.ServeMux {
+func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
 	controllers := loadControllers()
 	mux := http.NewServeMux()
 
@@ -65,8 +81,9 @@ func buildMux(basePrefix string) *http.ServeMux {
 			pattern = "GET /{$}" // exact-match "/", not a prefix
 		}
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			app.WriteRefreshHeader(w)
 			controllers[tpl].RenderTemplate(w, lofigui.TemplateContext{
-				"results":      template.HTML(sampleOutput()),
+				"results":      template.HTML(lofigui.Buffer()),
 				"current_path": r.URL.Path,
 				"base":         basePrefix,
 			})
@@ -76,35 +93,4 @@ func buildMux(basePrefix string) *http.ServeMux {
 	mux.HandleFunc("GET /favicon.ico", lofigui.ServeFavicon)
 	mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
 	return mux
-}
-
-var renderMu sync.Mutex
-
-func renderContent(fn func()) string {
-	renderMu.Lock()
-	defer renderMu.Unlock()
-	lofigui.Reset()
-	fn()
-	return lofigui.Buffer()
-}
-
-// sampleOutput generates teletype content shown in every style demo.
-func sampleOutput() string {
-	return renderContent(func() {
-		lofigui.Markdown("## Teletype Output")
-		lofigui.Print("This is sample teletype output.")
-		lofigui.Print("Each line appears as the model runs.")
-		lofigui.Print("Like a CLI printing to continuous paper.")
-		lofigui.Markdown("---")
-		lofigui.Table(
-			[][]string{
-				{"Level 1", "Teletype", "Pure output, no interaction"},
-				{"Level 2", "Teletype+ web", "Templates, navbars, forms"},
-				{"Level 3", "Polling", "Whole page refresh"},
-				{"Level 4", "HTMX", "Partial updates"},
-			},
-			lofigui.WithHeader([]string{"Level", "Name", "Description"}),
-		)
-		lofigui.Print("Done.")
-	})
 }
