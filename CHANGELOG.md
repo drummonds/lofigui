@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.36] - 2026-04-21
+
+ - Reuse example 01's model in example 03 for continuity
+
 ## [0.17.35] - 2026-04-18
 
  - 01 graphics!
