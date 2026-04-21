@@ -55,17 +55,17 @@
 .screenshot img { display: block; width: 100%; height: auto; }
 </style>
 <h1 id="03--style-sampler">03 — Style Sampler</h1>
-<p>One Go codebase, six page layouts, two deployment targets. The same template files render a multi-page site either as a classic HTTP server (<code>main.go</code>) or entirely inside the browser as a WebAssembly binary (<code>main_wasm.go</code>). Both builds share one model, one set of templates, and one loader.</p>
-<p><strong>Interactivity level:</strong> 6 — WASM (browser-only, no server)</p>
+<p>One Go codebase, six page layouts, two deployment targets. The same templates render a multi-page site either from a classic HTTP server (<code>main.go</code>) or entirely inside the browser via a service worker (<code>main_wasm.go</code>). Both entry points register the <strong>same <code>*http.ServeMux</code></strong> — navigation, routing, and rendering code paths are identical.</p>
+<p><strong>Interactivity level:</strong> 6 — WASM (browser-only, service worker)</p>
 <div class="buttons">
-<a href="demo.html" class="button is-primary">Launch Demo</a>
+<a href="wasm_demo/" class="button is-primary">Launch Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
 <figure class="image screenshot">
-<img src="../03_loading.svg" alt="Loading — WASM binary downloading">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Loading — WASM binary fetching</figcaption>
+<img src="../03_loading.svg" alt="Loading — service worker bootstrapping">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Loading — SW bootstrap registering</figcaption>
 </figure>
 </div>
 <div class="column is-narrow has-text-centered">
@@ -73,8 +73,8 @@
 </div>
 <div class="column is-5">
 <figure class="image screenshot">
-<img src="../03_working.svg" alt="Working — home page rendered by WASM">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Working — home page rendered client-side</figcaption>
+<img src="../03_working.svg" alt="Working — home page served by WASM via SW">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Working — home served by Go handlers via SW</figcaption>
 </figure>
 </div>
 </div>
@@ -83,11 +83,11 @@
 <p>lofigui is deliberately small. For this example it contributes four things:</p>
 <ol>
 <li><strong>A print-style output buffer</strong> — <code>lofigui.Print</code>, <code>Markdown</code>, <code>Table</code> accumulate HTML in a shared buffer (<code>model.go:sampleOutput</code>). The teletype content is identical in every layout.</li>
-<li><strong>A template-inheritance loader</strong> — <code>lofigui.NewControllerFromFS</code> parses <code>base.html</code> alongside the named child template (see <code>controller.go:NewControllerFromFS</code>), so Go's stdlib <code>{{block}}</code>/<code>{{define}}</code> works with embedded filesystems — the only source a WASM build can reach.</li>
-<li><strong>One render call with two shapes</strong> — <code>ctrl.RenderTemplate(w, ctx)</code> writes to an <code>http.ResponseWriter</code> on the server; <code>ctrl.RenderToString(ctx)</code> returns a string for the WASM build to hand back to JavaScript. Same controller, same context.</li>
-<li><strong>Built-in <code>/assets/bulma.min.css</code></strong> — <code>App.Run</code> and <code>App.RunWASM</code> register <code>lofigui.ServeBulma</code> so every demo (dev server or WASM) gets Bulma without an outbound CDN fetch.</li>
+<li><strong>A template-inheritance loader</strong> — <code>lofigui.NewControllerFromFS</code> parses <code>base.html</code> alongside the named child template, so Go stdlib <code>{{block}}</code>/<code>{{define}}</code> works with embedded filesystems — the only source a WASM build can reach.</li>
+<li><strong>One render call, same shape in both builds</strong> — <code>ctrl.RenderTemplate(w, ctx)</code> writes to an <code>http.ResponseWriter</code> regardless of whether that writer was handed over by <code>net/http.ListenAndServe</code> or by <code>go-wasm-http-server</code> inside a service worker.</li>
+<li><strong>Built-in <code>/assets/bulma.min.css</code></strong> — <code>lofigui.ServeBulma</code> is registered next to the app's routes so Bulma loads without a CDN round-trip, on server and WASM.</li>
 </ol>
-<p>Everything else — HTTP routing, the JS bridge, the page navigation — is plain Go or plain JavaScript.</p>
+<p>Everything else — the routes, the templates, the navigation — is plain Go standard library.</p>
 <hr>
 <h2 id="layout-styles">Layout styles</h2>
 <table>
@@ -135,7 +135,7 @@
 <hr>
 <h2 id="template-inheritance">Template inheritance</h2>
 <p>All styles share a base template using Go's <code>html/template</code> <code>{{block}}</code> / <code>{{define}}</code> inheritance:</p>
-<pre><code>base.html                        → &lt;html&gt;, &lt;head&gt;, Bulma CSS, {{block &quot;navbar&quot; .}}, {{block &quot;content&quot; .}}
+<pre><code>base.html                        → &lt;html&gt;, &lt;head&gt;, &lt;base&gt;, Bulma, {{block &quot;navbar&quot; .}}, {{block &quot;content&quot; .}}
 style_scrolling.html             → extends base: teal scrolling navbar + content
 style_fixed.html                 → extends base: red fixed navbar + padded content
 style_three_panel_nav.html       → extends base: yellow navbar + columns layout
@@ -143,6 +143,11 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 </code></pre>
 <p><code>base.html</code> declares blocks with <code>{{block &quot;name&quot; .}}default{{end}}</code>. Each child template overrides them with <code>{{define &quot;name&quot;}}...{{end}}</code>:</p>
 <pre><code class="language-html">&lt;!-- base.html --&gt;
+&lt;head&gt;
+  &lt;base href=&quot;{{.base}}&quot;&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;/assets/bulma.min.css&quot;&gt;
+  …
+&lt;/head&gt;
 &lt;body&gt;
   {{block &quot;navbar&quot; .}}{{end}}
   {{block &quot;content&quot; .}}{{end}}
@@ -153,40 +158,13 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 {{define &quot;content&quot;}}&lt;section class=&quot;section&quot;&gt;{{.results}}&lt;/section&gt;{{end}}
 </code></pre>
 <div class="annotation">
-<strong>No custom template engine needed</strong> — lofigui uses Go's standard-library <code>html/template</code>. <code>NewControllerFromFS</code> parses <code>base.html</code> alongside the named child so inheritance works with no extra setup, in both server and WASM builds.
+<strong><code>&lt;base href="{{.base}}"&gt;</code></strong> lets the same template work at both the site root ("/") and under a service-worker scope ("/03_style_sampler/wasm_demo/"). The navbar/sidebar links use <em>relative</em> hrefs like <code>style/scrolling</code> and <code>""</code> — the browser resolves them against <code>&lt;base&gt;</code>, so they stay inside the SW scope in WASM and resolve to site root on the server.
 </div>
 <hr>
-<h2 id="shared-loader--modelgo">Shared loader — <code>model.go</code></h2>
-<p>Both <code>main.go</code> and <code>main_wasm.go</code> delegate template setup to <code>model.go</code>, which embeds <code>templates/</code> once and parses every layout against <code>base.html</code>:</p>
+<h2 id="shared-mux--modelgo">Shared mux — <code>model.go</code></h2>
+<p>Both <code>main.go</code> and <code>main_wasm.go</code> delegate the routing table to <code>model.go</code>. It embeds <code>templates/</code>, parses every layout against <code>base.html</code>, and returns a <code>*http.ServeMux</code> with all routes wired up:</p>
 <pre><code class="language-go">//go:embed templates
 var templateFS embed.FS
-
-var templateNames = []string{
-    &quot;home.html&quot;,
-    &quot;style_scrolling.html&quot;,
-    &quot;style_fixed.html&quot;,
-    &quot;style_three_panel_nav.html&quot;,
-    &quot;style_three_panel_controls.html&quot;,
-    &quot;style_fullwidth.html&quot;,
-}
-
-func loadControllers() map[string]*lofigui.Controller {
-    ctrls := make(map[string]*lofigui.Controller, len(templateNames))
-    for _, name := range templateNames {
-        ctrl, err := lofigui.NewControllerFromFS(templateFS, &quot;templates&quot;, name)
-        if err != nil { panic(err) }
-        ctrls[name] = ctrl
-    }
-    return ctrls
-}
-</code></pre>
-<div class="annotation">
-<strong>Why embed in both builds?</strong> The server could read from disk (<code>NewControllerFromDir</code>) — but using <code>embed.FS</code> everywhere means the binary is self-contained and the template-loading code is identical between server and WASM. Fewer code paths, fewer surprises, one deployable binary.
-</div>
-<hr>
-<h2 id="the-server--maingo">The server — <code>main.go</code></h2>
-<p><code>main.go</code> exists because the HTTP side has to register routes, parse request URLs, and write to an <code>http.ResponseWriter</code>. Everything WASM doesn't have:</p>
-<pre><code class="language-go">//go:build !(js &amp;&amp; wasm)
 
 var pathToTemplate = map[string]string{
     &quot;/&quot;:                           &quot;home.html&quot;,
@@ -197,49 +175,52 @@ var pathToTemplate = map[string]string{
     &quot;/style/fullwidth&quot;:            &quot;style_fullwidth.html&quot;,
 }
 
-func main() {
+func buildMux(basePrefix string) *http.ServeMux {
     controllers := loadControllers()
-    for path, name := range pathToTemplate {
+    mux := http.NewServeMux()
+    for p, name := range pathToTemplate {
         tpl := name
-        http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+        pattern := &quot;GET &quot; + p
+        if p == &quot;/&quot; { pattern = &quot;GET /{$}&quot; }
+        mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
             controllers[tpl].RenderTemplate(w, lofigui.TemplateContext{
                 &quot;results&quot;:      template.HTML(sampleOutput()),
                 &quot;current_path&quot;: r.URL.Path,
+                &quot;base&quot;:         basePrefix,
             })
         })
     }
-    http.HandleFunc(&quot;/favicon.ico&quot;,          lofigui.ServeFavicon)
-    http.HandleFunc(&quot;/assets/bulma.min.css&quot;, lofigui.ServeBulma)
-    http.ListenAndServe(&quot;:1340&quot;, nil)
-}
-</code></pre>
-<p>The build tag <code>!(js &amp;&amp; wasm)</code> excludes this file from the WASM build — <code>net/http</code>, <code>http.ListenAndServe</code>, and <code>http.HandleFunc</code> are the server-only pieces.</p>
-<hr>
-<h2 id="the-wasm-entry-point--main-wasmgo">The WASM entry point — <code>main_wasm.go</code></h2>
-<p><code>main_wasm.go</code> exists because the WASM side needs <code>syscall/js</code> to expose a Go function to JavaScript, and a blocking <code>select{}</code> to keep the Go runtime alive for callbacks. Those can't link into a non-WASM build:</p>
-<pre><code class="language-go">//go:build js &amp;&amp; wasm
-
-var controllers = loadControllers()
-
-func goRenderPage(this js.Value, args []js.Value) any {
-    templateName := args[0].String()
-    currentPath  := args[1].String()
-    html, err := controllers[templateName].RenderToString(lofigui.TemplateContext{
-        &quot;results&quot;:      template.HTML(sampleOutput()),
-        &quot;current_path&quot;: currentPath,
-    })
-    if err != nil { return js.ValueOf(&quot;&lt;p&gt;Render error: &quot;+err.Error()+&quot;&lt;/p&gt;&quot;) }
-    return js.ValueOf(html)
-}
-
-func main() {
-    js.Global().Set(&quot;goRenderPage&quot;, js.FuncOf(goRenderPage))
-    js.Global().Call(&quot;wasmReady&quot;)
-    &lt;-make(chan struct{}) // keep the Go runtime alive for JS callbacks
+    mux.HandleFunc(&quot;GET /favicon.ico&quot;,          lofigui.ServeFavicon)
+    mux.HandleFunc(&quot;GET /assets/bulma.min.css&quot;, lofigui.ServeBulma)
+    return mux
 }
 </code></pre>
 <div class="annotation">
-<strong>Why two files instead of one with runtime switches?</strong> Build tags, not runtime logic. The server build can't see <code>syscall/js</code>; the WASM build can't see <code>net/http.ListenAndServe</code>. Splitting on <code>//go:build</code> lets each file import only what its target supports — no stub functions, no conditional imports inside one file.
+<strong>Everything interesting lives here.</strong> Template parsing, route registration, and render calls all use <code>net/http</code> types — no <code>syscall/js</code>, no WASM-only imports. Both the server and WASM builds hand this mux to their respective serving runtimes.
+</div>
+<hr>
+<h2 id="the-server--maingo">The server — <code>main.go</code></h2>
+<pre><code class="language-go">//go:build !(js &amp;&amp; wasm)
+
+func main() {
+    fmt.Println(&quot;Style Sampler running at http://localhost:1340&quot;)
+    http.ListenAndServe(&quot;:1340&quot;, buildMux(&quot;/&quot;))
+}
+</code></pre>
+<p>Two lines. <code>buildMux(&quot;/&quot;)</code> is handed straight to <code>http.ListenAndServe</code>. Base prefix is <code>&quot;/&quot;</code> because the server hosts the app at the site root.</p>
+<hr>
+<h2 id="the-wasm-entry-point--main-wasmgo">The WASM entry point — <code>main_wasm.go</code></h2>
+<pre><code class="language-go">//go:build js &amp;&amp; wasm
+
+func main() {
+    base := strings.TrimSuffix(lofigui.WASMScopePath(), &quot;/&quot;) + &quot;/&quot;
+    if _, err := wasmhttp.Serve(buildMux(base)); err != nil { panic(err) }
+    select {} // keep the Go runtime alive to service SW fetches
+}
+</code></pre>
+<p>Three lines of real work. <code>wasmhttp.Serve</code> registers every handler in the mux on the service-worker fetch pipeline. <code>lofigui.WASMScopePath()</code> returns the scope the SW is registered at (e.g. <code>/03_style_sampler/wasm_demo/</code>), which becomes the <code>&lt;base href&gt;</code> so the templates' relative links land back inside the scope.</p>
+<div class="annotation">
+<strong>Why two files at all?</strong> <code>syscall/js</code> (indirectly imported by <code>go-wasm-http-server</code>) does not link on non-WASM targets, and <code>http.ListenAndServe</code> is a runtime no-op under WASM. <code>//go:build</code> tags pick the right entry point at compile time; no runtime switches, no stubs, no conditional imports.
 </div>
 <hr>
 <h2 id="same-code-two-targets">Same code, two targets</h2>
@@ -258,87 +239,68 @@ func main() {
 <td><code>js &amp;&amp; wasm</code></td>
 </tr>
 <tr>
-<td>Template loading</td>
-<td><code>loadControllers()</code> in <code>model.go</code> — identical</td>
-<td><code>loadControllers()</code> in <code>model.go</code> — identical</td>
+<td>Routing table</td>
+<td><code>buildMux(&quot;/&quot;)</code> from <code>model.go</code></td>
+<td><code>buildMux(scopePath)</code> from <code>model.go</code></td>
 </tr>
 <tr>
-<td>Render call</td>
+<td>Serving runtime</td>
+<td><code>http.ListenAndServe(&quot;:1340&quot;, mux)</code></td>
+<td><code>wasmhttp.Serve(mux)</code> + <code>select{}</code></td>
+</tr>
+<tr>
+<td>Request shape</td>
+<td><code>http.Request</code> / <code>http.ResponseWriter</code></td>
+<td><code>http.Request</code> / <code>http.ResponseWriter</code></td>
+</tr>
+<tr>
+<td>Browser navigation</td>
+<td>HTTP request → Go handler</td>
+<td><code>fetch</code> intercepted by SW → Go handler</td>
+</tr>
+<tr>
+<td>Template render</td>
 <td><code>ctrl.RenderTemplate(w, ctx)</code></td>
-<td><code>ctrl.RenderToString(ctx)</code></td>
+<td><code>ctrl.RenderTemplate(w, ctx)</code> — same call</td>
 </tr>
 <tr>
-<td>Navigation</td>
-<td><code>http.HandleFunc</code> per URL</td>
-<td><code>app.js</code> calls <code>goRenderPage()</code></td>
-</tr>
-<tr>
-<td>Entry point</td>
-<td><code>http.ListenAndServe(&quot;:1340&quot;, …)</code></td>
-<td><code>js.Global().Set(&quot;goRenderPage&quot;, …)</code> + <code>select{}</code></td>
-</tr>
-<tr>
-<td>Imports</td>
-<td><code>net/http</code></td>
-<td><code>syscall/js</code></td>
+<td><code>&lt;base href&gt;</code></td>
+<td><code>&quot;/&quot;</code></td>
+<td><code>&quot;/03_style_sampler/wasm_demo/&quot;</code></td>
 </tr>
 </tbody>
 </table>
-<p>Model code (<code>sampleOutput</code> in <code>model.go</code>) is unchanged between builds. The template-loading helper is shared. The only real differences are the entry point and how the rendered HTML reaches the browser.</p>
+<p>The model (<code>sampleOutput</code>) is unchanged between builds. <code>buildMux</code> is shared. The render call is the same function. The only real differences are the entry-point one-liner and the <code>&lt;base&gt;</code> prefix.</p>
 <hr>
-<h2 id="client-side-routing--templatesappjs">Client-side routing — <code>templates/app.js</code></h2>
-<p>The WASM demo is a single static HTML page (<code>demo.html</code>) containing the top style-selector bar. Everything below that bar is replaced by whatever HTML <code>goRenderPage</code> returns. <code>app.js</code> is the glue:</p>
-<pre><code class="language-javascript">const outputDiv = document.getElementById('output');
-const buttons   = document.querySelectorAll('#style-buttons button');
-
-// Mirror of pathToTemplate in main.go — used to route in-page links.
-const pathToTemplate = {
-    '/':                           'home.html',
-    '/style/scrolling':            'style_scrolling.html',
-    '/style/fixed':                'style_fixed.html',
-    '/style/three-panel-nav':      'style_three_panel_nav.html',
-    '/style/three-panel-controls': 'style_three_panel_controls.html',
-    '/style/fullwidth':            'style_fullwidth.html',
-};
-
-function renderStyle(templateName, path) {
-    outputDiv.innerHTML = goRenderPage(templateName, path);   // call into WASM
-    buttons.forEach(b =&gt; b.classList.toggle('is-outlined',
-                                            b.dataset.template !== templateName));
-}
-
-// 1. Top button bar — explicit data-template/data-path attributes.
-buttons.forEach(b =&gt; b.addEventListener('click',
-    () =&gt; renderStyle(b.dataset.template, b.dataset.path)));
-
-// 2. In-page links (home.html card &quot;View&quot; buttons, sidebar navs) —
-//    delegated click handler maps server-style /style/* hrefs to templates.
-outputDiv.addEventListener('click', e =&gt; {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
-    const tpl = pathToTemplate[a.getAttribute('href')];
-    if (!tpl) return;
-    e.preventDefault();
-    renderStyle(tpl, a.getAttribute('href'));
-});
-
-// 3. WASM ready — Go signals completion by calling window.wasmReady.
-window.wasmReady = () =&gt; renderStyle('home.html', '/');
+<h2 id="the-service-worker-bootstrap-how-navigation-actually-works">The service-worker bootstrap (how navigation actually works)</h2>
+<p><code>wasmassets.Deploy</code> (invoked by <code>go run ./cmd/wasm-deploy</code> in the Taskfile) produces a self-contained demo directory at <code>docs/03_style_sampler/wasm_demo/</code>:</p>
+<pre><code>wasm_demo/
+  index.html          — SW bootstrap (registers sw.js, loads WASM, then redirects to &quot;./&quot;)
+  sw.js               — service worker
+  wasmhttp_sw.js      — go-wasm-http-server SW runtime
+  main.wasm           — the Go binary
+  wasm_exec.js        — Go's stdlib WASM loader
+  bulma.min.css       — vendored Bulma next to the bootstrap
+  demo.html           — recovery stub; unregisters the SW if the demo gets stuck
 </code></pre>
+<p>The sequence the browser sees:</p>
+<ol>
+<li>GET <code>/03_style_sampler/wasm_demo/</code> → static <code>index.html</code> (bootstrap).</li>
+<li>Bootstrap JS registers <code>sw.js</code> scoped at <code>/03_style_sampler/wasm_demo/</code>, loads <code>main.wasm</code>, and redirects to <code>./</code>.</li>
+<li><code>./</code> is now intercepted by the SW. <code>wasmhttp_sw.js</code> forwards the fetch as an <code>http.Request</code> into the WASM mux.</li>
+<li>The mux's <code>GET /{$}</code> handler renders <code>home.html</code> and returns the HTML.</li>
+<li>User clicks a nav link (<code>href=&quot;style/scrolling&quot;</code>). Browser resolves it against <code>&lt;base href=&quot;/03_style_sampler/wasm_demo/&quot;&gt;</code>, fetches <code>/03_style_sampler/wasm_demo/style/scrolling</code>. SW intercepts, strips the scope prefix, Go sees <code>/style/scrolling</code>, mux calls the scrolling handler.</li>
+</ol>
 <div class="annotation">
-<strong>Why intercept links instead of rewriting them?</strong> The template HTML is the same on the server and in WASM — every link inside is server-absolute (<code>href="/style/scrolling"</code>). On the server those paths are real HTTP routes; in WASM the page would navigate to the site root and 404. The delegated <code>click</code> handler on <code>#output</code> catches anything that looks like an internal route and calls <code>goRenderPage</code> instead. Templates stay untouched.
+<strong>No JavaScript bridge needed.</strong> The old version of this example exposed a <code>goRenderPage</code> function to JS and routed clicks through a custom <code>app.js</code>. Under the service-worker pattern the browser does normal HTTP navigation; the SW is the only integration point between JS and Go. The Go code is unaware it's running in WASM.
 </div>
-<div class="annotation">
-<strong>Why <code>wasmReady</code>?</strong> <code>main_wasm.go</code> calls <code>js.Global().Call("wasmReady")</code> after exposing <code>goRenderPage</code>. That's the signal that the WASM runtime is initialised and safe to call; until then, <code>app.js</code> leaves the loading progress bar in place.
-</div>
-<p>The three click paths — top bar, in-page links, initial render — all end up at the same <code>renderStyle</code> function. The WASM binary does the actual rendering; <code>app.js</code> is only responsible for routing the click into Go.</p>
 <hr>
 <h2 id="binary-size">Binary size</h2>
-<p>The WASM binary includes <code>html/template</code>, the embedded templates, and lofigui itself. Expect ~9 MB uncompressed (~2.4 MB gzipped) for standard Go WASM.</p>
+<p>The WASM binary includes <code>html/template</code>, <code>net/http</code>, the embedded templates, <code>go-wasm-http-server</code>, and lofigui itself. Expect ~10–11 MB uncompressed (~2.8 MB gzipped) — a bit bigger than the old <code>syscall/js</code>-bridge version, but the entire model and routing code now compiles from the same source as the server build.</p>
 <hr>
 <h2 id="links">Links</h2>
 <ul>
-<li><a href="demo.html">Launch Demo</a></li>
+<li><a href="wasm_demo/">Launch Demo</a></li>
 <li><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler">Source on Codeberg</a></li>
 </ul>
 

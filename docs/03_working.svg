@@ -1,32 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
   <defs>
-    <clipPath id="clip13">
-      <rect x="48" y="164" width="913" height="2" />
+    <clipPath id="clip1">
+      <rect x="48" y="210" width="913" height="2" />
     </clipPath>
-    <clipPath id="clip14">
-      <rect x="48" y="448" width="913" height="2" />
+    <clipPath id="clip12">
+      <rect x="48" y="615" width="913" height="2" />
     </clipPath>
-    <clipPath id="clip25">
-      <rect x="48" y="853" width="913" height="2" />
-    </clipPath>
-    <clipPath id="clip26">
-      <rect x="48" y="1182.5" width="913" height="2" />
-    </clipPath>
-    <filter id="shadow1" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow2" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+    <filter id="shadow2" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -34,19 +18,19 @@
       </feMerge>
     </filter>
     <filter id="shadow3" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="shadow4" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+    <filter id="shadow4" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -54,19 +38,19 @@
       </feMerge>
     </filter>
     <filter id="shadow5" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="shadow6" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+    <filter id="shadow6" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -74,19 +58,19 @@
       </feMerge>
     </filter>
     <filter id="shadow7" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="shadow8" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+    <filter id="shadow8" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -94,19 +78,19 @@
       </feMerge>
     </filter>
     <filter id="shadow9" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="shadow10" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+    <filter id="shadow10" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
       <feComposite in2="offsetblur" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -114,116 +98,6 @@
       </feMerge>
     </filter>
     <filter id="shadow11" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
-      <feOffset dx="0" dy="1" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow12" x="-0.5" y="-0.5" width="2.1" height="2.1">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow15" x="-0.7" y="-0.7" width="2.4" height="2.4">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
-      <feOffset dx="0" dy="8" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow16" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
-      <feOffset dx="0" dy="0" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow17" x="-0.7" y="-0.7" width="2.4" height="2.4">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
-      <feOffset dx="0" dy="8" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow18" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
-      <feOffset dx="0" dy="0" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow19" x="-0.7" y="-0.7" width="2.4" height="2.4">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
-      <feOffset dx="0" dy="8" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow20" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
-      <feOffset dx="0" dy="0" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow21" x="-0.7" y="-0.7" width="2.4" height="2.4">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
-      <feOffset dx="0" dy="8" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow22" x="-0.5" y="-0.5" width="2" height="2">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
-      <feOffset dx="0" dy="0" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow23" x="-0.7" y="-0.7" width="2.4" height="2.4">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
-      <feOffset dx="0" dy="8" result="offsetblur"/>
-      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
-      <feComposite in2="offsetblur" operator="in"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="shadow24" x="-0.5" y="-0.5" width="2" height="2">
       <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
       <feOffset dx="0" dy="0" result="offsetblur"/>
       <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
@@ -237,141 +111,86 @@
   <rect x="0" y="0" width="1024" height="768" fill="white"/>
   <rect x="0" y="0" width="1009" height="52" fill="rgb(46,51,61)"/>
   <text x="12" y="31.4" fill="rgb(243,244,246)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">03 — Style Sampler</text>
-  <rect x="945.9" y="14" width="51.1" height="24" rx="6" fill="rgb(72,199,142)"/>
-  <text x="954.9" y="29.4" fill="rgb(10,31,21)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Ready</text>
-  <rect x="48" y="100" width="75.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow1)"/>
-  <rect x="48" y="100" width="75.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow2)"/>
-  <rect x="48" y="100" width="75.6" height="40" rx="6" fill="rgb(46,51,61)"/>
-  <text x="64" y="125.4" fill="rgb(243,244,246)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Home</text>
-  <rect x="135.6" y="100" width="95.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow3)"/>
-  <rect x="135.6" y="100" width="95.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow4)"/>
-  <rect x="135.6" y="100" width="95.6" height="40" rx="6" fill="none" stroke="rgb(0,209,178)" stroke-width="1"/>
-  <text x="151.6" y="125.4" fill="rgb(0,209,178)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Scrolling</text>
-  <rect x="243.2" y="100" width="71.3" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow5)"/>
-  <rect x="243.2" y="100" width="71.3" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow6)"/>
-  <rect x="243.2" y="100" width="71.3" height="40" rx="6" fill="none" stroke="rgb(255,102,133)" stroke-width="1"/>
-  <text x="259.2" y="125.4" fill="rgb(255,102,133)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Fixed</text>
-  <rect x="326.6" y="100" width="152.1" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow7)"/>
-  <rect x="326.6" y="100" width="152.1" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow8)"/>
-  <rect x="326.6" y="100" width="152.1" height="40" rx="6" fill="none" stroke="rgb(255,183,15)" stroke-width="1"/>
-  <text x="342.6" y="125.4" fill="rgb(255,183,15)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Three-Panel Nav</text>
-  <rect x="490.7" y="100" width="94.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow9)"/>
-  <rect x="490.7" y="100" width="94.6" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow10)"/>
-  <rect x="490.7" y="100" width="94.6" height="40" rx="6" fill="none" stroke="rgb(66,88,255)" stroke-width="1"/>
-  <text x="506.7" y="125.4" fill="rgb(66,88,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Controls</text>
-  <rect x="597.3" y="100" width="107.1" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow11)"/>
-  <rect x="597.3" y="100" width="107.1" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow12)"/>
-  <rect x="597.3" y="100" width="107.1" height="40" rx="6" fill="none" stroke="rgb(72,199,142)" stroke-width="1"/>
-  <text x="613.3" y="125.4" fill="rgb(72,199,142)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Full Width</text>
-  <g clip-path="url(#clip13)">
-    <rect x="48" y="164" width="913" height="2" fill="rgb(243,244,246)"/>
+  <text x="48" y="128.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Layout Style Sampler</text>
+  <text x="48" y="155.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">Each option demonstrates a different layout pattern. Intentionally jarring — these are meant to</text>
+  <text x="48" y="180.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">contrast, not harmonise.</text>
+  <g clip-path="url(#clip1)">
+    <rect x="48" y="210" width="913" height="2" fill="rgb(243,244,246)"/>
   </g>
-  <rect x="0" y="238" width="1009" height="52" fill="rgb(46,51,61)"/>
-  <text x="12" y="269.4" fill="rgb(243,244,246)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">03 — Style Sampler</text>
-  <text x="48" y="366.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Layout Style Sampler</text>
-  <text x="48" y="393.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">Each option demonstrates a different layout pattern. Intentionally jarring — these are meant to</text>
-  <text x="48" y="418.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">contrast, not harmonise.</text>
-  <g clip-path="url(#clip14)">
-    <rect x="48" y="448" width="913" height="2" fill="rgb(243,244,246)"/>
+  <rect x="50" y="238" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow2)"/>
+  <rect x="47" y="235" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow3)"/>
+  <rect x="48" y="236" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="72" y="277.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Scrolling Navbar</text>
+  <text x="72" y="297.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Default Bulma navbar that scrolls</text>
+  <text x="72" y="317.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">with the page.</text>
+  <path d="M48,346.5 H336.3 Q336.3,346.5 336.3,346.5 V383.5 Q336.3,395.5 324.3,395.5 H60 Q48,395.5 48,383.5 V346.5 Q48,346.5 48,346.5Z" fill="none"/>
+  <line x1="48" y1="346.5" x2="336.3" y2="346.5" stroke="rgb(235,236,240)" stroke-width="1"/>
+  <a xlink:href="http://localhost:8080/03_style_sampler/wasm_demo/style/scrolling">
+    <text x="174.2" y="376.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
+  </a>
+  <rect x="362.3" y="238" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow4)"/>
+  <rect x="359.3" y="235" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow5)"/>
+  <rect x="360.3" y="236" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="384.3" y="277.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Fixed Navbar</text>
+  <text x="384.3" y="297.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Pinned to the top — content</text>
+  <text x="384.3" y="317.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">scrolls underneath.</text>
+  <path d="M360.3,346.5 H648.7 Q648.7,346.5 648.7,346.5 V383.5 Q648.7,395.5 636.7,395.5 H372.3 Q360.3,395.5 360.3,383.5 V346.5 Q360.3,346.5 360.3,346.5Z" fill="none"/>
+  <line x1="360.3" y1="346.5" x2="648.7" y2="346.5" stroke="rgb(235,236,240)" stroke-width="1"/>
+  <a xlink:href="http://localhost:8080/03_style_sampler/wasm_demo/style/fixed">
+    <text x="486.6" y="376.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
+  </a>
+  <rect x="674.7" y="238" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow6)"/>
+  <rect x="671.7" y="235" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow7)"/>
+  <rect x="672.7" y="236" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="696.7" y="277.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Three-Panel: Nav</text>
+  <text x="696.7" y="297.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Left sidebar with page navigation</text>
+  <text x="696.7" y="317.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">links.</text>
+  <path d="M672.7,346.5 H961 Q961,346.5 961,346.5 V383.5 Q961,395.5 949,395.5 H684.7 Q672.7,395.5 672.7,383.5 V346.5 Q672.7,346.5 672.7,346.5Z" fill="none"/>
+  <line x1="672.7" y1="346.5" x2="961" y2="346.5" stroke="rgb(235,236,240)" stroke-width="1"/>
+  <a xlink:href="http://localhost:8080/03_style_sampler/wasm_demo/style/three-panel-nav">
+    <text x="798.9" y="376.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
+  </a>
+  <rect x="50" y="421.5" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow8)"/>
+  <rect x="47" y="418.5" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow9)"/>
+  <rect x="48" y="419.5" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="72" y="460.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Three-Panel: Controls</text>
+  <text x="72" y="481.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Left sidebar with form inputs and</text>
+  <text x="72" y="501.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">buttons.</text>
+  <path d="M48,530 H336.3 Q336.3,530 336.3,530 V567 Q336.3,579 324.3,579 H60 Q48,579 48,567 V530 Q48,530 48,530Z" fill="none"/>
+  <line x1="48" y1="530" x2="336.3" y2="530" stroke="rgb(235,236,240)" stroke-width="1"/>
+  <a xlink:href="http://localhost:8080/03_style_sampler/wasm_demo/style/three-panel-controls">
+    <text x="174.2" y="560.4" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
+  </a>
+  <rect x="362.3" y="421.5" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow10)"/>
+  <rect x="359.3" y="418.5" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow11)"/>
+  <rect x="360.3" y="419.5" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
+  <text x="384.3" y="460.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Full Width</text>
+  <text x="384.3" y="481.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">No sidebar — teletype output</text>
+  <text x="384.3" y="501.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">fills the page.</text>
+  <path d="M360.3,530 H648.7 Q648.7,530 648.7,530 V567 Q648.7,579 636.7,579 H372.3 Q360.3,579 360.3,567 V530 Q360.3,530 360.3,530Z" fill="none"/>
+  <line x1="360.3" y1="530" x2="648.7" y2="530" stroke="rgb(235,236,240)" stroke-width="1"/>
+  <a xlink:href="http://localhost:8080/03_style_sampler/wasm_demo/style/fullwidth">
+    <text x="486.6" y="560.4" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
+  </a>
+  <g clip-path="url(#clip12)">
+    <rect x="48" y="615" width="913" height="2" fill="rgb(243,244,246)"/>
   </g>
-  <rect x="50" y="476" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow15)"/>
-  <rect x="47" y="473" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow16)"/>
-  <rect x="48" y="474" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
-  <text x="72" y="515.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Scrolling Navbar</text>
-  <text x="72" y="535.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Default Bulma navbar that scrolls</text>
-  <text x="72" y="555.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">with the page.</text>
-  <path d="M48,584.5 H336.3 Q336.3,584.5 336.3,584.5 V621.5 Q336.3,633.5 324.3,633.5 H60 Q48,633.5 48,621.5 V584.5 Q48,584.5 48,584.5Z" fill="none"/>
-  <line x1="48" y1="584.5" x2="336.3" y2="584.5" stroke="rgb(235,236,240)" stroke-width="1"/>
-  <a xlink:href="http://localhost:8080/style/scrolling">
-    <text x="174.2" y="614.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
-  </a>
-  <rect x="362.3" y="476" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow17)"/>
-  <rect x="359.3" y="473" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow18)"/>
-  <rect x="360.3" y="474" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
-  <text x="384.3" y="515.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Fixed Navbar</text>
-  <text x="384.3" y="535.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Pinned to the top — content</text>
-  <text x="384.3" y="555.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">scrolls underneath.</text>
-  <path d="M360.3,584.5 H648.7 Q648.7,584.5 648.7,584.5 V621.5 Q648.7,633.5 636.7,633.5 H372.3 Q360.3,633.5 360.3,621.5 V584.5 Q360.3,584.5 360.3,584.5Z" fill="none"/>
-  <line x1="360.3" y1="584.5" x2="648.7" y2="584.5" stroke="rgb(235,236,240)" stroke-width="1"/>
-  <a xlink:href="http://localhost:8080/style/fixed">
-    <text x="486.6" y="614.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
-  </a>
-  <rect x="674.7" y="476" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow19)"/>
-  <rect x="671.7" y="473" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow20)"/>
-  <rect x="672.7" y="474" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
-  <text x="696.7" y="515.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Three-Panel: Nav</text>
-  <text x="696.7" y="535.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Left sidebar with page navigation</text>
-  <text x="696.7" y="555.9" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">links.</text>
-  <path d="M672.7,584.5 H961 Q961,584.5 961,584.5 V621.5 Q961,633.5 949,633.5 H684.7 Q672.7,633.5 672.7,621.5 V584.5 Q672.7,584.5 672.7,584.5Z" fill="none"/>
-  <line x1="672.7" y1="584.5" x2="961" y2="584.5" stroke="rgb(235,236,240)" stroke-width="1"/>
-  <a xlink:href="http://localhost:8080/style/three-panel-nav">
-    <text x="798.9" y="614.9" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
-  </a>
-  <rect x="50" y="659.5" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow21)"/>
-  <rect x="47" y="656.5" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow22)"/>
-  <rect x="48" y="657.5" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
-  <text x="72" y="698.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Three-Panel: Controls</text>
-  <text x="72" y="719.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Left sidebar with form inputs and</text>
-  <text x="72" y="739.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">buttons.</text>
-  <path d="M48,768 H336.3 Q336.3,768 336.3,768 V805 Q336.3,817 324.3,817 H60 Q48,817 48,805 V768 Q48,768 48,768Z" fill="none"/>
-  <line x1="48" y1="768" x2="336.3" y2="768" stroke="rgb(235,236,240)" stroke-width="1"/>
-  <a xlink:href="http://localhost:8080/style/three-panel-controls">
-    <text x="174.2" y="798.4" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
-  </a>
-  <rect x="362.3" y="659.5" width="284.3" height="155.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow23)"/>
-  <rect x="359.3" y="656.5" width="290.3" height="161.5" rx="12" fill="rgb(9,10,12)" filter="url(#shadow24)"/>
-  <rect x="360.3" y="657.5" width="288.3" height="159.5" rx="12" fill="rgb(255,255,255)"/>
-  <text x="384.3" y="698.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">Full Width</text>
-  <text x="384.3" y="719.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">No sidebar — teletype output</text>
-  <text x="384.3" y="739.4" fill="rgb(105,116,140)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">fills the page.</text>
-  <path d="M360.3,768 H648.7 Q648.7,768 648.7,768 V805 Q648.7,817 636.7,817 H372.3 Q360.3,817 360.3,805 V768 Q360.3,768 360.3,768Z" fill="none"/>
-  <line x1="360.3" y1="768" x2="648.7" y2="768" stroke="rgb(235,236,240)" stroke-width="1"/>
-  <a xlink:href="http://localhost:8080/style/fullwidth">
-    <text x="486.6" y="798.4" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">View</text>
-  </a>
-  <g clip-path="url(#clip25)">
-    <rect x="48" y="853" width="913" height="2" fill="rgb(243,244,246)"/>
-  </g>
-  <text x="48" y="903.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="28" font-weight="800">What this example demonstrates</text>
-  <text x="239.4" y="943.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— Go</text>
-  <text x="441.4" y="943.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">with define overrides</text>
-  <text x="80" y="943.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Template inheritance</text>
-  <rect x="286.3" y="928" width="155.1" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="293.3" y="944.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">{{block &quot;name&quot; .}}</text>
-  <text x="182.4" y="971.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— scrolling vs fixed position</text>
-  <text x="80" y="971.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Navbar styles</text>
-  <text x="200" y="999.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— full-width, two-column, three-panel</text>
-  <text x="80" y="999.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Layout patterns</text>
-  <text x="201.6" y="1027.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— same</text>
-  <text x="398" y="1027.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">content in each layout</text>
-  <text x="80" y="1027.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Teletype output</text>
-  <rect x="266.4" y="1012" width="131.6" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="273.4" y="1028.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">lofigui.Print()</text>
-  <text x="183.8" y="1055.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— every page is a full server render</text>
-  <text x="80" y="1055.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">No JavaScript</text>
-  <g clip-path="url(#clip26)">
-    <rect x="48" y="1182.5" width="913" height="2" fill="rgb(243,244,246)"/>
-  </g>
-  <text x="48" y="1230.1" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="24" font-weight="800">Technical: WASM + Go templates</text>
-  <text x="48" y="1268.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">This demo runs entirely in the browser. Go's</text>
-  <text x="479.6" y="1268.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">engine is compiled into the WASM binary alongside the templates</text>
-  <text x="48" y="1292.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">(embedded via</text>
-  <text x="234.7" y="1292.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">). Clicking a style button calls</text>
-  <text x="567.8" y="1292.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">which renders the full page HTML using Go templates</text>
-  <text x="48" y="1316.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— the same code path as the server-side version. Template inheritance (</text>
-  <text x="645.9" y="1316.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">/</text>
-  <text x="744.2" y="1316.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">) works identically.</text>
-  <rect x="363.7" y="1253" width="115.9" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="370.7" y="1269.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">html/template</text>
-  <rect x="158" y="1277" width="76.7" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="165" y="1293.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">go:embed</text>
-  <rect x="444" y="1277" width="123.8" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="451" y="1293.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">goRenderPage()</text>
-  <rect x="561.3" y="1301" width="84.6" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="568.3" y="1317.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">{{block}}</text>
-  <rect x="651.8" y="1301" width="92.4" height="23" rx="7" fill="rgb(243,244,246)"/>
-  <text x="658.8" y="1317.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">{{define}}</text>
-  <text x="48" y="1356.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">No server round-trip. No JavaScript framework. Same Go templates, same rendering engine, running client-side in</text>
-  <text x="48" y="1380.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">WebAssembly.</text>
+  <text x="48" y="665.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="28" font-weight="800">What this example demonstrates</text>
+  <text x="239.4" y="705.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— Go</text>
+  <text x="441.4" y="705.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">with define overrides</text>
+  <text x="80" y="705.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Template inheritance</text>
+  <rect x="286.3" y="690" width="155.1" height="23" rx="7" fill="rgb(243,244,246)"/>
+  <text x="293.3" y="706.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">{{block &quot;name&quot; .}}</text>
+  <text x="182.4" y="733.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— scrolling vs fixed position</text>
+  <text x="80" y="733.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Navbar styles</text>
+  <text x="200" y="761.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— full-width, two-column, three-panel</text>
+  <text x="80" y="761.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Layout patterns</text>
+  <text x="201.6" y="789.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— same</text>
+  <text x="398" y="789.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">content in each layout</text>
+  <text x="80" y="789.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Teletype output</text>
+  <rect x="266.4" y="774" width="131.6" height="23" rx="7" fill="rgb(243,244,246)"/>
+  <text x="273.4" y="790.3" fill="rgb(204,0,41)" font-family="Inconsolata, Hack, &quot;SF Mono&quot;, &quot;Roboto Mono&quot;, &quot;Source Code Pro&quot;, &quot;Ubuntu Mono&quot;, monospace" font-size="14">lofigui.Print()</text>
+  <text x="183.8" y="817.9" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">— every page is a full server render</text>
+  <text x="80" y="817.9" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">No JavaScript</text>
   <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
 </svg>
