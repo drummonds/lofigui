@@ -57,6 +57,7 @@
 <h1 id="03--style-sampler">03 — Style Sampler</h1>
 <p>One Go codebase, six page layouts, two deployment targets. The same templates render a multi-page site either from a classic HTTP server (<code>main.go</code>) or entirely inside the browser via a service worker (<code>main_wasm.go</code>). Both entry points register the <strong>same <code>*http.ServeMux</code></strong> — navigation, routing, and rendering code paths are identical.</p>
 <p>The <code>model</code> function is the <strong>same five-lines-of-teletype</strong> used in <a href="../01_hello_world/">example 01</a> — <code>Print(&quot;Hello world.&quot;)</code>, a five-count loop with one-second sleeps, <code>Print(&quot;Done.&quot;)</code>. Every layout renders the current lofigui buffer, so whichever style you click into auto-refreshes in place while the counter ticks up. The point of this example is to show that <strong>adding layout variety on top of the same model is a matter of templates, not plumbing</strong>.</p>
+<p>Every page's navbar carries a <strong>Start / Cancel</strong> widget driven by the library — the model runs on demand, cancellable mid-flight, and the page you're looking at keeps polling until the buffer stops growing.</p>
 <p><strong>Interactivity level:</strong> 6 — WASM (browser-only, service worker)</p>
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
@@ -81,11 +82,12 @@
 </div>
 <hr>
 <h2 id="how-lofigui-helps-here">How lofigui helps here</h2>
-<p>lofigui is deliberately small. For this example it contributes four things:</p>
+<p>lofigui is deliberately small. For this example it contributes five things:</p>
 <ol>
 <li><strong>A print-style output buffer</strong> — <code>lofigui.Print</code> / <code>Printf</code> accumulate HTML in the global lofigui buffer. Every layout's handler reads <code>lofigui.Buffer()</code> on each request, so the teletype content is identical in every layout and grows in place as the model runs.</li>
 <li><strong>A template-inheritance loader</strong> — <code>lofigui.NewControllerFromFS</code> parses <code>base.html</code> alongside the named child template, so Go stdlib <code>{{block}}</code>/<code>{{define}}</code> works with embedded filesystems — the only source a WASM build can reach.</li>
 <li><strong>One render call, same shape in both builds</strong> — <code>ctrl.RenderTemplate(w, ctx)</code> writes to an <code>http.ResponseWriter</code> regardless of whether that writer was handed over by <code>net/http.ListenAndServe</code> or by <code>go-wasm-http-server</code> inside a service worker.</li>
+<li><strong>Lifecycle wiring out of the box</strong> — <code>app.RegisterLifecycle(mux, model)</code> installs <code>GET /start</code> and <code>GET /cancel</code> handlers, and <code>app.StatusControls(basePrefix)</code> renders a Running/Stopped tag plus Start/Cancel links as an HTML fragment. Drop <code>{{.status}}</code> into any navbar and every page drives the same singleton model.</li>
 <li><strong>Built-in <code>/assets/bulma.min.css</code></strong> — <code>lofigui.ServeBulma</code> is registered next to the app's routes so Bulma loads without a CDN round-trip, on server and WASM.</li>
 </ol>
 <p>Everything else — the routes, the templates, the navigation — is plain Go standard library.</p>
@@ -177,6 +179,27 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 <strong>Continuity with example 01.</strong> Nothing about layout changes requires a different model. The point of this example is that <em>templates</em> do the layout work; the app logic is still <code>Print</code> + <code>Sleep</code>, and you can drop it in unchanged from a simpler example.
 </div>
 <hr>
+<h2 id="start--cancel--baked-into-lofigui">Start / Cancel — baked into lofigui</h2>
+<p>Unlike the earlier version of this example, the model isn't kicked off at startup. The page loads in a <strong>Stopped</strong> state; clicking <strong>Start</strong> in the navbar fires the model, and the HTTP Refresh polling takes over. <strong>Cancel</strong> stops it mid-flight without shutting the server down.</p>
+<p>Two library calls do all the work:</p>
+<pre><code class="language-go">// buildMux, in model.go
+app.RegisterLifecycle(mux, model)       // wires GET /start and GET /cancel
+// …
+&quot;status&quot;: app.StatusControls(basePrefix), // drops the widget into every page's context
+</code></pre>
+<p><code>app.StatusControls</code> renders a small HTML fragment that every navbar template embeds as <code>{{.status}}</code>:</p>
+<pre><code class="language-html">&lt;!-- style_scrolling.html --&gt;
+&lt;div class=&quot;navbar-end&quot;&gt;
+  &lt;div class=&quot;navbar-item&quot;&gt;&lt;span class=&quot;tag is-success&quot;&gt;Default Navbar&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;navbar-item&quot;&gt;{{.status}}&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>When stopped, the fragment is a green &quot;Stopped&quot; tag + a Start link; when running, it flips to a yellow &quot;Running&quot; tag + a Cancel link. The <code>basePrefix</code> argument means the generated hrefs stay inside the service-worker scope in WASM (<code>/03_style_sampler/wasm_demo/start</code>) and resolve to the site root on the server (<code>/start</code>).</p>
+<p><code>RegisterLifecycle</code>'s <code>/cancel</code> handler is different from the root-level <code>App.HandleCancel</code> used by <code>App.Run</code>: it calls <code>EndAction</code> but does <strong>not</strong> shut the server down, because a multi-page app needs to keep serving after a cancel. Both handlers redirect back to the page you came from via the <code>Referer</code> header (falling back to <code>/</code>).</p>
+<div class="annotation">
+<strong>One singleton model across the whole app.</strong> The App holds a single action-running flag, so hitting Start from any page drives the same model, and the Running/Stopped state in every navbar reflects the same global reality. Hitting Start while one is already running is a no-op.
+</div>
+<hr>
 <h2 id="shared-mux--modelgo">Shared mux — <code>model.go</code></h2>
 <p>Both <code>main.go</code> and <code>main_wasm.go</code> delegate the routing table to <code>model.go</code>. It embeds <code>templates/</code>, parses every layout against <code>base.html</code>, and returns a <code>*http.ServeMux</code> with all routes wired up:</p>
 <pre><code class="language-go">//go:embed templates
@@ -204,9 +227,11 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
                 &quot;results&quot;:      template.HTML(lofigui.Buffer()),
                 &quot;current_path&quot;: r.URL.Path,
                 &quot;base&quot;:         basePrefix,
+                &quot;status&quot;:       app.StatusControls(basePrefix), // Running/Stopped + Start/Cancel
             })
         })
     }
+    app.RegisterLifecycle(mux, model) // GET /start, GET /cancel
     mux.HandleFunc(&quot;GET /favicon.ico&quot;,          lofigui.ServeFavicon)
     mux.HandleFunc(&quot;GET /assets/bulma.min.css&quot;, lofigui.ServeBulma)
     return mux
@@ -225,13 +250,12 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
 func main() {
     app := lofigui.NewApp()
     app.SetRefreshTime(1)
-    app.RunModel(model) // kick off the teletype in a background goroutine
 
     fmt.Println(&quot;Style Sampler running at http://localhost:1340&quot;)
     http.ListenAndServe(&quot;:1340&quot;, buildMux(app, &quot;/&quot;))
 }
 </code></pre>
-<p>Four lines. <code>app.RunModel(model)</code> launches the model in a goroutine (with cancellation-aware <code>Sleep</code> recovery already wired up inside the library). <code>buildMux(app, &quot;/&quot;)</code> is handed to <code>http.ListenAndServe</code>. Base prefix is <code>&quot;/&quot;</code> because the server hosts the app at the site root.</p>
+<p>Three lines. No <code>RunModel</code> at startup — the model is kicked off by the user via the navbar's <strong>Start</strong> button, and <code>RegisterLifecycle</code> (inside <code>buildMux</code>) wires the handler that launches the goroutine. Base prefix is <code>&quot;/&quot;</code> because the server hosts the app at the site root.</p>
 <hr>
 <h2 id="the-wasm-entry-point--main-wasmgo">The WASM entry point — <code>main_wasm.go</code></h2>
 <pre><code class="language-go">//go:build js &amp;&amp; wasm
@@ -239,14 +263,13 @@ func main() {
 func main() {
     app := lofigui.NewApp()
     app.SetRefreshTime(1)
-    app.RunModel(model)
 
     base := strings.TrimSuffix(lofigui.WASMScopePath(), &quot;/&quot;) + &quot;/&quot;
     if _, err := wasmhttp.Serve(buildMux(app, base)); err != nil { panic(err) }
     select {} // keep the Go runtime alive to service SW fetches
 }
 </code></pre>
-<p>Same three lines of setup as <code>main.go</code>, then <code>wasmhttp.Serve</code> registers every handler in the mux on the service-worker fetch pipeline. <code>lofigui.WASMScopePath()</code> returns the scope the SW is registered at (e.g. <code>/03_style_sampler/wasm_demo/</code>), which becomes the <code>&lt;base href&gt;</code> so the templates' relative links land back inside the scope.</p>
+<p>Same setup as <code>main.go</code>, then <code>wasmhttp.Serve</code> registers every handler in the mux on the service-worker fetch pipeline. <code>lofigui.WASMScopePath()</code> returns the scope the SW is registered at (e.g. <code>/03_style_sampler/wasm_demo/</code>), which becomes the <code>&lt;base href&gt;</code> so the templates' relative links — including the Start/Cancel links emitted by <code>StatusControls(base)</code> — land back inside the scope.</p>
 <div class="annotation">
 <strong>Why two files at all?</strong> <code>syscall/js</code> (indirectly imported by <code>go-wasm-http-server</code>) does not link on non-WASM targets, and <code>http.ListenAndServe</code> is a runtime no-op under WASM. <code>//go:build</code> tags pick the right entry point at compile time; no runtime switches, no stubs, no conditional imports.
 </div>
@@ -268,7 +291,7 @@ func main() {
 </tr>
 <tr>
 <td>App setup</td>
-<td><code>NewApp</code> + <code>SetRefreshTime(1)</code> + <code>RunModel(model)</code></td>
+<td><code>NewApp</code> + <code>SetRefreshTime(1)</code> (model starts on click)</td>
 <td>identical</td>
 </tr>
 <tr>
