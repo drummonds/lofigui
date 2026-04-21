@@ -3,42 +3,17 @@
 package main
 
 import (
-	"embed"
 	"html/template"
 	"syscall/js"
 
 	"codeberg.org/hum3/lofigui"
 )
 
-// templates/ is copied into go/ by build.sh before WASM compilation.
-// go:embed cannot traverse parent directories, so this is the workaround.
-//
-//go:embed templates
-var templateFS embed.FS
+var controllers = loadControllers()
 
-var controllers map[string]*lofigui.Controller
-
-func init() {
-	controllers = make(map[string]*lofigui.Controller)
-	templates := []string{
-		"home.html",
-		"style_scrolling.html",
-		"style_fixed.html",
-		"style_three_panel_nav.html",
-		"style_three_panel_controls.html",
-		"style_fullwidth.html",
-	}
-	for _, name := range templates {
-		ctrl, err := lofigui.NewControllerFromFS(templateFS, "templates", name)
-		if err != nil {
-			panic("template " + name + ": " + err.Error())
-		}
-		controllers[name] = ctrl
-	}
-}
-
-// goRenderPage renders a full page HTML string for the given style.
-// Called from JavaScript to switch between styles without a server round-trip.
+// goRenderPage is the JS-facing entry point: it renders a full page HTML
+// string for the given layout. templates/app.js calls it whenever the user
+// clicks a style button or an intercepted in-page link.
 func goRenderPage(this js.Value, args []js.Value) any {
 	templateName := "home.html"
 	currentPath := "/"
@@ -54,10 +29,8 @@ func goRenderPage(this js.Value, args []js.Value) any {
 		return js.ValueOf("<p>Unknown style: " + templateName + "</p>")
 	}
 
-	content := sampleOutput()
-
 	html, err := ctrl.RenderToString(lofigui.TemplateContext{
-		"results":      template.HTML(content),
+		"results":      template.HTML(sampleOutput()),
 		"current_path": currentPath,
 	})
 	if err != nil {

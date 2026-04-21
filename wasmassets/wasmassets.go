@@ -17,6 +17,8 @@ import (
 	"path/filepath"
 	"text/template"
 	"time"
+
+	"codeberg.org/hum3/lofigui"
 )
 
 //go:embed templates
@@ -132,6 +134,12 @@ func Deploy(cfg Config) ([]string, error) {
 		return nil, fmt.Errorf("wasmassets: copy main.wasm: %w", err)
 	}
 	written = append(written, "main.wasm")
+
+	// Vendored Bulma so the bootstrap loads without an outbound CDN fetch.
+	if err := os.WriteFile(filepath.Join(cfg.Dir, "bulma.min.css"), lofigui.BulmaCSS, 0o644); err != nil {
+		return nil, fmt.Errorf("wasmassets: write bulma.min.css: %w", err)
+	}
+	written = append(written, "bulma.min.css")
 
 	for _, stub := range cfg.RecoveryStubs {
 		if err := renderTemplate("templates/demo_stub.html.tmpl",

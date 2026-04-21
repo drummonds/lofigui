@@ -239,10 +239,30 @@ tasks:
         sleep 5
         url2svg --url http://localhost:1340 -o ../../../docs/01_complete.svg
 
+  docs:capture:02:
+    desc: Capture screenshots for example 02 documentation
+    dir: examples/02_svg_graph/go
+    cmds:
+      - |
+        LOFIGUI_HOLD=1 go run . &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        for i in $(seq 1 30); do
+          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          sleep 0.5
+        done
+        # First curl triggered model — wait for partway through the showcase
+        sleep 6
+        url2svg --url http://localhost:1340 -o ../../../docs/02_polling.svg
+        # Showcase runs ~16s total — wait for completion
+        sleep 14
+        url2svg --url http://localhost:1340 -o ../../../docs/02_complete.svg
+
   docs:capture:
     desc: Capture all example screenshots
     cmds:
       - task: docs:capture:01
+      - task: docs:capture:02
 
   docs:open:01:
     desc: Start example 01 in HOLD mode for manual inspection
@@ -254,6 +274,9 @@ tasks:
   docs:build:
     desc: Build documentation (markdown to HTML)
     cmds:
+      # Vendored Bulma lives at repo root for go:embed; mirror into docs/assets for the static site.
+      - mkdir -p docs/assets
+      - cp bulma.min.css docs/assets/bulma.min.css
       - task-plus md2html --file README.md --dst docs
       - task-plus md2html --file CHANGELOG.md --dst docs
       - task-plus md2html --file ROADMAP.md --dst docs
@@ -285,11 +308,13 @@ tasks:
       - task-plus md2html --file examples/11_water_tank_storage/index.md --dst docs/11_water_tank_storage
       - task-plus md2html --file examples/12_batch_yield/index.md --dst docs/12_batch_yield
       # Fix breadcrumb/navbar links for nested example pages (md2html generates same-dir links)
+      # and rewrite CDN Bulma link to the vendored local copy at docs/assets/bulma.min.css
       - |
-        for f in docs/*/index.html; do
+        for f in docs/*/index.html docs/*.html; do
           [ -f "$f" ] || continue
           sed -i 's|href="index.html">lofigui|href="../index.html">lofigui|' "$f"
           sed -i 's|<a href="#" aria-current="page">Internal Docs</a>|<a href="../index.html">Docs</a>|' "$f"
+          sed -i -E 's|https://cdn\.jsdelivr\.net/npm/bulma@[0-9.]+/css/bulma\.min\.css|/assets/bulma.min.css|g' "$f"
         done
       - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 
@@ -336,13 +361,10 @@ tasks:
       - cp examples/01b_hello_world_explicit_gzip/go/templates/sw/sw.js docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
       - cp examples/01b_hello_world_explicit_gzip/go/templates/sw/wasmhttp_sw.js docs/01b_hello_world_explicit_gzip/wasm_demo/sw/
       - rm examples/01b_hello_world_explicit_gzip/go/main.wasm
-      # 02 Output Showcase
-      - mkdir -p docs/02_svg_graph
+      # 02 Output Showcase (compact — library CLI generates the SW bootstrap)
+      - rm -rf docs/02_svg_graph/wasm_demo
       - cd examples/02_svg_graph/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
-      - cp "{{.WASM_EXEC_JS}}" docs/02_svg_graph/
-      - cp examples/02_svg_graph/go/main.wasm docs/02_svg_graph/
-      - cp examples/02_svg_graph/go/templates/index.html docs/02_svg_graph/demo.html
-      - cp examples/02_svg_graph/go/templates/app.js docs/02_svg_graph/
+      - go run ./cmd/wasm-deploy --dir=docs/02_svg_graph/wasm_demo --title="02 — Output Showcase" --wasm=examples/02_svg_graph/go/main.wasm --recovery-stubs=demo.html
       - rm examples/02_svg_graph/go/main.wasm
       # 03 Style Sampler (templates embedded via go:embed from go/templates/)
       - mkdir -p docs/03_style_sampler

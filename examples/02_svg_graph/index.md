@@ -1,6 +1,8 @@
 <style>
 .annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
 .annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; width: 100%; height: auto; }
 .demo-output { background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; padding: 1em; }
 .demo-code pre { margin: 0 !important; }
 </style>
@@ -9,11 +11,29 @@
 
 A scrolling demonstration of every output type lofigui supports. The model runs in the background while the browser auto-refreshes to show new content appearing section by section.
 
-**Interactivity level:** 2 — Scrolling / printing output (same async polling pattern as example 01)
+**Interactivity level:** 1 — Teletype (same async polling pattern as example 01)
 
 <div class="buttons">
-<a href="demo.html" class="button is-primary">Launch Demo</a>
+<a href="wasm_demo/" class="button is-primary">Launch Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
+</div>
+
+<div class="columns is-vcentered">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../02_polling.svg" alt="During polling — showcase partway through">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling</figcaption>
+</figure>
+</div>
+<div class="column is-narrow has-text-centered">
+<span style="font-size: 2rem; color: #999;">&rarr;</span>
+</div>
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../02_complete.svg" alt="After completion — every output type rendered">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Complete</figcaption>
+</figure>
+</div>
 </div>
 
 ---
@@ -266,14 +286,29 @@ func model(app *lofigui.App) {
 
 ---
 
-## SVG charts — no dependencies
+## SVG charts — hand-rolled mocks vs a real library
 
-Three helpers in `charts.go` generate SVG strings — no external charting library:
+`charts.go` ships two hand-rolled SVG helpers — bar and pie — so the example has zero charting dependencies:
 
 ```go
 lofigui.HTML(barChartSVG(values, labels, "Title"))
 lofigui.HTML(pieChartSVG(slices, "Title"))
-lofigui.HTML(sparklineSVG(values, "Title"))
+```
+
+<div class="annotation">
+<strong>These are demo mocks.</strong> They illustrate that any SVG string can be streamed into the buffer via <code>lofigui.HTML()</code>, but they skip the things a real charting library handles — proper axes, tick spacing, legends, theming, time-series scales. For production use, reach for <a href="https://codeberg.org/hum3/gogal">gogal</a>, which the live line chart in <code>sectionStaticCharts</code> already uses:
+</div>
+
+```go
+lineChart := gogal.NewLineChart(
+    gogal.WithTitle("Growth Trend"),
+    gogal.WithSize(400, 150),
+    gogal.WithGrid(true),
+    gogal.WithSmooth(true),
+)
+lineChart.AddXY("Growth", xValues, values)
+svg, _ := lineChart.RenderString()
+lofigui.HTML(svg)
 ```
 
 The live-updating chart prints 5 versions of a growing bar chart, one per second:
@@ -321,7 +356,7 @@ task go-example:02        # Run the server
 
 ## WASM
 
-The same model compiles to WebAssembly with no changes:
+The same model compiles to WebAssembly with no changes — and, like example 01, no on-disk templates. `app.RunWASM()` uses lofigui's built-in default WASM template (served via service worker):
 
 ```go
 //go:build js && wasm
@@ -330,11 +365,15 @@ package main
 
 import "codeberg.org/hum3/lofigui"
 
-func main() { lofigui.RunWASM(model) }
+func main() {
+    app := lofigui.NewApp()
+    app.Version = "Output Showcase v1.0"
+    app.RunWASM(model)
+}
 ```
 
 <div class="buttons">
-<a href="demo.html" class="button is-primary is-small">Go WASM Demo</a>
+<a href="wasm_demo/" class="button is-primary is-small">Go WASM Demo</a>
 </div>
 
 [main_wasm.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go)

@@ -104,7 +104,7 @@ ctrl, err := lofigui.NewController(lofigui.ControllerConfig{
 <html>
 <head>
   {{ refresh | safe }}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <link rel="stylesheet" href="/assets/bulma.min.css">
 </head>
 <body>
   <div class="columns">

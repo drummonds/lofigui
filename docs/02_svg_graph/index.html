@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>02 — Output Showcase - lofigui</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="/assets/bulma.min.css">
     <style>
         pre {
             background-color: #2b2b2b;
@@ -51,15 +51,34 @@
                 <style>
 .annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
 .annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; width: 100%; height: auto; }
 .demo-output { background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; padding: 1em; }
 .demo-code pre { margin: 0 !important; }
 </style>
 <h1 id="02--output-showcase">02 — Output Showcase</h1>
 <p>A scrolling demonstration of every output type lofigui supports. The model runs in the background while the browser auto-refreshes to show new content appearing section by section.</p>
-<p><strong>Interactivity level:</strong> 2 — Scrolling / printing output (same async polling pattern as example 01)</p>
+<p><strong>Interactivity level:</strong> 1 — Teletype (same async polling pattern as example 01)</p>
 <div class="buttons">
-<a href="demo.html" class="button is-primary">Launch Demo</a>
+<a href="wasm_demo/" class="button is-primary">Launch Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
+</div>
+<div class="columns is-vcentered">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../02_polling.svg" alt="During polling — showcase partway through">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">During polling</figcaption>
+</figure>
+</div>
+<div class="column is-narrow has-text-centered">
+<span style="font-size: 2rem; color: #999;">&rarr;</span>
+</div>
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../02_complete.svg" alt="After completion — every output type rendered">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Complete</figcaption>
+</figure>
+</div>
 </div>
 <hr>
 <h2 id="output-gallery">Output Gallery</h2>
@@ -279,11 +298,23 @@ lofigui.HTML(`&lt;p&gt;&lt;small&gt;small&lt;/small&gt;, &lt;ins&gt;ins&lt;/ins&
 </div>
 <p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/model.go">model.go source on Codeberg</a></p>
 <hr>
-<h2 id="svg-charts--no-dependencies">SVG charts — no dependencies</h2>
-<p>Three helpers in <code>charts.go</code> generate SVG strings — no external charting library:</p>
+<h2 id="svg-charts--hand-rolled-mocks-vs-a-real-library">SVG charts — hand-rolled mocks vs a real library</h2>
+<p><code>charts.go</code> ships two hand-rolled SVG helpers — bar and pie — so the example has zero charting dependencies:</p>
 <pre><code class="language-go">lofigui.HTML(barChartSVG(values, labels, &quot;Title&quot;))
 lofigui.HTML(pieChartSVG(slices, &quot;Title&quot;))
-lofigui.HTML(sparklineSVG(values, &quot;Title&quot;))
+</code></pre>
+<div class="annotation">
+<strong>These are demo mocks.</strong> They illustrate that any SVG string can be streamed into the buffer via <code>lofigui.HTML()</code>, but they skip the things a real charting library handles — proper axes, tick spacing, legends, theming, time-series scales. For production use, reach for <a href="https://codeberg.org/hum3/gogal">gogal</a>, which the live line chart in <code>sectionStaticCharts</code> already uses:
+</div>
+<pre><code class="language-go">lineChart := gogal.NewLineChart(
+    gogal.WithTitle(&quot;Growth Trend&quot;),
+    gogal.WithSize(400, 150),
+    gogal.WithGrid(true),
+    gogal.WithSmooth(true),
+)
+lineChart.AddXY(&quot;Growth&quot;, xValues, values)
+svg, _ := lineChart.RenderString()
+lofigui.HTML(svg)
 </code></pre>
 <p>The live-updating chart prints 5 versions of a growing bar chart, one per second:</p>
 <pre><code class="language-go">for _, n := range []int{2, 4, 6, 8, 10} {
@@ -313,17 +344,21 @@ lofigui.HTML(sparklineSVG(values, &quot;Title&quot;))
 </code></pre>
 <hr>
 <h2 id="wasm">WASM</h2>
-<p>The same model compiles to WebAssembly with no changes:</p>
+<p>The same model compiles to WebAssembly with no changes — and, like example 01, no on-disk templates. <code>app.RunWASM()</code> uses lofigui's built-in default WASM template (served via service worker):</p>
 <pre><code class="language-go">//go:build js &amp;&amp; wasm
 
 package main
 
 import &quot;codeberg.org/hum3/lofigui&quot;
 
-func main() { lofigui.RunWASM(model) }
+func main() {
+    app := lofigui.NewApp()
+    app.Version = &quot;Output Showcase v1.0&quot;
+    app.RunWASM(model)
+}
 </code></pre>
 <div class="buttons">
-<a href="demo.html" class="button is-primary is-small">Go WASM Demo</a>
+<a href="wasm_demo/" class="button is-primary is-small">Go WASM Demo</a>
 </div>
 <p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go">main_wasm.go source on Codeberg</a></p>
 

@@ -17,7 +17,7 @@ const defaultWASMTemplate = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.version}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <link rel="stylesheet" href="/assets/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation">
@@ -124,6 +124,7 @@ func (app *App) RunWASM(modelFunc func(*App)) {
 	mux.HandleFunc("POST /cancel", app.HandleCancel(scopePath))
 
 	mux.HandleFunc("GET /favicon.ico", ServeFavicon)
+	mux.HandleFunc("GET /assets/bulma.min.css", ServeBulma)
 
 	if _, err := wasmhttp.Serve(mux); err != nil {
 		panic(err)

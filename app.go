@@ -466,6 +466,7 @@ func (app *App) RunModel(modelFunc func(*App)) {
 func (app *App) Run(addr string, modelFunc func(*App)) {
 	http.HandleFunc("/", app.Handle(modelFunc))
 	http.HandleFunc("/cancel", app.HandleCancel("/"))
+	http.HandleFunc("/assets/bulma.min.css", ServeBulma)
 	if err := app.ListenAndServe(addr, nil); err != nil {
 		if errors.Is(err, ErrCancelled) {
 			log.Printf("%v", err)

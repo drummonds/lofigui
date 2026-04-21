@@ -58,7 +58,7 @@ Web applications sit on a spectrum of interactivity. lofigui deliberately target
 
 | Level | Approach | lofigui support | JS required | Examples |
 |-------|----------|-----------------|-------------|----------|
-| 1 | Teletype | Full (App + polling) | None/WASM low | [01](01_hello_world/) (Hello World), [02](02_chart.svg) (Output Showcase) |
+| 1 | Teletype | Full (App + polling) | None/WASM low | [01](01_hello_world/) (Hello World), [01a](01a_hello_world_explicit/) (Explicit), [01b](01b_hello_world_explicit_gzip/) (Explicit + gzip), [02](02_svg_graph/) (Output Showcase) |
 | 2 | Teletype+ web | Full (templates + forms) | None | [06](06_notes.svg) (Notes CRUD), [07](07_water_tank/) (Water Tank), [08](08_water_tank_multi/) (Multi-Page) |
 | 3 | Polling (whole page) | Full (App + Refresh) | None | — |
 | 4 | HTMX (partial updates) | Full (Controller + HTMX) | ~14KB | [09](09_water_tank_htmx/) (Water Tank HTMX), [10](10_water_tank_maintenance/) (Maintenance), [12](12_batch_yield/) (Batch Yield) |
@@ -72,7 +72,7 @@ Most internal tools and dashboards live at levels 2-4. lofigui covers that range
 
 Named after old-fashioned teletypes that print on continuous rolls of paper. You start a process, it prints output until it finishes — there is no interactivity until the end. You can stop it, but you cannot steer it. The server renders the complete page and the browser reloads via polling, but the user is purely a spectator.
 
-*lofigui examples: 01 (Hello World), 02 (SVG Graph output showcase).*
+*lofigui examples: 01 (Hello World), 01a (Hello World Explicit), 01b (Hello World Explicit + gzip), 02 (Output Showcase).*
 
 ### 2. Teletype+ web
 
