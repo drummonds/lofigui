@@ -134,9 +134,9 @@ Two library calls do all the work:
 
 ```go
 // buildMux, in model.go
-app.RegisterLifecycle(mux, model)       // wires GET /start and GET /cancel
+app.RegisterLifecycle(mux, model, basePrefix) // wires GET /start and GET /cancel
 // …
-"status": app.StatusControls(basePrefix), // drops the widget into every page's context
+"status": app.StatusControls(basePrefix),     // drops the widget into every page's context
 ```
 
 `app.StatusControls` renders a small HTML fragment that every navbar template embeds as `{{.status}}`:
@@ -193,7 +193,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
             })
         })
     }
-    app.RegisterLifecycle(mux, model) // GET /start, GET /cancel
+    app.RegisterLifecycle(mux, model, basePrefix) // GET /start, GET /cancel
     mux.HandleFunc("GET /favicon.ico",          lofigui.ServeFavicon)
     mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
     return mux

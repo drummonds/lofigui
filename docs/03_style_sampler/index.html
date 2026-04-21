@@ -183,9 +183,9 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 <p>Unlike the earlier version of this example, the model isn't kicked off at startup. The page loads in a <strong>Stopped</strong> state; clicking <strong>Start</strong> in the navbar fires the model, and the HTTP Refresh polling takes over. <strong>Cancel</strong> stops it mid-flight without shutting the server down.</p>
 <p>Two library calls do all the work:</p>
 <pre><code class="language-go">// buildMux, in model.go
-app.RegisterLifecycle(mux, model)       // wires GET /start and GET /cancel
+app.RegisterLifecycle(mux, model, basePrefix) // wires GET /start and GET /cancel
 // …
-&quot;status&quot;: app.StatusControls(basePrefix), // drops the widget into every page's context
+&quot;status&quot;: app.StatusControls(basePrefix),     // drops the widget into every page's context
 </code></pre>
 <p><code>app.StatusControls</code> renders a small HTML fragment that every navbar template embeds as <code>{{.status}}</code>:</p>
 <pre><code class="language-html">&lt;!-- style_scrolling.html --&gt;
@@ -231,7 +231,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
             })
         })
     }
-    app.RegisterLifecycle(mux, model) // GET /start, GET /cancel
+    app.RegisterLifecycle(mux, model, basePrefix) // GET /start, GET /cancel
     mux.HandleFunc(&quot;GET /favicon.ico&quot;,          lofigui.ServeFavicon)
     mux.HandleFunc(&quot;GET /assets/bulma.min.css&quot;, lofigui.ServeBulma)
     return mux

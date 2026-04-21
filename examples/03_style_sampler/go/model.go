@@ -91,7 +91,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
 		})
 	}
 
-	app.RegisterLifecycle(mux, model)
+	app.RegisterLifecycle(mux, model, basePrefix)
 	mux.HandleFunc("GET /favicon.ico", lofigui.ServeFavicon)
 	mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
 	return mux
