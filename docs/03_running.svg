@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <clipPath id="clip1">
+      <rect x="48" y="277" width="913" height="2" />
+    </clipPath>
+  </defs>
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <rect x="0" y="0" width="1009" height="52" fill="rgb(0,209,178)"/>
+  <a xlink:href="http://localhost:1340/">
+    <text x="12" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Style Sampler</text>
+  </a>
+  <a xlink:href="http://localhost:1340/">
+    <text x="140.4" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Home</text>
+  </a>
+  <a xlink:href="http://localhost:1340/style/scrolling">
+    <rect x="195.6" y="0" width="85.8" height="52" fill="rgb(0,209,178)"/>
+    <text x="207.6" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Scrolling</text>
+  </a>
+  <a xlink:href="http://localhost:1340/style/fixed">
+    <text x="293.4" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Fixed</text>
+  </a>
+  <a xlink:href="http://localhost:1340/style/three-panel-nav">
+    <text x="355.8" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Three-Panel</text>
+  </a>
+  <a xlink:href="http://localhost:1340/style/fullwidth">
+    <text x="466" y="31.4" fill="rgb(0,31,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Full Width</text>
+  </a>
+  <rect x="741" y="14" width="99.6" height="24" rx="6" fill="rgb(72,199,142)"/>
+  <text x="750" y="29.4" fill="rgb(10,31,21)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Default Navbar</text>
+  <rect x="864.6" y="14" width="62.7" height="24" rx="6" fill="rgb(255,183,15)"/>
+  <text x="873.6" y="29.4" fill="rgb(41,29,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Running</text>
+  <a xlink:href="http://localhost:1340/cancel?from=%2Fstyle%2Fscrolling">
+    <rect x="943.3" y="14" width="53.7" height="24" rx="6" fill="rgb(255,235,239)"/>
+    <text x="952.3" y="29.4" fill="rgb(128,0,26)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="12">Cancel</text>
+  </a>
+  <text x="48" y="128.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Scrolling Navbar</text>
+  <text x="48" y="155.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">The default Bulma pattern — navbar scrolls with the page. Used in examples 01–02.</text>
+  <rect x="48" y="185" width="913" height="68" rx="6" fill="rgb(204,240,255)"/>
+  <text x="133.2" y="224.4" fill="rgb(0,54,77)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">The navbar is part of the document flow. Scroll down and it disappears. Simple and predictable.</text>
+  <text x="72" y="224.4" fill="rgb(0,54,77)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">Pattern:</text>
+  <g clip-path="url(#clip1)">
+    <rect x="48" y="277" width="913" height="2" fill="rgb(243,244,246)"/>
+  </g>
+  <text x="48" y="320.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Hello world.</text>
+  <text x="48" y="360.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Count 0</text>
+  <text x="48" y="400.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16">Count 1</text>
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
+</svg>

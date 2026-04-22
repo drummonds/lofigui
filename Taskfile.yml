@@ -258,11 +258,32 @@ tasks:
         sleep 14
         url2svg --url http://localhost:1340 -o ../../../docs/02_complete.svg
 
+  docs:capture:03:
+    desc: Capture screenshots for example 03 documentation
+    dir: examples/03_style_sampler/go
+    cmds:
+      - |
+        go run . &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        for i in $(seq 1 30); do
+          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          sleep 0.5
+        done
+        # Stopped state — navbar shows "Stopped" + Start button, no output yet
+        url2svg --url http://localhost:1340/style/scrolling -o ../../../docs/03_stopped.svg
+        # Kick off the model, returning to the scrolling page
+        curl -sf -o /dev/null "http://localhost:1340/start?from=%2Fstyle%2Fscrolling"
+        # Running state — wait for partial output (~2s into a 5s loop)
+        sleep 2
+        url2svg --url http://localhost:1340/style/scrolling -o ../../../docs/03_running.svg
+
   docs:capture:
     desc: Capture all example screenshots
     cmds:
       - task: docs:capture:01
       - task: docs:capture:02
+      - task: docs:capture:03
 
   docs:open:01:
     desc: Start example 01 in HOLD mode for manual inspection
