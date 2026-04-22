@@ -23,8 +23,8 @@ Every page's navbar carries a **Start / Cancel** widget driven by the library �
 <div class="columns is-vcentered">
 <div class="column is-5">
 <figure class="image screenshot">
-<img src="../03_loading.svg" alt="Loading — service worker bootstrapping">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Loading — SW bootstrap registering</figcaption>
+<img src="../03_stopped.svg" alt="Stopped — navbar shows Start button, no model output yet">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Stopped — Start button in the navbar, waiting for the user</figcaption>
 </figure>
 </div>
 <div class="column is-narrow has-text-centered">
@@ -32,8 +32,8 @@ Every page's navbar carries a **Start / Cancel** widget driven by the library �
 </div>
 <div class="column is-5">
 <figure class="image screenshot">
-<img src="../03_working.svg" alt="Working — scrolling layout after model completion">
-<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Working — Scrolling layout after model completes</figcaption>
+<img src="../03_running.svg" alt="Running — navbar shows Cancel, teletype output growing">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Running — Cancel button visible, teletype output growing</figcaption>
 </figure>
 </div>
 </div>
