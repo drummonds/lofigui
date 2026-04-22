@@ -134,10 +134,12 @@ Two library calls do all the work:
 
 ```go
 // buildMux, in model.go
-app.RegisterLifecycle(mux, model, basePrefix) // wires GET /start and GET /cancel
+app.RegisterLifecycle(mux, model, basePrefix)            // wires GET /start and GET /cancel
 // …
-"status": app.StatusControls(basePrefix),     // drops the widget into every page's context
+"status": app.StatusControls(basePrefix, r.URL.Path),   // drops the widget into every page's context
 ```
+
+The current request's path is threaded into the widget so the generated links embed `?from=<current-page>`; the handlers read that back and redirect to it. The Referer header would normally do this job, but service workers don't reliably forward `Referer`, so we carry the return URL explicitly.
 
 `app.StatusControls` renders a small HTML fragment that every navbar template embeds as `{{.status}}`:
 
@@ -189,7 +191,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
                 "results":      template.HTML(lofigui.Buffer()),
                 "current_path": r.URL.Path,
                 "base":         basePrefix,
-                "status":       app.StatusControls(basePrefix), // Running/Stopped + Start/Cancel
+                "status":       app.StatusControls(basePrefix, r.URL.Path), // Running/Stopped + Start/Cancel
             })
         })
     }

@@ -86,7 +86,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
 				"results":      template.HTML(lofigui.Buffer()),
 				"current_path": r.URL.Path,
 				"base":         basePrefix,
-				"status":       app.StatusControls(basePrefix),
+				"status":       app.StatusControls(basePrefix, r.URL.Path),
 			})
 		})
 	}
