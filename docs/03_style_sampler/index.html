@@ -183,10 +183,11 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 <p>Unlike the earlier version of this example, the model isn't kicked off at startup. The page loads in a <strong>Stopped</strong> state; clicking <strong>Start</strong> in the navbar fires the model, and the HTTP Refresh polling takes over. <strong>Cancel</strong> stops it mid-flight without shutting the server down.</p>
 <p>Two library calls do all the work:</p>
 <pre><code class="language-go">// buildMux, in model.go
-app.RegisterLifecycle(mux, model, basePrefix) // wires GET /start and GET /cancel
+app.RegisterLifecycle(mux, model, basePrefix)            // wires GET /start and GET /cancel
 // …
-&quot;status&quot;: app.StatusControls(basePrefix),     // drops the widget into every page's context
+&quot;status&quot;: app.StatusControls(basePrefix, r.URL.Path),   // drops the widget into every page's context
 </code></pre>
+<p>The current request's path is threaded into the widget so the generated links embed <code>?from=&lt;current-page&gt;</code>; the handlers read that back and redirect to it. The Referer header would normally do this job, but service workers don't reliably forward <code>Referer</code>, so we carry the return URL explicitly.</p>
 <p><code>app.StatusControls</code> renders a small HTML fragment that every navbar template embeds as <code>{{.status}}</code>:</p>
 <pre><code class="language-html">&lt;!-- style_scrolling.html --&gt;
 &lt;div class=&quot;navbar-end&quot;&gt;
@@ -227,7 +228,7 @@ func buildMux(app *lofigui.App, basePrefix string) *http.ServeMux {
                 &quot;results&quot;:      template.HTML(lofigui.Buffer()),
                 &quot;current_path&quot;: r.URL.Path,
                 &quot;base&quot;:         basePrefix,
-                &quot;status&quot;:       app.StatusControls(basePrefix), // Running/Stopped + Start/Cancel
+                &quot;status&quot;:       app.StatusControls(basePrefix, r.URL.Path), // Running/Stopped + Start/Cancel
             })
         })
     }

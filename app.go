@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -568,23 +569,27 @@ func (app *App) HandleCancel(redirectURL string) http.HandlerFunc {
 //
 // The rendered links target "<basePrefix>start" and "<basePrefix>cancel";
 // wire those routes with [App.RegisterLifecycle].
-func (app *App) StatusControls(basePrefix string) template.HTML {
+func (app *App) StatusControls(basePrefix, currentPath string) template.HTML {
 	app.mu.RLock()
 	running := app.actionRunning
 	app.mu.RUnlock()
 
 	prefix := strings.TrimSuffix(basePrefix, "/") + "/"
+	// Encode the full in-scope URL of the current page into ?from= so the
+	// /start and /cancel handlers can redirect back to it without relying on
+	// the Referer header (which service workers don't always forward).
+	from := url.QueryEscape(prefix + strings.TrimPrefix(currentPath, "/"))
 	if running {
 		return template.HTML(fmt.Sprintf(
 			`<span class="tag is-warning">Running</span>`+
-				`<a href="%scancel" class="tag is-danger is-light ml-1">Cancel</a>`,
-			prefix,
+				`<a href="%scancel?from=%s" class="tag is-danger is-light ml-1">Cancel</a>`,
+			prefix, from,
 		))
 	}
 	return template.HTML(fmt.Sprintf(
 		`<span class="tag is-success">Stopped</span>`+
-			`<a href="%sstart" class="tag is-primary is-light ml-1">Start</a>`,
-		prefix,
+			`<a href="%sstart?from=%s" class="tag is-primary is-light ml-1">Start</a>`,
+		prefix, from,
 	))
 }
 
@@ -593,15 +598,15 @@ func (app *App) StatusControls(basePrefix string) template.HTML {
 //
 //   - /start  — if no action is running, resets the buffer and launches
 //     modelFunc in a goroutine (via [App.RunModel]), then redirects to the
-//     Referer page (or basePrefix if the Referer is missing).
+//     ?from= query param (falling back to Referer, then basePrefix).
 //   - /cancel — calls [App.EndAction] to stop the running model and redirects
 //     the same way. Unlike [App.HandleCancel], this does NOT shut the server
 //     down, so it is suitable for long-running multi-page apps.
 //
 // basePrefix must match the prefix passed to [App.StatusControls] (e.g. "/"
 // for a server build, or the service-worker scope for a WASM build). It is
-// used as the fallback redirect target when no Referer is available, so
-// lifecycle links stay inside the SW scope.
+// used as the final redirect fallback so lifecycle links stay inside the SW
+// scope when neither ?from= nor Referer is available.
 func (app *App) RegisterLifecycle(mux *http.ServeMux, modelFunc func(*App), basePrefix string) {
 	fallback := strings.TrimSuffix(basePrefix, "/") + "/"
 	mux.HandleFunc("GET /start", func(w http.ResponseWriter, r *http.Request) {
@@ -616,14 +621,23 @@ func (app *App) RegisterLifecycle(mux *http.ServeMux, modelFunc func(*App), base
 	})
 }
 
-// lifecycleRedirect redirects to the request's Referer path, falling back to
-// the given URL when no Referer is present. Only the Referer's path+query is
-// used, so a cross-origin Referer can at worst steer navigation within the
-// app's own origin.
+// lifecycleRedirect picks the best "go back to where you came from" target
+// and sends a 303. Precedence:
+//  1. The ?from= query param (set by [App.StatusControls]). Most reliable,
+//     since service workers don't always forward the Referer header.
+//  2. The Referer header, reduced to its path+query.
+//  3. The given fallback (typically the app's basePrefix).
+//
+// Only the path+query of each candidate is used, so cross-origin inputs can
+// at worst steer navigation within the app's own origin.
 func lifecycleRedirect(w http.ResponseWriter, r *http.Request, fallback string) {
 	dest := fallback
-	if ref := r.Header.Get("Referer"); ref != "" {
-		if u, err := r.URL.Parse(ref); err == nil && u.Path != "" {
+	if from := r.URL.Query().Get("from"); from != "" {
+		if u, err := url.Parse(from); err == nil && u.Path != "" {
+			dest = u.RequestURI()
+		}
+	} else if ref := r.Header.Get("Referer"); ref != "" {
+		if u, err := url.Parse(ref); err == nil && u.Path != "" {
 			dest = u.RequestURI()
 		}
 	}
