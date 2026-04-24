@@ -164,19 +164,23 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 <strong><code>&lt;base href="{{.base}}"&gt;</code></strong> lets the same template work at both the site root ("/") and under a service-worker scope ("/03_style_sampler/wasm_demo/"). The navbar/sidebar links use <em>relative</em> hrefs like <code>style/scrolling</code> and <code>""</code> — the browser resolves them against <code>&lt;base&gt;</code>, so they stay inside the SW scope in WASM and resolve to site root on the server.
 </div>
 <hr>
-<h2 id="the-model--identical-to-example-01">The model — identical to example 01</h2>
-<p>The teletype that every layout displays is the same five-line model 01 uses:</p>
+<h2 id="the-model--the-same-shape-as-example-01">The model — the same shape as example 01</h2>
+<p>The teletype that every layout displays is the same print-loop-print pattern from example 01, with the count bumped so the model runs long enough to navigate between layouts while it's working:</p>
 <pre><code class="language-go">func model(app *lofigui.App) {
     lofigui.Print(&quot;Hello world.&quot;)
-    for i := 0; i &lt; 5; i++ {
+    for i := 0; i &lt; 20; i++ {
         app.Sleep(1 * time.Second)
         lofigui.Printf(&quot;Count %d&quot;, i)
     }
     lofigui.Print(&quot;Done.&quot;)
 }
 </code></pre>
+<p>The 20-count loop is deliberately long so you have time to navigate between layouts while the model is running — and that reveals the point below.</p>
 <div class="annotation">
 <strong>Continuity with example 01.</strong> Nothing about layout changes requires a different model. The point of this example is that <em>templates</em> do the layout work; the app logic is still <code>Print</code> + <code>Sleep</code>, and you can drop it in unchanged from a simpler example.
+</div>
+<div class="annotation">
+<strong>One model, many views.</strong> The five layouts are not five separate apps — they are five templates rendering the same singleton model. Start the model on <em>Scrolling</em>, then click over to <em>Fixed</em> or <em>Three-Panel</em>: the model keeps running, the buffer keeps growing, and the navbar in every layout reflects the same Running/Stopped state. Hitting Cancel on any page cancels the one shared model. This is [App.StartAction]'s singleton active-model concept made visible — it's the same reason <code>app.StatusControls</code> only needs the current path and the base prefix to render the right widget everywhere.
 </div>
 <hr>
 <h2 id="start--cancel--baked-into-lofigui">Start / Cancel — baked into lofigui</h2>
