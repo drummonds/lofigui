@@ -340,8 +340,10 @@ tasks:
       - d2 docs/01_flow.d2 docs/01_hello_world/01_flow.svg
 
   post:release:
-    desc: Commit docs assets rebuilt during pages deploy
+    desc: Rebuild docs + WASM and commit so the repo is clean after `tp release`
     cmds:
+      - task: docs:build
+      - task: docs:build-wasm
       - git add docs/
       - git diff --cached --quiet || git commit -m "Rebuild docs assets for $(git describe --tags --abbrev=0)"
       - git push origin main
