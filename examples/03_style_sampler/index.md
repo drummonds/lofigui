@@ -38,6 +38,8 @@ Every page's navbar carries a **Start / Cancel** widget driven by the library â€
 </div>
 </div>
 
+<p class="has-text-grey is-size-7 has-text-centered">Both captures are the <em>Scrolling</em> layout â€” one of five views rendered from the same model. The teletype content looks very similar to <a href="../01_hello_world/">example 01</a>; the interesting bit is that four other layouts show the same buffer at the same time, each with its own navbar.</p>
+
 ---
 
 ## How lofigui helps here
