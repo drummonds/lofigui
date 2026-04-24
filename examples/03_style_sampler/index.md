@@ -105,14 +105,14 @@ style_three_panel_nav.html       → extends base: yellow navbar + columns layou
 
 ---
 
-## The model — identical to example 01
+## The model — the same shape as example 01
 
-The teletype that every layout displays is the same five-line model 01 uses:
+The teletype that every layout displays is the same print-loop-print pattern from example 01, with the count bumped so the model runs long enough to navigate between layouts while it's working:
 
 ```go
 func model(app *lofigui.App) {
     lofigui.Print("Hello world.")
-    for i := 0; i < 5; i++ {
+    for i := 0; i < 20; i++ {
         app.Sleep(1 * time.Second)
         lofigui.Printf("Count %d", i)
     }
@@ -120,8 +120,14 @@ func model(app *lofigui.App) {
 }
 ```
 
+The 20-count loop is deliberately long so you have time to navigate between layouts while the model is running — and that reveals the point below.
+
 <div class="annotation">
 <strong>Continuity with example 01.</strong> Nothing about layout changes requires a different model. The point of this example is that <em>templates</em> do the layout work; the app logic is still <code>Print</code> + <code>Sleep</code>, and you can drop it in unchanged from a simpler example.
+</div>
+
+<div class="annotation">
+<strong>One model, many views.</strong> The five layouts are not five separate apps — they are five templates rendering the same singleton model. Start the model on <em>Scrolling</em>, then click over to <em>Fixed</em> or <em>Three-Panel</em>: the model keeps running, the buffer keeps growing, and the navbar in every layout reflects the same Running/Stopped state. Hitting Cancel on any page cancels the one shared model. This is [App.StartAction]'s singleton active-model concept made visible — it's the same reason <code>app.StatusControls</code> only needs the current path and the base prefix to render the right widget everywhere.
 </div>
 
 ---

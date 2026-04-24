@@ -34,7 +34,7 @@ var pathToTemplate = map[string]string{
 // so the teletype output visibly grows as the browser auto-refreshes.
 func model(app *lofigui.App) {
 	lofigui.Print("Hello world.")
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		app.Sleep(1 * time.Second)
 		lofigui.Printf("Count %d", i)
 	}
