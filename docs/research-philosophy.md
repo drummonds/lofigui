@@ -2,6 +2,10 @@
 
 Design philosophy and the interactivity spectrum.
 
+## Inspiration: Niklaus Wirth
+
+lofigui is in the spirit of [Niklaus Wirth](https://en.wikipedia.org/wiki/Niklaus_Wirth)'s long argument that computer systems should be **simpler and more readable** — that complexity is a cost paid forever, that a system you can fit in your head is a system you can fix and extend. Wirth's [*A Plea for Lean Software*](https://cr.yp.to/bib/1995/wirth.pdf) (1995) frames the trade-off bluntly: software grows because nothing forces it to stay small, and the only people who pay are users and maintainers. lofigui takes that seriously — every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML.
+
 ## The original vision: no CSS, no JavaScript
 
 lofigui started from a simple premise: what if a web UI was just `print()` statements rendered as plain HTML? No CSS framework, no JavaScript, no build step. The reasons:
@@ -65,6 +69,8 @@ Web applications sit on a spectrum of interactivity. lofigui deliberately target
 | 5 | SPA (full Ajax) | Out of scope | Framework | — |
 
 Most internal tools and dashboards live at levels 2-4. lofigui covers that range with a `print()`-based API and zero-to-minimal JavaScript.
+
+> **Two different numberings, on purpose.** The interactivity spectrum is a small, bounded taxonomy — five levels, unlikely to grow much. The example folders (`01_…`, `02_…`, …) are an open-ended progression of increasing complexity and are expected to grow toward 20+ entries as more patterns get worked out. So example **06** ("Notes CRUD") and spectrum-level **6** are unrelated by design — there is no level 6 in this table. The example index reads as a curriculum; the spectrum reads as an ontology.
 
 ### 1. Teletype
 

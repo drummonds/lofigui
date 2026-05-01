@@ -10,13 +10,15 @@ Examples map to the [interactivity spectrum](research-philosophy.html#the-intera
 |-------|----------|----------|
 | 1 | Static | (docs site itself) |
 | 2 | Scrolling / printing output | 02 (Output Showcase) |
-| 3 | Polling (whole page refresh) | 01 (Hello World), 07 (Water Tank), 08 (Multi-Page) |
-| 4 | Static + forms (CRUD) | 06 (Notes CRUD) |
+| 3 | Polling (whole page refresh) | 01 (Hello World), 05 (Demo App, Python only), 07 (Water Tank), 08 (Multi-Page) |
+| 4 | Static + forms (CRUD) | 06 (Notes CRUD — also ships a WASM build) |
 | 5 | HTMX partial updates | 09 (Water Tank HTMX), 10 (Maintenance), 12 (Batch Yield) |
-| 6 | WASM (browser-only) | 03 (Style Sampler) |
+| 6 | WASM (browser-only) | 03 (Style Sampler), 06 (Notes CRUD WASM build) |
 | 7 | WASM + API server | 11 (Water Tank Storage) |
 
 The progression is deliberate — each level adds one concept. Users stop at the level of complexity their project needs.
+
+> **Note on two numberings.** The example folders (`01_…`, `02_…`, …) are an open-ended progression of increasing complexity and will keep growing toward 20+ entries as more patterns get worked out. The interactivity / state taxonomy in [research-philosophy.html](research-philosophy.html#the-interactivity-spectrum) is small and bounded — that table is unlikely to grow much. So example numbers and spectrum-level numbers are not meant to line up.
 
 ## File structure per example
 
@@ -271,7 +273,8 @@ docs:capture:NN:
 | 01 | Hello World | 3 — Polling | Async + refresh | `App.Handle`, `Print`, `Sleep`, auto-refresh, cancel |
 | 02 | Output Showcase | 2 — Scrolling | Async + refresh | All output types: `Print`, `Markdown`, `HTML`, `Table`, SVG charts |
 | 03 | Style Sampler | 6 — WASM | Browser-only | Template inheritance, `NewControllerFromFS`, multiple page layouts |
-| 06 | Notes CRUD | 4 — Forms | CRUD + redirect | Form POST, `StateDict`, `RenderTemplate`, redirect-after-POST |
+| 05 | Demo App | 3 — Polling | Python-only | Jinja2 template inheritance (`{% extends %}` / `{% block %}`), `Controller.start_action`/`end_action`, two-column status panel layout |
+| 06 | Notes CRUD | 4 — Forms (+ WASM) | CRUD + redirect | Master/detail UI with per-row buttons, redirect-after-POST, package-level **flash variable** to carry notifications across the redirect, 4 KiB note cap, shared `buildMux(basePrefix)` for server + WASM, base-relative form actions and `./`/`../` Location headers for SW scope |
 | 07 | Water Tank | 3 — Polling | Dashboard | Generated SVG, simulation goroutine, clickable `<a>` links |
 | 08 | Water Tank Multi | 3 — Polling | Multi-page | Multiple routes, `LayoutNavbar`, HTTP Refresh per-page |
 | 09 | Water Tank HTMX | 5 — HTMX | Partial updates | `hx-get`/`hx-trigger`, fragment endpoints, `renderAndCapture` mutex |
@@ -282,10 +285,11 @@ docs:capture:NN:
 ## Choosing a starting point
 
 - **Status page / report** → 01 (polling) or 02 (scrolling output)
-- **CRUD / forms** → 06
+- **CRUD / forms** → 06 (server *and* WASM build from one mux)
 - **Real-time dashboard** → 08 (HTTP Refresh) or 09 (HTMX)
 - **Background tasks with progress** → 10
-- **Browser-only (no server)** → 03 (WASM)
+- **Browser-only (no server)** → 03 (multi-page) or 06 (form-driven)
+- **Python multi-page app with template inheritance** → 05
 - **All output types demo** → 02
 
 ## Refreshing example documentation

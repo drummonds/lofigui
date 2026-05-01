@@ -52,6 +52,7 @@
 <!-- auto:version -->Latest: v0.17.37<!-- /auto:version -->
 <p><strong>Lofi GUI</strong> - A minimalist Go library for creating really simple web-based GUIs for CLI tools and small projects. It provides a print-like interface for building lightweight web UIs with minimal complexity.</p>
 <p>The application is where you have a single real object (e.g. machine or long-running process) which then has a number of pages around it to show various aspects of it.</p>
+<p>In the spirit of <a href="https://en.wikipedia.org/wiki/Niklaus_Wirth">Niklaus Wirth</a> — computer systems should be simpler and more readable. Every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML. See <a href="https://h3-lofigui.statichost.page/research-philosophy.html">Philosophy</a> for the longer argument.</p>
 <p><a href="https://golang.org/dl/"><img src="https://img.shields.io/badge/go-1.21+-blue.svg" alt="Go Version"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></p>
 <h2 id="overview">Overview</h2>
@@ -68,7 +69,7 @@
 <li><strong>No JavaScript</strong>: Pure HTML/CSS using the Bulma framework</li>
 <li><strong>Single binary</strong>: Deploy as one executable, no dependencies</li>
 <li><strong>WebAssembly</strong>: Same code runs in the browser via WASM</li>
-<li><strong>Built-in layouts</strong>: <code>LayoutSingle</code>, <code>LayoutNavbar</code>, <code>LayoutThreePanel</code></li>
+<li><strong>Responsive layouts</strong>: Bulma-based templates with optional <code>base.html</code> inheritance — see example 03 (Style Sampler) for the catalogue</li>
 </ul>
 <h2 id="quick-start">Quick Start</h2>
 <pre><code class="language-go">package main

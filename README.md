@@ -6,6 +6,8 @@
 
 The application is where you have a single real object (e.g. machine or long-running process) which then has a number of pages around it to show various aspects of it.
 
+In the spirit of [Niklaus Wirth](https://en.wikipedia.org/wiki/Niklaus_Wirth) — computer systems should be simpler and more readable. Every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML. See [Philosophy](https://h3-lofigui.statichost.page/research-philosophy.html) for the longer argument.
+
 [![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/dl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -24,7 +26,7 @@ The application is where you have a single real object (e.g. machine or long-run
 - **No JavaScript**: Pure HTML/CSS using the Bulma framework
 - **Single binary**: Deploy as one executable, no dependencies
 - **WebAssembly**: Same code runs in the browser via WASM
-- **Built-in layouts**: `LayoutSingle`, `LayoutNavbar`, `LayoutThreePanel`
+- **Responsive layouts**: Bulma-based templates with optional `base.html` inheritance — see example 03 (Style Sampler) for the catalogue
 
 ## Quick Start
 
