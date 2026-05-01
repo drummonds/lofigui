@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Research: Philosophy - lofigui</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="/assets/bulma.min.css">
     <style>
         pre {
             background-color: #2b2b2b;
@@ -50,6 +50,8 @@
             <div class="content">
                 <h1 id="research-philosophy">Research: Philosophy</h1>
 <p>Design philosophy and the interactivity spectrum.</p>
+<h2 id="inspiration-niklaus-wirth">Inspiration: Niklaus Wirth</h2>
+<p>lofigui is in the spirit of <a href="https://en.wikipedia.org/wiki/Niklaus_Wirth">Niklaus Wirth</a>'s long argument that computer systems should be <strong>simpler and more readable</strong> — that complexity is a cost paid forever, that a system you can fit in your head is a system you can fix and extend. Wirth's <a href="https://cr.yp.to/bib/1995/wirth.pdf"><em>A Plea for Lean Software</em></a> (1995) frames the trade-off bluntly: software grows because nothing forces it to stay small, and the only people who pay are users and maintainers. lofigui takes that seriously — every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML.</p>
 <h2 id="the-original-vision-no-css-no-javascript">The original vision: no CSS, no JavaScript</h2>
 <p>lofigui started from a simple premise: what if a web UI was just <code>print()</code> statements rendered as plain HTML? No CSS framework, no JavaScript, no build step. The reasons:</p>
 <ol>
@@ -160,6 +162,9 @@
 </tbody>
 </table>
 <p>Most internal tools and dashboards live at levels 2-4. lofigui covers that range with a <code>print()</code>-based API and zero-to-minimal JavaScript.</p>
+<blockquote>
+<p><strong>Two different numberings, on purpose.</strong> The interactivity spectrum is a small, bounded taxonomy — five levels, unlikely to grow much. The example folders (<code>01_…</code>, <code>02_…</code>, …) are an open-ended progression of increasing complexity and are expected to grow toward 20+ entries as more patterns get worked out. So example <strong>06</strong> (&quot;Notes CRUD&quot;) and spectrum-level <strong>6</strong> are unrelated by design — there is no level 6 in this table. The example index reads as a curriculum; the spectrum reads as an ontology.</p>
+</blockquote>
 <h3 id="1-teletype">1. Teletype</h3>
 <p><img src="teletype.svg" alt="Animated teletype"></p>
 <p>Named after old-fashioned teletypes that print on continuous rolls of paper. You start a process, it prints output until it finishes — there is no interactivity until the end. You can stop it, but you cannot steer it. The server renders the complete page and the browser reloads via polling, but the user is purely a spectator.</p>

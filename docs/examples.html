@@ -35,7 +35,7 @@
 <body>
     <nav class="navbar is-primary">
         <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
         </div>
     </nav>
     <section class="section">
@@ -74,12 +74,12 @@
 <tr>
 <td>3</td>
 <td>Polling (whole page refresh)</td>
-<td>01 (Hello World), 07 (Water Tank), 08 (Multi-Page)</td>
+<td>01 (Hello World), 05 (Demo App, Python only), 07 (Water Tank), 08 (Multi-Page)</td>
 </tr>
 <tr>
 <td>4</td>
 <td>Static + forms (CRUD)</td>
-<td>06 (Notes CRUD)</td>
+<td>06 (Notes CRUD — also ships a WASM build)</td>
 </tr>
 <tr>
 <td>5</td>
@@ -89,7 +89,7 @@
 <tr>
 <td>6</td>
 <td>WASM (browser-only)</td>
-<td>03 (Style Sampler)</td>
+<td>03 (Style Sampler), 06 (Notes CRUD WASM build)</td>
 </tr>
 <tr>
 <td>7</td>
@@ -99,6 +99,9 @@
 </tbody>
 </table>
 <p>The progression is deliberate — each level adds one concept. Users stop at the level of complexity their project needs.</p>
+<blockquote>
+<p><strong>Note on two numberings.</strong> The example folders (<code>01_…</code>, <code>02_…</code>, …) are an open-ended progression of increasing complexity and will keep growing toward 20+ entries as more patterns get worked out. The interactivity / state taxonomy in <a href="research-philosophy.html#the-interactivity-spectrum">research-philosophy.html</a> is small and bounded — that table is unlikely to grow much. So example numbers and spectrum-level numbers are not meant to line up.</p>
+</blockquote>
 <h2 id="file-structure-per-example">File structure per example</h2>
 <p>Each example has two locations: source code in <code>examples/</code> and rendered documentation in <code>docs/</code>.</p>
 <pre><code>examples/NN_name/
@@ -335,11 +338,18 @@ loadWASM();
 <td>Template inheritance, <code>NewControllerFromFS</code>, multiple page layouts</td>
 </tr>
 <tr>
+<td>05</td>
+<td>Demo App</td>
+<td>3 — Polling</td>
+<td>Python-only</td>
+<td>Jinja2 template inheritance (<code>{% extends %}</code> / <code>{% block %}</code>), <code>Controller.start_action</code>/<code>end_action</code>, two-column status panel layout</td>
+</tr>
+<tr>
 <td>06</td>
 <td>Notes CRUD</td>
-<td>4 — Forms</td>
+<td>4 — Forms (+ WASM)</td>
 <td>CRUD + redirect</td>
-<td>Form POST, <code>StateDict</code>, <code>RenderTemplate</code>, redirect-after-POST</td>
+<td>Master/detail UI with per-row buttons, redirect-after-POST, package-level <strong>flash variable</strong> to carry notifications across the redirect, 4 KiB note cap, shared <code>buildMux(basePrefix)</code> for server + WASM, base-relative form actions and <code>./</code>/<code>../</code> Location headers for SW scope</td>
 </tr>
 <tr>
 <td>07</td>
@@ -388,10 +398,11 @@ loadWASM();
 <h2 id="choosing-a-starting-point">Choosing a starting point</h2>
 <ul>
 <li><strong>Status page / report</strong> → 01 (polling) or 02 (scrolling output)</li>
-<li><strong>CRUD / forms</strong> → 06</li>
+<li><strong>CRUD / forms</strong> → 06 (server <em>and</em> WASM build from one mux)</li>
 <li><strong>Real-time dashboard</strong> → 08 (HTTP Refresh) or 09 (HTMX)</li>
 <li><strong>Background tasks with progress</strong> → 10</li>
-<li><strong>Browser-only (no server)</strong> → 03 (WASM)</li>
+<li><strong>Browser-only (no server)</strong> → 03 (multi-page) or 06 (form-driven)</li>
+<li><strong>Python multi-page app with template inheritance</strong> → 05</li>
 <li><strong>All output types demo</strong> → 02</li>
 </ul>
 <h2 id="refreshing-example-documentation">Refreshing example documentation</h2>
