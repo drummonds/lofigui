@@ -281,7 +281,7 @@ See [Binary size and compression](#binary-size-and-compression) above for transf
 |-----------|------------------|
 | Go runtime + `syscall/js` | 1.7 MB (irreducible floor) |
 | `net/http` + `crypto/tls` | +1.8 MB (TLS precomputed tables) |
-| pongo2 + blackfriday | +3.9 MB (template + markdown engines) |
+| `html/template` + blackfriday | +3.9 MB (template + markdown engines) |
 | Application code | negligible |
 
 **Build tag optimisation**: lofigui's `app.go`, `controller.go`, `favicon.go`, and `serve.go` currently have no build tags excluding them from `js/wasm` builds. Adding `//go:build !(js && wasm)` to server-only files would eliminate `net/http` and `crypto/tls` from non-service-worker WASM builds, dropping the binary from ~8 MB to ~4 MB (~1.2 MB gzipped). This optimisation is separate from the service worker migration and could be done first.

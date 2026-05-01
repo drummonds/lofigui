@@ -189,10 +189,10 @@ func (ctrl *Controller) SetRefreshTime(seconds int)
 
 ```go
 // Generate template context with current state
-func (ctrl *Controller) StateDict(r *http.Request) pongo2.Context
+func (ctrl *Controller) StateDict(r *http.Request) lofigui.TemplateContext
 ```
 
-Returns a `pongo2.Context` containing:
+Returns a `lofigui.TemplateContext` (a `map[string]any`) containing:
 - `request`: The HTTP request object
 - `results`: Buffer content from Print/Markdown calls
 - `refresh`: Meta tag for auto-refresh (if action is running)
@@ -212,7 +212,7 @@ func (ctrl *Controller) HandleRoot(
 func (ctrl *Controller) HandleDisplay(
     w http.ResponseWriter,
     r *http.Request,
-    extraContext pongo2.Context,
+    extraContext lofigui.TemplateContext,
 )
 
 // Implements http.Handler interface (calls HandleDisplay with nil context)
@@ -223,10 +223,10 @@ func (ctrl *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 ```go
 // Render template with custom context
-func (ctrl *Controller) RenderTemplate(w http.ResponseWriter, context pongo2.Context) error
+func (ctrl *Controller) RenderTemplate(w http.ResponseWriter, context lofigui.TemplateContext) error
 
-// Get the underlying pongo2 template
-func (ctrl *Controller) GetTemplate() *pongo2.Template
+// Get the underlying html/template
+func (ctrl *Controller) GetTemplate() *template.Template
 
 // Reload template from disk (useful during development)
 func (ctrl *Controller) ReloadTemplate(templatePath string) error
@@ -261,7 +261,7 @@ Pass additional variables to your template:
 
 ```go
 http.HandleFunc("/display", func(w http.ResponseWriter, r *http.Request) {
-    extra := pongo2.Context{
+    extra := lofigui.TemplateContext{
         "title": "My Custom Title",
         "user":  "John Doe",
     }
@@ -298,7 +298,7 @@ For advanced use cases, render templates directly:
 
 ```go
 http.HandleFunc("/custom", func(w http.ResponseWriter, r *http.Request) {
-    context := pongo2.Context{
+    context := lofigui.TemplateContext{
         "data":    myData,
         "results": lofigui.Buffer(),
     }
@@ -377,12 +377,12 @@ func main() {
 
 ```go
 type Controller struct {
-    template      *pongo2.Template
+    template      *template.Template
     actionRunning bool
 }
 
 func NewController() *Controller {
-    tmpl, err := pongo2.FromFile("../templates/hello.html")
+    tmpl, err := template.ParseFiles("../templates/hello.html")
     if err != nil {
         log.Fatal(err)
     }

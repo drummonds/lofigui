@@ -66,7 +66,7 @@ Like a normal terminal program you essentially just print things to a screen but
 
 ### Model View Controller architecture
 
-All I really want to do is to write the model. The controller and view (in the browser and templating system) are a necessary evil. The controller includes the routing and web server. The controller is split between the app (single instance) and a model-specific controller. The view is the HTML templating (pongo2) and the browser.
+All I really want to do is to write the model. The controller and view (in the browser and templating system) are a necessary evil. The controller includes the routing and web server. The controller is split between the app (single instance) and a model-specific controller. The view is the HTML templating (`html/template` in Go, Jinja2 in Python) and the browser.
 
 ### Buffer
 

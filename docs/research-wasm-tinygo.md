@@ -54,9 +54,8 @@ These are the blockers that prevent TinyGo from being used for lofigui's service
 | Feature | Standard Go | TinyGo | Why it matters |
 |---------|-------------|--------|----------------|
 | `net/http` in browser | Works (maps to Fetch API) | **Panics at runtime** ([#4420](https://github.com/tinygo-org/tinygo/issues/4420)) | Service workers need `net/http` for `go-wasm-http-server` |
-| `html/template` | Works | **Cannot import** (reflection limits) | Server-side template rendering |
-| `text/template` | Works | **Cannot import** (reflection limits) | Same |
-| `pongo2` | Works | Likely broken (reflection) | Lofigui's Go template engine |
+| `html/template` | Works | **Cannot import** (reflection limits) | Lofigui's Go template engine |
+| `text/template` | Works | **Cannot import** (reflection limits) | Same family |
 | `encoding/json` | Works | Partial (missing `sync.WaitGroup.Go()`) | API response parsing |
 | Full goroutine scheduler | Yes (cooperative on single thread) | Simpler scheduler, edge cases | Complex concurrent handlers |
 
@@ -72,10 +71,9 @@ Since `go-wasm-http-server` depends on `net/http` types (`http.Request`, `http.R
 |--------|-----------------|-------------|----------|
 | `html/template` | Works | Broken | Reflection-based |
 | `text/template` | Works | Broken | Reflection-based |
-| pongo2 | Works | Likely broken | Reflection-based |
 | [templ](https://github.com/a-h/templ) | Works | **Works** | Code generation, no reflection |
 
-`templ` is the only viable template engine for TinyGo WASM because it uses code generation instead of reflection. For standard Go WASM, pongo2 and `html/template` both work.
+`templ` is the only viable template engine for TinyGo WASM because it uses code generation instead of reflection. lofigui's standard Go WASM builds use `html/template`.
 
 ## Where TinyGo still works
 
@@ -108,7 +106,7 @@ Standard Go's `net/http` works in `GOOS=js GOARCH=wasm` because of a transport i
 
 3. **Test with `go-wasm-http-server`.** Once `net/http` works, verify that `go-wasm-http-server` (which bridges `net/http.Handler` to service worker `FetchEvent`) functions correctly. This library uses `http.Request`, `http.ResponseWriter`, and `http.Handler` --- all of which would need to work under TinyGo.
 
-4. **Template engine.** Even with `net/http` working, `html/template` and `pongo2` would remain broken (reflection). The lofigui WASM build would need to switch to `templ` or raw string concatenation for template rendering. This is a separate, larger migration.
+4. **Template engine.** Even with `net/http` working, `html/template` would remain broken under TinyGo (reflection). The lofigui WASM build would need to switch to `templ` or raw string concatenation for template rendering. This is a separate, larger migration.
 
 ### Effort estimate
 

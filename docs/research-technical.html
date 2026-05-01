@@ -35,7 +35,7 @@
 <body>
     <nav class="navbar is-primary">
         <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
         </div>
     </nav>
     <section class="section">
@@ -59,7 +59,7 @@
 <p><strong>Buffer Layer</strong> (<code>lofigui.go</code> / <code>context.py</code>, <code>print.py</code>, <code>markdown.py</code>) — Global mutable buffer that accumulates HTML fragments via <code>Print()</code>, <code>Markdown()</code>, <code>HTML()</code>, <code>Table()</code> calls. Python uses an <code>asyncio.Queue</code> that drains into a string buffer; Go uses a <code>strings.Builder</code> directly.</p>
 </li>
 <li>
-<p><strong>Controller Layer</strong> (<code>controller.go</code> / <code>controller.py</code>) — Wraps a template engine (pongo2 in Go, Jinja2 in Python). Renders templates with the buffer content injected as <code>{{ results | safe }}</code>.</p>
+<p><strong>Controller Layer</strong> (<code>controller.go</code> / <code>controller.py</code>) — Wraps a template engine (<code>html/template</code> in Go, Jinja2 in Python). Renders templates with the buffer content injected as <code>{{.results}}</code> (Go, via <code>template.HTML</code>) or <code>{{ results | safe }}</code> (Python).</p>
 </li>
 <li>
 <p><strong>App Layer</strong> (<code>app.go</code> / <code>app.py</code>) — Manages controller lifecycle, action state (running/stopped), and auto-refresh polling. Implements the &quot;singleton active model&quot; concept — only one background task should run at a time.</p>

@@ -12,7 +12,7 @@ The framework has three layers:
 
 1. **Buffer Layer** (`lofigui.go` / `context.py`, `print.py`, `markdown.py`) — Global mutable buffer that accumulates HTML fragments via `Print()`, `Markdown()`, `HTML()`, `Table()` calls. Python uses an `asyncio.Queue` that drains into a string buffer; Go uses a `strings.Builder` directly.
 
-2. **Controller Layer** (`controller.go` / `controller.py`) — Wraps a template engine (pongo2 in Go, Jinja2 in Python). Renders templates with the buffer content injected as `{{ results | safe }}`.
+2. **Controller Layer** (`controller.go` / `controller.py`) — Wraps a template engine (`html/template` in Go, Jinja2 in Python). Renders templates with the buffer content injected as `{{.results}}` (Go, via `template.HTML`) or `{{ results | safe }}` (Python).
 
 3. **App Layer** (`app.go` / `app.py`) — Manages controller lifecycle, action state (running/stopped), and auto-refresh polling. Implements the "singleton active model" concept — only one background task should run at a time.
 

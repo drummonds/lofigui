@@ -10,7 +10,7 @@ This example shows:
 - Simple real time print output to web page
 - Action and display pattern of urls
 - MVC architecture pattern
-- Shared templates between Go (pongo2) and Python (Jinja2)
+- Templates: `html/template` (Go) and Jinja2 (Python)
 
 It is a little verbose but these are the bits that you will extend for your own project.
 
@@ -138,7 +138,7 @@ The view renders the buffered HTML:
 
 The `results` variable contains the accumulated HTML from lofigui.
 
-**Note**: The Go version uses [pongo2](https://github.com/flosch/pongo2), a Django/Jinja2-compatible template engine. This allows both Go and Python implementations to share the exact same template files.
+**Note**: The Go version uses the standard library's [`html/template`](https://pkg.go.dev/html/template). The template fragment above is Jinja-style (`{{ results | safe }}`) for the Python build; the Go equivalent is `{{.results}}` with `results` typed as `template.HTML` so it isn't escaped.
 
 ### Python equivalent
 

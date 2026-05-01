@@ -35,7 +35,7 @@
 <body>
     <nav class="navbar is-primary">
         <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
         </div>
     </nav>
     <section class="section">
@@ -183,19 +183,13 @@
 <td><code>html/template</code></td>
 <td>Works</td>
 <td><strong>Cannot import</strong> (reflection limits)</td>
-<td>Server-side template rendering</td>
+<td>Lofigui's Go template engine</td>
 </tr>
 <tr>
 <td><code>text/template</code></td>
 <td>Works</td>
 <td><strong>Cannot import</strong> (reflection limits)</td>
-<td>Same</td>
-</tr>
-<tr>
-<td><code>pongo2</code></td>
-<td>Works</td>
-<td>Likely broken (reflection)</td>
-<td>Lofigui's Go template engine</td>
+<td>Same family</td>
 </tr>
 <tr>
 <td><code>encoding/json</code></td>
@@ -238,12 +232,6 @@
 <td>Reflection-based</td>
 </tr>
 <tr>
-<td>pongo2</td>
-<td>Works</td>
-<td>Likely broken</td>
-<td>Reflection-based</td>
-</tr>
-<tr>
 <td><a href="https://github.com/a-h/templ">templ</a></td>
 <td>Works</td>
 <td><strong>Works</strong></td>
@@ -251,7 +239,7 @@
 </tr>
 </tbody>
 </table>
-<p><code>templ</code> is the only viable template engine for TinyGo WASM because it uses code generation instead of reflection. For standard Go WASM, pongo2 and <code>html/template</code> both work.</p>
+<p><code>templ</code> is the only viable template engine for TinyGo WASM because it uses code generation instead of reflection. lofigui's standard Go WASM builds use <code>html/template</code>.</p>
 <h2 id="where-tinygo-still-works">Where TinyGo still works</h2>
 <p>For lofigui's <em>original</em> WASM approach --- direct <code>syscall/js</code> function exports without service workers --- TinyGo works. This approach uses <code>js.Global().Set(&quot;goRender&quot;, ...)</code> and custom JavaScript glue, never touching <code>net/http</code>. The smaller binary size is genuinely valuable here.</p>
 <p>However, lofigui has decided to standardise on the service worker approach (shared <code>net/http</code> handlers for server and WASM builds), which makes TinyGo incompatible with the direction of the project. The direct JS export pattern remains available for trivial Level 1--2 examples where code sharing is not needed, but new examples should use the service worker pattern.</p>
@@ -279,7 +267,7 @@
 <p><strong>Test with <code>go-wasm-http-server</code>.</strong> Once <code>net/http</code> works, verify that <code>go-wasm-http-server</code> (which bridges <code>net/http.Handler</code> to service worker <code>FetchEvent</code>) functions correctly. This library uses <code>http.Request</code>, <code>http.ResponseWriter</code>, and <code>http.Handler</code> --- all of which would need to work under TinyGo.</p>
 </li>
 <li>
-<p><strong>Template engine.</strong> Even with <code>net/http</code> working, <code>html/template</code> and <code>pongo2</code> would remain broken (reflection). The lofigui WASM build would need to switch to <code>templ</code> or raw string concatenation for template rendering. This is a separate, larger migration.</p>
+<p><strong>Template engine.</strong> Even with <code>net/http</code> working, <code>html/template</code> would remain broken under TinyGo (reflection). The lofigui WASM build would need to switch to <code>templ</code> or raw string concatenation for template rendering. This is a separate, larger migration.</p>
 </li>
 </ol>
 <h3 id="effort-estimate">Effort estimate</h3>

@@ -148,8 +148,8 @@ func sectionHTML5Elements(app *lofigui.App) {
   <dd>A lightweight web-UI framework with a print-like interface.</dd>
   <dt><strong>Bulma</strong></dt>
   <dd>A modern CSS framework based on Flexbox.</dd>
-  <dt><strong>pongo2</strong></dt>
-  <dd>A Django-syntax template engine for Go.</dd>
+  <dt><strong>html/template</strong></dt>
+  <dd>Go's standard library template engine, with auto-escaping.</dd>
 </dl>`)
 
 	// Horizontal rule demonstration
