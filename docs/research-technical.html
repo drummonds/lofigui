@@ -99,54 +99,86 @@
 </table>
 <hr>
 <h2 id="2-notification-system-pollingauto-refresh">2. Notification System (Polling/Auto-Refresh)</h2>
-<p>The &quot;notification system&quot; is a server-side polling mechanism using HTML <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code> tags. There is no WebSocket, SSE, or JavaScript-based notification — it's pure HTTP redirect-based polling.</p>
+<p>The &quot;notification system&quot; is a server-side polling mechanism. While the model runs, the server tells the browser to reload after N seconds. There's no WebSocket, SSE, or JavaScript timer — it's pure HTTP, driven by the server.</p>
+<p>The two implementations diverge in <em>how</em> they tell the browser to reload:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Go</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mechanism</td>
+<td><code>Refresh: N</code> HTTP header on the response</td>
+<td><code>&lt;meta http-equiv=&quot;Refresh&quot; content=&quot;N&quot;&gt;</code> in the rendered HTML</td>
+</tr>
+<tr>
+<td>Set by</td>
+<td><code>App.WriteRefreshHeader(w)</code></td>
+<td><code>App.state_dict()</code> populates <code>refresh</code> template var</td>
+</tr>
+<tr>
+<td>Template needs <code>{{refresh}}</code>?</td>
+<td>No — always empty (kept for back-compat)</td>
+<td>Yes — must include `{{ refresh</td>
+</tr>
+<tr>
+<td>Reload target</td>
+<td>The current page URL (per HTTP semantics)</td>
+<td>The current page URL (browser respects meta refresh)</td>
+</tr>
+</tbody>
+</table>
+<p>The header-based approach was adopted in Go because <code>&lt;meta http-equiv=&quot;Refresh&quot;&gt;</code> reloads the URL the meta tag is in, which broke multi-page apps where the user navigates between routes (each page should refresh itself, not the original landing URL). The HTTP <code>Refresh</code> header naturally reloads whatever URL was requested.</p>
 <h3 id="how-it-works">How It Works</h3>
 <ol>
-<li><strong>Start</strong>: <code>app.StartAction()</code> sets <code>actionRunning=true</code>, <code>polling=true</code>, <code>PollCount=0</code>.</li>
-<li><strong>Poll Cycle</strong>: On each <code>/display</code> request, <code>app.StateDict()</code> (Python) checks <code>self.poll</code>:
-<ul>
-<li>If <code>True</code>: injects <code>&lt;meta http-equiv=&quot;Refresh&quot; content=&quot;N&quot;&gt;</code> into the <code>refresh</code> template variable. Increments <code>poll_count</code>.</li>
-<li>If <code>False</code>: sets <code>refresh=&quot;&quot;</code>, resets <code>poll_count=0</code>.</li>
-</ul>
-</li>
-<li><strong>Stop</strong>: <code>app.EndAction()</code> sets <code>actionRunning=false</code>, <code>polling=false</code>. Next <code>/display</code> request renders without the refresh tag — polling stops.</li>
-<li><strong>Template</strong>: The template must include <code>{{ refresh | safe }}</code> in the <code>&lt;head&gt;</code> for auto-refresh to work.</li>
+<li><strong>Start</strong>: <code>app.StartAction()</code> sets <code>actionRunning=true</code>, <code>polling=true</code>, <code>PollCount=0</code>. Establishes a cancellable context that flows through the buffer.</li>
+<li><strong>Poll Cycle</strong>: On each render request, <code>App.StateDict(r, extra)</code> builds the template context with <code>polling=&quot;Running&quot;</code> and increments <code>PollCount</code>. <code>App.WriteRefreshHeader(w)</code> writes the <code>Refresh: N</code> header.</li>
+<li><strong>Stop</strong>: <code>app.EndAction()</code> sets <code>actionRunning=false</code>, <code>polling=false</code>, cancels the context. The next render emits no <code>Refresh</code> header — the browser stops polling.</li>
 </ol>
-<h3 id="python-implementation-details">Python Implementation Details</h3>
-<ul>
-<li><code>App.state_dict()</code> builds the full context dict including <code>refresh</code>, <code>polling</code>, <code>poll_count</code>.</li>
-<li><code>App.template_response()</code> calls <code>state_dict()</code> then renders via Jinja2.</li>
-<li>The Python path works correctly: <code>template_response()</code> -&gt; <code>state_dict()</code> -&gt; injects refresh meta tag.</li>
-</ul>
 <h3 id="go-implementation-details">Go Implementation Details</h3>
 <ul>
-<li><code>App.StateDict()</code> is the method that should build the full context with polling info.</li>
-<li><code>Controller.StateDict()</code> only returns <code>request</code> and <code>results</code> (no polling info).</li>
-<li><code>App.HandleDisplay()</code> delegates to <code>ctrl.HandleDisplay()</code> which only uses <code>ctrl.StateDict()</code>.</li>
+<li><code>App.StateDict(r, extra)</code> builds the full context: <code>request</code>, <code>version</code>, <code>build_date</code>, <code>controller_name</code>, <code>results</code> (as <code>template.HTML</code>), <code>polling</code>, <code>poll_count</code>, plus <code>refresh</code> (always empty <code>template.HTML</code>).</li>
+<li><code>Controller.StateDict(r)</code> returns only the minimal pair (<code>request</code>, <code>results</code>) — used when rendering with no app state.</li>
+<li><code>App.HandleDisplay(w, r)</code> and <code>App.Handle(model)</code> both call <code>App.StateDict</code> and render via <code>ctrl.RenderTemplate(w, data)</code> directly, after <code>app.WriteRefreshHeader(w)</code> has set the header.</li>
+</ul>
+<h3 id="python-implementation-details">Python Implementation Details</h3>
+<ul>
+<li><code>App.state_dict()</code> builds the context dict including <code>refresh</code> (the <code>&lt;meta&gt;</code> tag string), <code>polling</code>, <code>poll_count</code>.</li>
+<li><code>App.template_response()</code> calls <code>state_dict()</code> then renders via Jinja2.</li>
+<li>Templates inject the meta tag with <code>{{ refresh | safe }}</code> in <code>&lt;head&gt;</code>.</li>
 </ul>
 <h3 id="startup-bounce-python-only">Startup Bounce (Python only)</h3>
 <p>The Python <code>App</code> has a <code>startup</code> flag. On the first call to <code>template_response()</code>, if the URL path isn't <code>/</code>, it redirects to <code>/</code>. This prevents a stale <code>/display</code> page from showing when the server restarts. The <code>startup_bounce_count</code> limit of 3 is effectively unreachable because <code>startup</code> is set to <code>False</code> on the first invocation.</p>
 <hr>
 <h2 id="3-task-scheduling-flow">3. Task Scheduling Flow</h2>
-<h3 id="go-flow-async-pattern">Go Flow (async pattern)</h3>
+<h3 id="go-flow-handleroot--handledisplay-pattern">Go Flow (HandleRoot + HandleDisplay pattern)</h3>
 <pre><code>User -&gt; GET / -&gt; app.HandleRoot(w, r, model, true)
-  1. RLock -&gt; read ctrl, displayURL -&gt; RUnlock
+  1. Lock -&gt; ensureController, read displayURL -&gt; Unlock
   2. ctrl.context.Reset()
-  3. app.StartAction()          &lt;- sets actionRunning=true, polling=true
-  4. go modelFunc(app)          &lt;- goroutine launched, no cancellation mechanism
-  5. Write redirect HTML to /display
+  3. app.StartAction()          &lt;- sets actionRunning=true, polling=true,
+                                   establishes cancellable context
+  4. go modelFunc(app)          &lt;- goroutine wrapped with recover() for the
+                                   cancelledError sentinel
+  5. http.Redirect(w, r, &quot;/display&quot;, 303)
 
 Background goroutine:
-  model(app) {
-      lofigui.Print(&quot;...&quot;)
-      time.Sleep(...)
-      app.EndAction()           &lt;- sets actionRunning=false, polling=false
+  modelFunc(app) {
+      lofigui.Print(&quot;...&quot;)        // checkCancelled() runs first
+      app.Sleep(1 * time.Second)  // panic(errCancelled) on cancel
+      app.EndAction()             // sets actionRunning=false, polling=false
   }
 
 User -&gt; GET /display -&gt; app.HandleDisplay(w, r)
-  1. RLock -&gt; read ctrl -&gt; RUnlock
-  2. ctrl.HandleDisplay(w, r, nil)  &lt;- uses ctrl.StateDict (NOT app.StateDict)
+  1. Lock -&gt; ensureController -&gt; Unlock
+  2. app.WriteRefreshHeader(w)   &lt;- emits &quot;Refresh: N&quot; while polling
+  3. data := app.StateDict(r, nil)
+  4. ctrl.RenderTemplate(w, data)
 </code></pre>
+<p><code>App.Handle(model)</code> is a single-endpoint variant that uses buffer state to gate restarts (see §4 below). <code>App.Run(addr, model)</code> wires <code>Handle</code>+<code>HandleCancel</code>+<code>ServeBulma</code> and starts the server in one call — the simplest viable shape.</p>
 <hr>
 <h2 id="4-handle-single-endpoint-pattern">4. Handle (Single-Endpoint Pattern)</h2>
 <p><code>Handle(model)</code> returns an <code>http.HandlerFunc</code> that manages the full lifecycle on a single URL. It uses buffer state as a signal:</p>

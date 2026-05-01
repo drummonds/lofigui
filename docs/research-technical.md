@@ -29,28 +29,36 @@ The framework has three layers:
 
 ## 2. Notification System (Polling/Auto-Refresh)
 
-The "notification system" is a server-side polling mechanism using HTML `<meta http-equiv="Refresh">` tags. There is no WebSocket, SSE, or JavaScript-based notification — it's pure HTTP redirect-based polling.
+The "notification system" is a server-side polling mechanism. While the model runs, the server tells the browser to reload after N seconds. There's no WebSocket, SSE, or JavaScript timer — it's pure HTTP, driven by the server.
+
+The two implementations diverge in *how* they tell the browser to reload:
+
+| | Go | Python |
+|---|----|--------|
+| Mechanism | `Refresh: N` HTTP header on the response | `<meta http-equiv="Refresh" content="N">` in the rendered HTML |
+| Set by | `App.WriteRefreshHeader(w)` | `App.state_dict()` populates `refresh` template var |
+| Template needs `{{refresh}}`? | No — always empty (kept for back-compat) | Yes — must include `{{ refresh | safe }}` in `<head>` |
+| Reload target | The current page URL (per HTTP semantics) | The current page URL (browser respects meta refresh) |
+
+The header-based approach was adopted in Go because `<meta http-equiv="Refresh">` reloads the URL the meta tag is in, which broke multi-page apps where the user navigates between routes (each page should refresh itself, not the original landing URL). The HTTP `Refresh` header naturally reloads whatever URL was requested.
 
 ### How It Works
 
-1. **Start**: `app.StartAction()` sets `actionRunning=true`, `polling=true`, `PollCount=0`.
-2. **Poll Cycle**: On each `/display` request, `app.StateDict()` (Python) checks `self.poll`:
-   - If `True`: injects `<meta http-equiv="Refresh" content="N">` into the `refresh` template variable. Increments `poll_count`.
-   - If `False`: sets `refresh=""`, resets `poll_count=0`.
-3. **Stop**: `app.EndAction()` sets `actionRunning=false`, `polling=false`. Next `/display` request renders without the refresh tag — polling stops.
-4. **Template**: The template must include `{{ refresh | safe }}` in the `<head>` for auto-refresh to work.
-
-### Python Implementation Details
-
-- `App.state_dict()` builds the full context dict including `refresh`, `polling`, `poll_count`.
-- `App.template_response()` calls `state_dict()` then renders via Jinja2.
-- The Python path works correctly: `template_response()` -> `state_dict()` -> injects refresh meta tag.
+1. **Start**: `app.StartAction()` sets `actionRunning=true`, `polling=true`, `PollCount=0`. Establishes a cancellable context that flows through the buffer.
+2. **Poll Cycle**: On each render request, `App.StateDict(r, extra)` builds the template context with `polling="Running"` and increments `PollCount`. `App.WriteRefreshHeader(w)` writes the `Refresh: N` header.
+3. **Stop**: `app.EndAction()` sets `actionRunning=false`, `polling=false`, cancels the context. The next render emits no `Refresh` header — the browser stops polling.
 
 ### Go Implementation Details
 
-- `App.StateDict()` is the method that should build the full context with polling info.
-- `Controller.StateDict()` only returns `request` and `results` (no polling info).
-- `App.HandleDisplay()` delegates to `ctrl.HandleDisplay()` which only uses `ctrl.StateDict()`.
+- `App.StateDict(r, extra)` builds the full context: `request`, `version`, `build_date`, `controller_name`, `results` (as `template.HTML`), `polling`, `poll_count`, plus `refresh` (always empty `template.HTML`).
+- `Controller.StateDict(r)` returns only the minimal pair (`request`, `results`) — used when rendering with no app state.
+- `App.HandleDisplay(w, r)` and `App.Handle(model)` both call `App.StateDict` and render via `ctrl.RenderTemplate(w, data)` directly, after `app.WriteRefreshHeader(w)` has set the header.
+
+### Python Implementation Details
+
+- `App.state_dict()` builds the context dict including `refresh` (the `<meta>` tag string), `polling`, `poll_count`.
+- `App.template_response()` calls `state_dict()` then renders via Jinja2.
+- Templates inject the meta tag with `{{ refresh | safe }}` in `<head>`.
 
 ### Startup Bounce (Python only)
 
@@ -60,27 +68,33 @@ The Python `App` has a `startup` flag. On the first call to `template_response()
 
 ## 3. Task Scheduling Flow
 
-### Go Flow (async pattern)
+### Go Flow (HandleRoot + HandleDisplay pattern)
 
 ```
 User -> GET / -> app.HandleRoot(w, r, model, true)
-  1. RLock -> read ctrl, displayURL -> RUnlock
+  1. Lock -> ensureController, read displayURL -> Unlock
   2. ctrl.context.Reset()
-  3. app.StartAction()          <- sets actionRunning=true, polling=true
-  4. go modelFunc(app)          <- goroutine launched, no cancellation mechanism
-  5. Write redirect HTML to /display
+  3. app.StartAction()          <- sets actionRunning=true, polling=true,
+                                   establishes cancellable context
+  4. go modelFunc(app)          <- goroutine wrapped with recover() for the
+                                   cancelledError sentinel
+  5. http.Redirect(w, r, "/display", 303)
 
 Background goroutine:
-  model(app) {
-      lofigui.Print("...")
-      time.Sleep(...)
-      app.EndAction()           <- sets actionRunning=false, polling=false
+  modelFunc(app) {
+      lofigui.Print("...")        // checkCancelled() runs first
+      app.Sleep(1 * time.Second)  // panic(errCancelled) on cancel
+      app.EndAction()             // sets actionRunning=false, polling=false
   }
 
 User -> GET /display -> app.HandleDisplay(w, r)
-  1. RLock -> read ctrl -> RUnlock
-  2. ctrl.HandleDisplay(w, r, nil)  <- uses ctrl.StateDict (NOT app.StateDict)
+  1. Lock -> ensureController -> Unlock
+  2. app.WriteRefreshHeader(w)   <- emits "Refresh: N" while polling
+  3. data := app.StateDict(r, nil)
+  4. ctrl.RenderTemplate(w, data)
 ```
+
+`App.Handle(model)` is a single-endpoint variant that uses buffer state to gate restarts (see §4 below). `App.Run(addr, model)` wires `Handle`+`HandleCancel`+`ServeBulma` and starts the server in one call — the simplest viable shape.
 
 ---
 

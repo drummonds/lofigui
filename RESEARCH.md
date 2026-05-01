@@ -10,7 +10,6 @@ Design philosophy, trade-offs, and technical deep-dives.
 | [Charts](research-charts.html) | Charting options — Go SVG vs JavaScript libraries |
 | [Layouts](research-layouts.html) | Page layout complexity progression — single page to three-panel |
 | [Technical](research-technical.html) | Architecture overview, polling mechanism, task scheduling |
-| [Bugs](research-bugs.html) | Known bugs, interaction analysis, and root causes |
 | [Python](research-python.html) | Python implementation — API reference, installation, development |
 | [WASM Service Workers](research-wasm-service-workers.html) | Go WASM in service workers — routing, HTMX, static hosting |
 | [WASM External APIs](research-wasm-external-apis.html) | Calling external HTTP APIs from a WASM service worker — routing loop, CORS, JS proxy patterns |
