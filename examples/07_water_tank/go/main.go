@@ -130,6 +130,7 @@ func main() {
 	})
 
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
+	http.HandleFunc("/assets/bulma.min.css", lofigui.ServeBulma)
 
 	addr := ":1347"
 	log.Printf("Starting Water Tank SCADA on http://localhost%s", addr)

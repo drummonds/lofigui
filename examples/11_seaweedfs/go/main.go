@@ -249,6 +249,7 @@ func main() {
 	})
 
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
+	http.HandleFunc("/assets/bulma.min.css", lofigui.ServeBulma)
 
 	addr := ":1350"
 	log.Printf("SeaweedFS Demo on http://localhost%s", addr)
