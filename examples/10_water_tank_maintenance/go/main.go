@@ -374,6 +374,7 @@ func main() {
 	})
 
 	http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
+	http.HandleFunc("/assets/bulma.min.css", lofigui.ServeBulma)
 
 	addr := ":1349"
 	log.Printf("Starting Water Tank Maintenance on http://localhost%s", addr)

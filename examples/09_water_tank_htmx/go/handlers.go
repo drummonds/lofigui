@@ -238,6 +238,7 @@ func setupRoutes(sim *Simulation) *http.ServeMux {
 	})
 
 	mux.HandleFunc("GET /favicon.ico", lofigui.ServeFavicon)
+	mux.HandleFunc("GET /assets/bulma.min.css", lofigui.ServeBulma)
 
 	return mux
 }
