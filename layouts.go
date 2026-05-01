@@ -10,8 +10,7 @@ const LayoutSingle = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{if .title}}{{.title}}{{else}}Lofigui{{end}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-  {{.refresh}}
+  <link rel="stylesheet" href="/assets/bulma.min.css">
 </head>
 <body>
   <section class="section">
@@ -30,8 +29,7 @@ const LayoutNavbar = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{if .title}}{{.title}}{{else}}Lofigui{{end}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-  {{.refresh}}
+  <link rel="stylesheet" href="/assets/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
@@ -65,8 +63,7 @@ const LayoutThreePanel = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{if .title}}{{.title}}{{else}}Lofigui{{end}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
-  {{.refresh}}
+  <link rel="stylesheet" href="/assets/bulma.min.css">
 </head>
 <body>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">

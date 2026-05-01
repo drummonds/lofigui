@@ -22,8 +22,8 @@ func TestLayoutSingleRenders(t *testing.T) {
 	app.HandleDisplay(w, req)
 
 	body := w.Body.String()
-	if !strings.Contains(body, "bulma@1.0.4") {
-		t.Error("Expected Bulma CDN link")
+	if !strings.Contains(body, `href="/assets/bulma.min.css"`) {
+		t.Error("Expected vendored Bulma stylesheet link")
 	}
 	if !strings.Contains(body, "Hello Layout") {
 		t.Error("Expected content in output")
