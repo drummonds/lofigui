@@ -15,7 +15,6 @@
 <li><a href="research-charts.html">Charts</a></li>
 <li><a href="research-layouts.html">Page Layouts</a></li>
 <li><a href="research-technical.html">Technical</a></li>
-<li><a href="research-bugs.html">Bugs</a></li>
 <li><a href="research-python.html">Python</a></li>
 <li><a href="research-wasm-service-workers.html">WASM Service Workers</a></li>
 </ul>
@@ -40,7 +39,8 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 | [01b](01b_hello_world_explicit_gzip/) | Hello World Explicit + gzip | 01a + `DecompressionStream` layer for gzipped WASM |
 | [02](02_svg_graph/) | Output Showcase | All output types: Print, Markdown, HTML, Table, SVG |
 | [03](03_style_sampler/) | Style Sampler | WASM with template inheritance |
-| [06](06_notes.svg) | Notes CRUD | Form POST handlers |
+| [05](05_demo_app/) | Demo App | Python-only: Jinja2 template inheritance |
+| [06](06_notes_crud/) | Notes CRUD | Form POST + redirect, Go server + WASM, Python (FastAPI) |
 | [07](07_water_tank/) | Water Tank | SVG dashboard with simulation |
 | [08](08_water_tank_multi/) | Water Tank Multi | Multi-page with HTTP Refresh |
 | [09](09_water_tank_htmx/) | Water Tank HTMX | Partial updates with HTMX |
