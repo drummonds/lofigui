@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 )
 
-// TemplateContext is the data passed to templates during rendering.
-// It replaces pongo2.Context as a simple map of string keys to values.
+// TemplateContext is the data passed to templates during rendering —
+// a simple map of string keys to values used as the html/template root.
 type TemplateContext map[string]interface{}
 
 // Update merges all key-value pairs from other into this context.

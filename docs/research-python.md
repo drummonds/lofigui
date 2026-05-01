@@ -107,7 +107,7 @@ lg.save_favicon_ico("static/favicon.ico")
 The Python implementation uses:
 
 - **FastAPI** as the web server (async-ready)
-- **Jinja2** for templates (vs pongo2 in Go)
+- **Jinja2** for templates (vs `html/template` in Go)
 - **asyncio.Queue** for the buffer (vs `strings.Builder` in Go)
 
 ### MVC Pattern

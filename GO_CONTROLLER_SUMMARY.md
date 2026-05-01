@@ -27,12 +27,12 @@ Simplified from ~90 lines to ~45 lines by using the library controller:
 **Before:**
 ```go
 type Controller struct {
-    template      *pongo2.Template
+    template      *template.Template
     actionRunning bool
 }
 
 func NewController() *Controller {
-    tmpl, err := pongo2.FromFile("../templates/hello.html")
+    tmpl, err := template.ParseFiles("../templates/hello.html")
     if err != nil {
         log.Fatalf("Failed to load template: %v", err)
     }
@@ -72,7 +72,7 @@ All tests pass successfully.
 
 ### 5. Updated Dependencies
 
-Added `github.com/flosch/pongo2/v6` to `go.mod` for template rendering support.
+Template rendering uses Go's standard library `html/template` (no third-party dependency).
 
 ### 6. Created Documentation (`GO_CONTROLLER_GUIDE.md`)
 
@@ -151,7 +151,7 @@ http.HandleFunc("/display", ctrl.ServeHTTP)  // Direct handler!
 
 ### Custom Context
 ```go
-extra := pongo2.Context{
+extra := lofigui.TemplateContext{
     "title": "My Page",
     "user":  currentUser,
 }
@@ -169,7 +169,7 @@ ctrl.HandleDisplay(w, r, extra)
 - `examples/01_hello_world/go/hello_simple.go` - Simple example
 
 ### Modified
-- `go.mod` - Added pongo2/v6 dependency
+- `go.mod` - No template-engine dependency (uses standard `html/template`)
 - `examples/01_hello_world/go/main.go` - Updated to use library controller
 
 ## Test Results
