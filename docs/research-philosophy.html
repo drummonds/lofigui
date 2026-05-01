@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Research: Philosophy - lofigui</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="/assets/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <style>
         pre {
             background-color: #2b2b2b;
@@ -35,7 +35,7 @@
 <body>
     <nav class="navbar is-primary">
         <div class="navbar-brand">
-            <a class="navbar-item has-text-weight-bold" href="../index.html">lofigui</a>
+            <a class="navbar-item has-text-weight-bold" href="index.html">lofigui</a>
         </div>
     </nav>
     <section class="section">
@@ -167,7 +167,7 @@
 <h3 id="2-teletype-web">2. Teletype+ web</h3>
 <p><img src="teletype-web.svg" alt="Teletype in a web page"></p>
 <p>Where Level 1 is like running a CLI program, Level 2 embeds that teletype in a web application. The command line gets a configurable UI — dialog forms for parameters, navigation between pages, and the full range of HTML form elements. Think of it as wrapping a CLI tool in a web-based front end.</p>
-<p><strong>Templates</strong>: pongo2 (Go) and Jinja2 (Python) provide server-side rendering with template inheritance (<code>{% extends %}</code>, <code>{% block %}</code>). A base template defines the layout — navbar, footer, CSS — and each page extends it. This is the same pattern as Django templates, with no client-side rendering.</p>
+<p><strong>Templates</strong>: <code>html/template</code> (Go) and Jinja2 (Python) provide server-side rendering with template inheritance — <code>{{define}}</code> / <code>{{block}}</code> in Go, <code>{% extends %}</code> / <code>{% block %}</code> in Jinja2. A base template defines the layout — navbar, footer, CSS — and each page extends it. No client-side rendering.</p>
 <p><strong>Navigation</strong>: Bulma navbar with links between pages. Each page is a full HTTP request/response cycle — no client-side routing. The navbar is defined once in the base template and inherited by all pages.</p>
 <p><strong>Static pages</strong>: About pages, help pages, configuration views — anything that renders once without polling. These use <code>Controller.RenderTemplate()</code> directly, with no <code>App</code> or background model needed.</p>
 <p><strong>Dialog forms</strong>: Full-page HTML forms for parameter input. The form POSTs to the server, the server processes it and redirects back (POST/redirect/GET pattern). No JavaScript, no popups — just native HTML <code>&lt;form&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>. The browser handles encoding and submission.</p>
@@ -186,6 +186,42 @@
 <h3 id="5-fully-interactive-single-page-apps-spa">5. Fully interactive single-page apps (SPA)</h3>
 <p>Full client-side rendering with Ajax/fetch. React, Vue, Svelte territory. The server becomes a JSON API; the browser builds the entire UI. Maximum interactivity, maximum complexity: bundlers, virtual DOM, state management, hydration.</p>
 <p><strong>lofigui does not target this level.</strong> If your project needs a full SPA, use a proper SPA framework. lofigui's value is avoiding that complexity for the many tools that don't need it.</p>
+<h2 id="the-state-dimension">The state dimension</h2>
+<p>The interactivity spectrum captures <em>how often</em> the page changes. A second, mostly-orthogonal dimension captures <em>whose state</em> the page reflects. The same architectural pattern (polling, HTMX, WASM) can sit in any of three boxes:</p>
+<table>
+<thead>
+<tr>
+<th>State scope</th>
+<th>Who sees what</th>
+<th>Where it lives</th>
+<th>lofigui examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global</td>
+<td>Every viewer sees the same data</td>
+<td>Single server process / one shared in-memory simulation</td>
+<td>01, 02, 05, 06 (server build), 07–10 (server build)</td>
+</tr>
+<tr>
+<td>Individual</td>
+<td>Every browser has its own state, isolated from other browsers</td>
+<td>Service-worker WASM process (one per browser), or per-tab in-memory</td>
+<td>03, 06 (WASM build), 07–10 (WASM build)</td>
+</tr>
+<tr>
+<td>Personalised</td>
+<td>Each logged-in user sees the same state from any device, isolated from other users</td>
+<td>Server-side store keyed by user identity (DB + auth)</td>
+<td>— (lofigui has no auth example yet; 11 is the closest, with a separate API server holding shared state but no per-user partitioning)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Global</strong> is the default for a Go server with a package-level variable: one process, one map, every visitor reads and writes the same notes. The water-tank simulation is the canonical case — there is one tank, and watching it from two browsers shows the same level. This is the easiest model to reason about, and the right one for internal dashboards or single-tenant tools.</p>
+<p><strong>Individual</strong> is what falls out of the WASM service-worker pattern. The Go runtime lives inside the SW; the SW belongs to one browser; nothing crosses that boundary. Two people opening the same WASM CRUD app each get their own seeded notes. State persists for as long as the SW is registered and is wiped when the user clears site data or the recovery stub unregisters the SW. Useful for demos, single-user tools, and anywhere &quot;no backend&quot; is a feature rather than a limitation.</p>
+<p><strong>Personalised</strong> requires a server, a user identity, and a store partitioned by that identity. Two devices logged into the same account see the same notes; two accounts see different notes. lofigui doesn't currently ship an example at this level — it would compose login/session middleware with the server-side patterns from 06–10, scoping every read/write to the authenticated user. The print/template/HTMX layers don't change; only the data layer does.</p>
+<p>The two dimensions multiply: a Level 4 (HTMX) app can be Global (shared dashboard), Individual (per-browser scratchpad), or Personalised (logged-in editor). Picking a row in each table gives you the cell your app sits in.</p>
 <h2 id="print-as-interface">Print as interface</h2>
 <p>The fundamental insight is that <code>print()</code> is the most natural programming interface. Every developer learns it first. lofigui preserves that — you print things, they appear on a web page. The abstraction cost is near zero.</p>
 <h2 id="progressive-complexity">Progressive complexity</h2>

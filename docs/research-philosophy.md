@@ -80,7 +80,7 @@ Named after old-fashioned teletypes that print on continuous rolls of paper. You
 
 Where Level 1 is like running a CLI program, Level 2 embeds that teletype in a web application. The command line gets a configurable UI — dialog forms for parameters, navigation between pages, and the full range of HTML form elements. Think of it as wrapping a CLI tool in a web-based front end.
 
-**Templates**: pongo2 (Go) and Jinja2 (Python) provide server-side rendering with template inheritance (`{% extends %}`, `{% block %}`). A base template defines the layout — navbar, footer, CSS — and each page extends it. This is the same pattern as Django templates, with no client-side rendering.
+**Templates**: `html/template` (Go) and Jinja2 (Python) provide server-side rendering with template inheritance — `{{define}}` / `{{block}}` in Go, `{% extends %}` / `{% block %}` in Jinja2. A base template defines the layout — navbar, footer, CSS — and each page extends it. No client-side rendering.
 
 **Navigation**: Bulma navbar with links between pages. Each page is a full HTTP request/response cycle — no client-side routing. The navbar is defined once in the base template and inherited by all pages.
 
@@ -117,6 +117,24 @@ This is the sweet spot for lofigui: server-rendered HTML with just enough client
 Full client-side rendering with Ajax/fetch. React, Vue, Svelte territory. The server becomes a JSON API; the browser builds the entire UI. Maximum interactivity, maximum complexity: bundlers, virtual DOM, state management, hydration.
 
 **lofigui does not target this level.** If your project needs a full SPA, use a proper SPA framework. lofigui's value is avoiding that complexity for the many tools that don't need it.
+
+## The state dimension
+
+The interactivity spectrum captures *how often* the page changes. A second, mostly-orthogonal dimension captures *whose state* the page reflects. The same architectural pattern (polling, HTMX, WASM) can sit in any of three boxes:
+
+| State scope | Who sees what | Where it lives | lofigui examples |
+|-------------|---------------|----------------|------------------|
+| Global | Every viewer sees the same data | Single server process / one shared in-memory simulation | 01, 02, 05, 06 (server build), 07–10 (server build) |
+| Individual | Every browser has its own state, isolated from other browsers | Service-worker WASM process (one per browser), or per-tab in-memory | 03, 06 (WASM build), 07–10 (WASM build) |
+| Personalised | Each logged-in user sees the same state from any device, isolated from other users | Server-side store keyed by user identity (DB + auth) | — (lofigui has no auth example yet; 11 is the closest, with a separate API server holding shared state but no per-user partitioning) |
+
+**Global** is the default for a Go server with a package-level variable: one process, one map, every visitor reads and writes the same notes. The water-tank simulation is the canonical case — there is one tank, and watching it from two browsers shows the same level. This is the easiest model to reason about, and the right one for internal dashboards or single-tenant tools.
+
+**Individual** is what falls out of the WASM service-worker pattern. The Go runtime lives inside the SW; the SW belongs to one browser; nothing crosses that boundary. Two people opening the same WASM CRUD app each get their own seeded notes. State persists for as long as the SW is registered and is wiped when the user clears site data or the recovery stub unregisters the SW. Useful for demos, single-user tools, and anywhere "no backend" is a feature rather than a limitation.
+
+**Personalised** requires a server, a user identity, and a store partitioned by that identity. Two devices logged into the same account see the same notes; two accounts see different notes. lofigui doesn't currently ship an example at this level — it would compose login/session middleware with the server-side patterns from 06–10, scoping every read/write to the authenticated user. The print/template/HTMX layers don't change; only the data layer does.
+
+The two dimensions multiply: a Level 4 (HTMX) app can be Global (shared dashboard), Individual (per-browser scratchpad), or Personalised (logged-in editor). Picking a row in each table gives you the cell your app sits in.
 
 ## Print as interface
 
