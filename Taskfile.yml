@@ -306,7 +306,6 @@ tasks:
       - task-plus md2html --file docs/research-charts.md --dst docs
       - task-plus md2html --file docs/research-layouts.md --dst docs
       - task-plus md2html --file docs/research-technical.md --dst docs
-      - task-plus md2html --file docs/research-bugs.md --dst docs
       - task-plus md2html --file docs/research-python.md --dst docs
       - task-plus md2html --file docs/research-wasm-service-workers.md --dst docs
       - task-plus md2html --file docs/research-wasm-external-apis.md --dst docs
