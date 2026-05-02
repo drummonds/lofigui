@@ -1,7 +1,16 @@
 {{define "title"}}Three-Panel Controls{{end}}
 
+{{define "head"}}
+<style>
+  /* Fixed navbar needs body padding so content isn't hidden behind it */
+  body { padding-top: 3.25rem; }
+</style>
+{{end}}
+
+{{define "body_attrs"}}class="has-navbar-fixed-top"{{end}}
+
 {{define "navbar"}}
-<nav class="navbar is-link">
+<nav class="navbar is-link is-fixed-top">
   <div class="navbar-brand">
     <a class="navbar-item has-text-weight-bold" href="">Style Sampler</a>
   </div>
@@ -94,7 +103,7 @@
         <h1 class="title">Three-Panel: Controls Sidebar</h1>
         <p class="subtitle">Left panel holds form controls that configure the teletype process. Like wrapping a CLI tool in a web dialog.</p>
         <div class="notification is-link is-light">
-          <strong>Pattern:</strong> The left sidebar is a parameter form — text inputs, dropdowns, checkboxes, buttons. Submitting the form starts the teletype model with those parameters. Blue navbar this time.
+          <strong>Pattern:</strong> The left sidebar is a parameter form — text inputs, dropdowns, checkboxes, buttons. Submitting the form starts the teletype model with those parameters. Fixed (<code>is-fixed-top</code>) blue navbar so the status tag stays visible while the right panel scrolls.
         </div>
         <hr>
         <div class="content">
