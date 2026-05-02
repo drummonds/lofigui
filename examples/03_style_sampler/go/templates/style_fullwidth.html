@@ -22,11 +22,11 @@
 
 {{define "content"}}
 <section class="section">
-  <div class="container">
+  <div class="container is-fluid">
     <h1 class="title">Full Width</h1>
-    <p class="subtitle">No sidebar — the teletype output gets the entire page width. The simplest layout, closest to the Level 1 teletype. Green navbar for maximum clash.</p>
+    <p class="subtitle">No sidebar — the teletype output gets the entire viewport width. The only sidebar-less layout that breaks out of Bulma's bounded container. Green navbar for maximum clash.</p>
     <div class="notification is-success is-light">
-      <strong>Pattern:</strong> Just a navbar and a single content column. This is what examples 01 and 02 use. The teletype output fills the available width.
+      <strong>Pattern:</strong> <code>&lt;div class="container is-fluid"&gt;</code> spans the full viewport (minus a 32 px gutter) instead of the breakpoint-bounded width that <code>scrolling</code> and <code>fixed</code> use. Useful for log viewers, wide tables, and anything that wants maximum horizontal real estate without a sidebar.
     </div>
     <hr>
     <div class="content">

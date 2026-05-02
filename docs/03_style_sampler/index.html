@@ -58,7 +58,8 @@
 <p>One Go codebase, six page layouts, two deployment targets. The same templates render a multi-page site either from a classic HTTP server (<code>main.go</code>) or entirely inside the browser via a service worker (<code>main_wasm.go</code>). Both entry points register the <strong>same <code>*http.ServeMux</code></strong> — navigation, routing, and rendering code paths are identical.</p>
 <p>The <code>model</code> function is the <strong>same five-lines-of-teletype</strong> used in <a href="../01_hello_world/">example 01</a> — <code>Print(&quot;Hello world.&quot;)</code>, a five-count loop with one-second sleeps, <code>Print(&quot;Done.&quot;)</code>. Every layout renders the current lofigui buffer, so whichever style you click into auto-refreshes in place while the counter ticks up. The point of this example is to show that <strong>adding layout variety on top of the same model is a matter of templates, not plumbing</strong>.</p>
 <p>Every page's navbar carries a <strong>Start / Cancel</strong> widget driven by the library — the model runs on demand, cancellable mid-flight, and the page you're looking at keeps polling until the buffer stops growing.</p>
-<p><strong>Interactivity level:</strong> 6 — WASM (browser-only, service worker)</p>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 6 — WASM (browser-only, service worker)
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Individual (per-browser SW process; the server build at <code>:1340</code> is Global)</p>
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler" class="button is-light">Source on Codeberg</a>
@@ -94,48 +95,61 @@
 <p>Everything else — the routes, the templates, the navigation — is plain Go standard library.</p>
 <hr>
 <h2 id="layout-styles">Layout styles</h2>
+<p>The catalogue varies on three orthogonal axes — container width, navbar fixity, and sidebar — so each layout earns a distinct cell:</p>
 <table>
 <thead>
 <tr>
 <th>Style</th>
+<th>Container</th>
 <th>Navbar</th>
-<th>Layout</th>
+<th>Sidebar</th>
 <th>Use case</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Scrolling</td>
-<td>Default, scrolls with page</td>
-<td>Single column</td>
+<td>bounded</td>
+<td>scrolls with page</td>
+<td>—</td>
 <td>Simple tools (examples 01, 02)</td>
 </tr>
 <tr>
 <td>Fixed</td>
-<td>Pinned to top</td>
-<td>Single column</td>
+<td>bounded</td>
+<td>fixed (pinned)</td>
+<td>—</td>
 <td>Dashboards needing persistent nav</td>
 </tr>
 <tr>
+<td>Full Width</td>
+<td><strong>fluid</strong></td>
+<td>scrolls with page</td>
+<td>—</td>
+<td>Log viewers, wide tables, anything wanting maximum horizontal real estate</td>
+</tr>
+<tr>
 <td>Three-Panel Nav</td>
-<td>Top + left sidebar</td>
-<td>Left nav, right content</td>
+<td>fluid</td>
+<td>fixed (pinned)</td>
+<td>left: navigation</td>
 <td>Multi-page apps with page tree</td>
 </tr>
 <tr>
 <td>Three-Panel Controls</td>
-<td>Top + left sidebar</td>
-<td>Left form, right output</td>
+<td>fluid</td>
+<td>fixed (pinned)</td>
+<td>left: form</td>
 <td>CLI tools with parameter dialogs</td>
-</tr>
-<tr>
-<td>Full Width</td>
-<td>Minimal top bar</td>
-<td>Single wide column</td>
-<td>Maximum output area</td>
 </tr>
 </tbody>
 </table>
+<div class="annotation">
+<strong>Container width.</strong> "Bounded" uses Bulma's <code>&lt;div class="container"&gt;</code> — fixed max-widths that step at each breakpoint, centred on the page with margin gutters either side. "Fluid" uses <code>&lt;div class="container is-fluid"&gt;</code> — spans the full viewport minus a 32 px gutter. The three-panel layouts default to fluid because the right pane already sacrifices horizontal space to the sidebar; a bounded container would compress the content too much.
+</div>
+<div class="annotation">
+<strong>Fixed navbar default.</strong> Three-panel layouts default to a fixed (<code>is-fixed-top</code>) navbar because the right pane is what scrolls — the navigation and status indicator should stay visible while the user reads or interacts. Single-column layouts default to scrolling because there's nothing else competing for the top of the viewport.
+</div>
 <hr>
 <h2 id="template-inheritance">Template inheritance</h2>
 <p>All styles share a base template using Go's <code>html/template</code> <code>{{block}}</code> / <code>{{define}}</code> inheritance:</p>

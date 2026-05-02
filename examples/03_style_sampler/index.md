@@ -13,7 +13,8 @@ The `model` function is the **same five-lines-of-teletype** used in [example 01]
 
 Every page's navbar carries a **Start / Cancel** widget driven by the library — the model runs on demand, cancellable mid-flight, and the page you're looking at keeps polling until the buffer stops growing.
 
-**Interactivity level:** 6 — WASM (browser-only, service worker)
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 6 — WASM (browser-only, service worker)
+**[State scope](../research-philosophy.html#the-state-dimension):** Individual (per-browser SW process; the server build at `:1340` is Global)
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
@@ -58,13 +59,23 @@ Everything else — the routes, the templates, the navigation — is plain Go st
 
 ## Layout styles
 
-| Style | Navbar | Layout | Use case |
-|-------|--------|--------|----------|
-| Scrolling | Default, scrolls with page | Single column | Simple tools (examples 01, 02) |
-| Fixed | Pinned to top | Single column | Dashboards needing persistent nav |
-| Three-Panel Nav | Top + left sidebar | Left nav, right content | Multi-page apps with page tree |
-| Three-Panel Controls | Top + left sidebar | Left form, right output | CLI tools with parameter dialogs |
-| Full Width | Minimal top bar | Single wide column | Maximum output area |
+The catalogue varies on three orthogonal axes — container width, navbar fixity, and sidebar — so each layout earns a distinct cell:
+
+| Style | Container | Navbar | Sidebar | Use case |
+|-------|-----------|--------|---------|----------|
+| Scrolling | bounded | scrolls with page | — | Simple tools (examples 01, 02) |
+| Fixed | bounded | fixed (pinned) | — | Dashboards needing persistent nav |
+| Full Width | **fluid** | scrolls with page | — | Log viewers, wide tables, anything wanting maximum horizontal real estate |
+| Three-Panel Nav | fluid | fixed (pinned) | left: navigation | Multi-page apps with page tree |
+| Three-Panel Controls | fluid | fixed (pinned) | left: form | CLI tools with parameter dialogs |
+
+<div class="annotation">
+<strong>Container width.</strong> "Bounded" uses Bulma's <code>&lt;div class="container"&gt;</code> — fixed max-widths that step at each breakpoint, centred on the page with margin gutters either side. "Fluid" uses <code>&lt;div class="container is-fluid"&gt;</code> — spans the full viewport minus a 32 px gutter. The three-panel layouts default to fluid because the right pane already sacrifices horizontal space to the sidebar; a bounded container would compress the content too much.
+</div>
+
+<div class="annotation">
+<strong>Fixed navbar default.</strong> Three-panel layouts default to a fixed (<code>is-fixed-top</code>) navbar because the right pane is what scrolls — the navigation and status indicator should stay visible while the user reads or interacts. Single-column layouts default to scrolling because there's nothing else competing for the top of the viewport.
+</div>
 
 ---
 
