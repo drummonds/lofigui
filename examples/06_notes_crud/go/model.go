@@ -138,7 +138,10 @@ func renderListView() {
 		ids = append(ids, id)
 	}
 	sort.Ints(ids)
-	type row struct{ id int; preview string }
+	type row struct {
+		id      int
+		preview string
+	}
 	rows := make([]row, 0, len(ids))
 	for _, id := range ids {
 		text := notesDB[id]
