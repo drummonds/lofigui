@@ -2,7 +2,8 @@
 
 A real-time SVG dashboard with a simulated water tank. Combines polling with POST controls and generated SVG schematics. Also compiles to WASM.
 
-**Interactivity level:** 3 — Polling (whole page refresh)
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 3 — Polling (whole page refresh)
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server build — one shared simulation) / Individual (WASM build — each browser runs its own tank)
 
 <!-- TODO: Add screenshots, annotated code walkthrough -->
 

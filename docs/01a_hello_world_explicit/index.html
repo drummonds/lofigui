@@ -54,6 +54,8 @@
 </style>
 <h1 id="01a--hello-world-explicit">01a — Hello World Explicit</h1>
 <p>Same model as <a href="../01_hello_world/index.html">example 01</a>, but with everything unbundled. Where 01 uses <code>app.Run()</code> (one call does everything), this example shows the explicit wiring: custom template, separate route handlers, and a service worker for the WASM build.</p>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 1 — Teletype (async polling)
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server) / Individual (WASM build, per-browser SW process)</p>
 <div class="buttons">
 <a href="wasm_demo/sw/" class="button is-primary">Launch Service Worker Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>

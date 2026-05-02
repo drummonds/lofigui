@@ -9,6 +9,9 @@
 
 If you can write a Go program that prints to stdout, you can write a lofigui app. The model function below is ordinary Go code — `Print()`, a loop, a sleep. The only difference is the output goes to a web page instead of a terminal. No WebSocket, no JavaScript — just the browser's built-in refresh mechanism doing the work.
 
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 1 — Teletype (async polling)
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build, per-browser SW process)
+
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch 01 (compact)</a>
 <a href="../01a_hello_world_explicit/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01a (explicit)</a>

@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-lofigui = { path = "../../", editable = true }
+lofigui = { path = "../../../", editable = true }
 
 [project.optional-dependencies]
 dev = [

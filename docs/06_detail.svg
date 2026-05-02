@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <clipPath id="clip2">
+      <rect x="64" y="149" width="881" height="2" />
+    </clipPath>
+    <clipPath id="clip5">
+      <rect x="84" y="255" width="841" height="21" />
+    </clipPath>
+    <clipPath id="clip12">
+      <rect x="64" y="384" width="881" height="2" />
+    </clipPath>
+    <filter id="shadow1" x="-0.6" y="-0.6" width="2.2" height="2.2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="rgb(0,0,0)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow3" x="-0.7" y="-0.7" width="2.4" height="2.4">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="8" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow4" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0"/>
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feFlood flood-color="rgb(9,10,12)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow6" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow7" x="-0.5" y="-0.5" width="2.1" height="2.1">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow8" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow9" x="-0.5" y="-0.5" width="2.1" height="2.1">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow10" x="-0.5" y="-0.5" width="2" height="2">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow11" x="-0.5" y="-0.5" width="2.1" height="2.1">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="rgb(51,51,51)" flood-opacity="0"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <rect x="0" y="0" width="1009" height="498" fill="rgb(245,245,245)"/>
+  <rect x="32" y="32" width="945" height="434" rx="8" fill="rgb(0,0,0)" filter="url(#shadow1)"/>
+  <rect x="32" y="32" width="945" height="434" rx="8" fill="rgb(255,255,255)"/>
+  <text x="64" y="92.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Notes CRUD Example</text>
+  <text x="64" y="119.4" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="20">Simple database operations with lofigui</text>
+  <g clip-path="url(#clip2)">
+    <rect x="64" y="149" width="881" height="2" fill="rgb(243,244,246)"/>
+  </g>
+  <text x="64" y="203.8" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="32" font-weight="800">Note #1</text>
+  <rect x="66" y="237" width="877" height="57" rx="12" fill="rgb(9,10,12)" filter="url(#shadow3)"/>
+  <rect x="63" y="234" width="883" height="63" rx="12" fill="rgb(9,10,12)" filter="url(#shadow4)"/>
+  <rect x="64" y="235" width="881" height="61" rx="12" fill="rgb(255,255,255)"/>
+  <g clip-path="url(#clip5)">
+    <text x="84" y="269.8" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="14">First note - Welcome to the notes CRUD example!</text>
+  </g>
+  <a xlink:href="http://localhost:1340/">
+    <rect x="64" y="320" width="132.3" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow6)"/>
+    <rect x="64" y="320" width="132.3" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow7)"/>
+    <rect x="64" y="320" width="132.3" height="40" rx="6" fill="rgb(255,255,255)" stroke="rgb(214,217,224)" stroke-width="1"/>
+    <text x="80" y="345.4" fill="rgb(46,51,61)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">← Back to list</text>
+  </a>
+  <a xlink:href="http://localhost:1340/notes/1/edit">
+    <rect x="208.3" y="320" width="61.2" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow8)"/>
+    <rect x="208.3" y="320" width="61.2" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow9)"/>
+    <rect x="208.3" y="320" width="61.2" height="40" rx="6" fill="rgb(255,183,15)"/>
+    <text x="224.3" y="345.4" fill="rgb(41,29,0)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Edit</text>
+  </a>
+  <rect x="281.5" y="320" width="81.4" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow10)"/>
+  <rect x="281.5" y="320" width="81.4" height="40" rx="6" fill="rgb(51,51,51)" filter="url(#shadow11)"/>
+  <rect x="281.5" y="320" width="81.4" height="40" rx="6" fill="rgb(255,102,133)"/>
+  <text x="297.5" y="345.4" fill="rgb(26,0,5)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="16" font-weight="500">Delete</text>
+  <g clip-path="url(#clip12)">
+    <rect x="64" y="384" width="881" height="2" fill="rgb(243,244,246)"/>
+  </g>
+  <text x="309" y="427.8" fill="rgb(64,70,84)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="14">Example demonstrating CRUD operations with lofigui.</text>
+  <a xlink:href="http://localhost:1340/">
+    <text x="651.1" y="427.8" fill="rgb(41,66,255)" font-family="Inter, &quot;SF Pro&quot;, &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif" font-size="14">Refresh</text>
+  </a>
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
+</svg>

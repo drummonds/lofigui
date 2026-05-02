@@ -2,7 +2,8 @@
 
 Extends HTMX pattern with long-running background goroutines for equipment maintenance. Demonstrates progress tracking, context cancellation, and equipment lockout.
 
-**Interactivity level:** 5 — HTMX partial updates
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 5 — HTMX partial updates
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build — maintenance goroutines run per-browser)
 
 <!-- TODO: Add screenshots, annotated code walkthrough -->
 

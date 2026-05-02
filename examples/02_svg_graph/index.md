@@ -11,7 +11,8 @@
 
 A scrolling demonstration of every output type lofigui supports. The model runs in the background while the browser auto-refreshes to show new content appearing section by section.
 
-**Interactivity level:** 1 — Teletype (same async polling pattern as example 01)
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 1 — Teletype (same async polling pattern as example 01)
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build, per-browser SW process)
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>

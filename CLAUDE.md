@@ -50,8 +50,12 @@ lofigui/
                            # buildMux(basePrefix); main.go + main_wasm.go are one-liner
                            # entry points. Templates use <base href="{{.base}}"> so the
                            # same markup works at "/" (server) and under the SW scope.
-    05_demo_app/           # Python template inheritance
-    06_notes_crud/         # Level 4: CRUD app (Python + Go)
+    05_demo_app/           # Python-only: Jinja2 template inheritance.
+                           # Lives under python/; no Go or WASM build —
+                           # see 03 for the Go-template equivalent.
+    06_notes_crud/         # Level 4: CRUD app. Standard WASM pattern
+                           # (main.go / main_wasm.go / model.go) for the
+                           # Go side; Python (FastAPI) side under python/.
     07_water_tank/         # Level 3: SVG schematic, simulation goroutine, WASM-compatible
     08_water_tank_multi/   # Level 3: Multi-page with HTTP Refresh polling
     09_water_tank_htmx/    # Level 5: HTMX partial updates (no full-page polling)
@@ -648,7 +652,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 | 02 | Output Showcase | All output types: `Print`, `Printf`, `Markdown`, `HTML`, `Table`, inline SVG charts | Async polling |
 | 03 | Style Sampler | Shared `buildMux(basePrefix)` + `<base href>`, SW-served multi-route WASM, template inheritance, `NewControllerFromFS` | Standard WASM pattern |
 | 05 | Demo App | Python template inheritance, Jinja2 extends/blocks | Python only |
-| 06 | Notes CRUD | Form POST handlers, `ctrl.StateDict()` + `ctrl.RenderTemplate()` directly (no App), redirect-after-POST | CRUD |
+| 06 | Notes CRUD | Master/detail UI (per-row Read / Edit / Delete buttons), redirect-after-POST, package-level **flash variable** for notifications across the redirect, 4 KiB note cap, shared `buildMux(basePrefix)` for server + WASM. `lofigui.HTML()` (not `Print()`) for raw markup; user text escaped with `html.EscapeString`. | CRUD + WASM |
 | 07 | Water Tank | Generated SVG schematic (`buildSVG()`), simulation goroutine, clickable SVG `<a>` links, dual server/WASM build | Dashboard |
 | 08 | Water Tank Multi | Multiple routes sharing one model, `LayoutNavbar`, HTTP Refresh per-page, diagnostics view | Multi-page |
 | 09 | Water Tank HTMX | HTMX `hx-get`/`hx-trigger` for partial updates, fragment endpoints, `Controller` without `App`, `renderAndCapture` mutex, embedded template | HTMX |
@@ -665,7 +669,7 @@ Each example builds on previous ones. Study them in order to learn the framework
 
 ### WASM service worker notes
 
-- **Auto-generated bootstrap** (01, 02, 03): the library ships bootstrap + SW templates in `wasmassets/`. `cmd/wasm-deploy` emits them into `docs/NN/wasm_demo/` at build time, alongside a vendored `bulma.min.css`. Each example with a compact WASM demo adds one `wasm-deploy` call to its Taskfile block. This is the default — reach for a hand-written bootstrap only when you need to demonstrate the mechanics (01a) or ship custom bootstrap logic (01b).
+- **Auto-generated bootstrap** (01, 02, 03, 06): the library ships bootstrap + SW templates in `wasmassets/`. `cmd/wasm-deploy` emits them into `docs/NN/wasm_demo/` at build time, alongside a vendored `bulma.min.css`. Each example with a compact WASM demo adds one `wasm-deploy` call to its Taskfile block. This is the default — reach for a hand-written bootstrap only when you need to demonstrate the mechanics (01a) or ship custom bootstrap logic (01b). 06 uses base-relative form actions (`action="create"`, not `/create`) so the browser resolves them via `<base href>`, and `http.Redirect`s use absolute paths built from `basePrefix` (not `"./"` / `"../"`) — `net/http.Redirect` rewrites relative paths against `r.URL.Path`, which `wasmhttp` has already stripped of the SW scope, so a relative redirect under WASM lands at `/` and escapes the scope.
 - **Hand-written bootstrap** (01a, 01b): kept visible under `go/templates/sw/` so readers can see the mechanics. The SW scope is a dedicated subdirectory (`sw/`) so its cache and scope can't collide with other SW demos on the same origin.
 - **Recovery stubs**: every SW demo ships a small HTML page (`demo.html`, `demo-gz.html`, or `demo-sw.html`) *outside* the SW scope. Visiting it unregisters ancestor-scoped SWs and redirects to the canonical entry. Use this when a demo is stuck; fall back to DevTools Application → Service Workers only if the stub itself can't load.
 - **Gzip caveat** (01b): production hosts like GitHub Pages negotiate `Content-Encoding: gzip` transparently. The explicit gzip pattern is for hosts that don't, or when you want client-side control over which variant loads. Don't add gzip behind a one-line option — the moving parts (`DecompressionStream`, named cache, content-type, scope-relative URL key) are worth seeing.

@@ -219,4 +219,4 @@ async def delete(note_id: int = Form(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("notes:app", host="127.0.0.1", port=1346, reload=True)
+    uvicorn.run("notes:app", host="127.0.0.1", port=1340, reload=True)

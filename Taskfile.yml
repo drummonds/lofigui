@@ -125,7 +125,7 @@ tasks:
   example-05:
     desc: Run Python example 05 (Demo App with template inheritance)
     aliases: [py05, demo]
-    dir: examples/05_demo_app
+    dir: examples/05_demo_app/python
     cmds:
       - uv sync --no-install-project
       - uv run --no-project python demo_app.py
@@ -278,12 +278,91 @@ tasks:
         sleep 2
         url2svg --url http://localhost:1340/style/scrolling -o ../../../docs/03_running.svg
 
+  docs:capture:05:
+    desc: Capture screenshots for example 05 documentation
+    dir: examples/05_demo_app/python
+    cmds:
+      - |
+        uv sync --no-install-project
+        uv run --no-project python demo_app.py &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        for i in $(seq 1 30); do
+          curl -sf http://localhost:8050/ > /dev/null 2>&1 && break
+          sleep 0.5
+        done
+        # Home page — feature cards + status panel
+        url2svg --url http://localhost:8050/ -o ../../../docs/05_home.svg
+        # Data Tables page — same base.html, different mainpanel
+        url2svg --url http://localhost:8050/data -o ../../../docs/05_data.svg
+
+  docs:capture:06:
+    desc: 'Capture screenshots for example 06 (CRUD via curl — also acts as integration test)'
+    deps: [clean-ports]
+    dir: examples/06_notes_crud/go
+    cmds:
+      - |
+        set -e
+        go run . &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        for i in $(seq 1 30); do
+          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          sleep 0.5
+        done
+
+        # ---- Initial state: three seeded notes, empty Create form ----
+        url2svg --url http://localhost:1340/ -o ../../../docs/06_initial.svg
+
+        # ---- CRUD test sequence (the capture is also the integration test) ----
+        # Every POST must redirect with 303 See Other.
+        check_303() {
+          code=$(curl -sf -o /dev/null -w '%{http_code}' "$@")
+          if [ "$code" != "303" ]; then echo "FAIL: expected 303, got $code for $*" >&2; exit 1; fi
+        }
+        # Create two notes
+        check_303 -X POST -d 'note_text=Buy milk and eggs' http://localhost:1340/create
+        check_303 -X POST -d 'note_text=Pay electricity bill' http://localhost:1340/create
+        # Delete the third seed
+        check_303 -X POST http://localhost:1340/notes/3/delete
+        # Update note 2 (last action — its flash is what the populated screenshot will show)
+        check_303 -X POST --data-urlencode 'new_text=Add, edit, and delete notes — and now WASM!' http://localhost:1340/notes/2/update
+
+        # Master view with the "Updated note #2" flash visible
+        url2svg --url http://localhost:1340/ -o ../../../docs/06_populated.svg
+        # Detail page (the "Read" button target) for note 1
+        url2svg --url http://localhost:1340/notes/1 -o ../../../docs/06_detail.svg
+
+        # ---- Validation tests (4 KiB cap + non-existent ID) ----
+        # Oversized note must be rejected, redirected, and flash a danger notification.
+        # POSIX way to build a 4097-byte string of 'x' (printf '%.0s' is bash-only).
+        big=$(head -c 4097 /dev/zero | tr '\0' x)
+        check_303 -X POST --data-urlencode "note_text=${big}" http://localhost:1340/create
+        curl -sf http://localhost:1340/ | grep -q "maximum is 4096" \
+          || { echo "FAIL: oversized note flash missing" >&2; exit 1; }
+        # Non-existent delete is a no-op + flash
+        check_303 -X POST http://localhost:1340/notes/9999/delete
+        curl -sf http://localhost:1340/ | grep -q "note #9999 not found" \
+          || { echo "FAIL: not-found flash missing" >&2; exit 1; }
+
+        # Sanity: the populated SVG must contain proof the CRUD ran
+        for needle in "Buy milk and eggs" "Pay electricity bill" "now WASM" "Updated note #2"; do
+          grep -q "$needle" ../../../docs/06_populated.svg \
+            || { echo "FAIL: '$needle' missing from 06_populated.svg" >&2; exit 1; }
+        done
+        # Sanity: detail SVG shows the full text of note 1
+        grep -q "Welcome to the notes CRUD example" ../../../docs/06_detail.svg \
+          || { echo "FAIL: note 1 text missing from 06_detail.svg" >&2; exit 1; }
+        echo "06 CRUD test sequence passed"
+
   docs:capture:
     desc: Capture all example screenshots
     cmds:
       - task: docs:capture:01
       - task: docs:capture:02
       - task: docs:capture:03
+      - task: docs:capture:05
+      - task: docs:capture:06
 
   docs:open:01:
     desc: Start example 01 in HOLD mode for manual inspection
@@ -398,6 +477,13 @@ tasks:
       - rm examples/03_style_sampler/go/main.wasm
       # Drop the pre-SW artifacts from the previous flat layout
       - rm -f docs/03_style_sampler/main.wasm docs/03_style_sampler/main.wasm.gz docs/03_style_sampler/app.js docs/03_style_sampler/wasm_exec.js docs/03_style_sampler/demo.html
+      # 06 Notes CRUD (compact — library CLI generates the SW bootstrap).
+      # CRUD app under the SW: <base href> + base-relative form actions + "./"
+      # redirects keep every fetch inside the SW scope.
+      - rm -rf docs/06_notes_crud/wasm_demo
+      - cd examples/06_notes_crud/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
+      - go run ./cmd/wasm-deploy --dir=docs/06_notes_crud/wasm_demo --title="06 — Notes CRUD" --wasm=examples/06_notes_crud/go/main.wasm --recovery-stubs=demo.html
+      - rm examples/06_notes_crud/go/main.wasm
       # 07 Water Tank
       - mkdir -p docs/07_water_tank
       - cd examples/07_water_tank/go && GOOS=js GOARCH=wasm go build -ldflags="-s" -trimpath -o main.wasm .
