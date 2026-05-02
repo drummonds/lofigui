@@ -1,141 +1,61 @@
-# Notes CRUD Example
+# 06 — Notes CRUD
 
-A simple demonstration of Create, Read, Update, Delete (CRUD) operations using lofigui.
+In-memory notes app with a **master / detail UI** (per-row Read / Edit / Delete buttons), the **Post / Redirect / Get** pattern, and a 4 KiB cap per note. The Go build runs in two targets (server and WASM) from the same `*http.ServeMux`; the Python build uses FastAPI.
 
-## Features
+See [`index.md`](./index.md) for the rendered documentation page (three screenshots — initial / populated / detail — plus the curl-driven integration test).
 
-- **Simple Database**: In-memory dictionary/map with numeric IDs as keys and text strings as values
-- **CRUD Operations**: Full Create, Read, Update, Delete functionality
-- **Interactive Interface**: Web-based forms for all operations
-- **Data Table Display**: Shows all notes in a formatted table
-- **Both Languages**: Implementations in Python and Go
-
-## Database Structure
-
-The database is as simple as possible:
-- **Keys**: Numeric IDs (1, 2, 3, ...)
-- **Values**: Text strings (the note content)
-- **Storage**: In-memory (no persistence)
-
-## Running the Example
-
-### Python Version
+## Quick start
 
 ```bash
-cd examples/06_notes_crud/python
-uv pip install -e .
-python notes.py
+task go-example:06       # Go server                http://localhost:1340
+task example-06          # Python (FastAPI)         http://localhost:1340
+
+# WASM demo (browser-only, served from docs/):
+task docs:build-wasm     # builds main.wasm into docs/06_notes_crud/wasm_demo/
+tp pages                 # serves docs/ on http://localhost:8080
+# Visit http://localhost:8080/06_notes_crud/wasm_demo/
 ```
 
-Or from the root directory:
-```bash
-task py06
-```
-
-The application will start on http://localhost:1346
-
-### Go Version
+The Go build also has a curl-driven CRUD test that doubles as the screenshot capture:
 
 ```bash
-cd examples/06_notes_crud/go
-go run main.go
+task docs:capture:06     # asserts every POST returns 303 + greps the resulting SVG
 ```
 
-Or from the root directory:
-```bash
-task go06
-```
-
-The application will start on http://localhost:1346
-
-## Using the Application
-
-The interface provides four main operations:
-
-### 1. Create - Add New Notes
-- Enter text in the "Create New Note" form
-- Click "Create Note"
-- A new note is added with an auto-incremented ID
-
-### 2. Read - View a Specific Note
-- Enter a note ID in the "Read Note" form
-- Click "Read"
-- The note content is displayed
-
-### 3. Update - Modify Existing Notes
-- Enter the note ID to update
-- Enter the new text
-- Click "Update"
-- Shows both old and new text
-
-### 4. Delete - Remove Notes
-- Enter the note ID to delete
-- Click "Delete"
-- The note is removed from the database
-
-## Initial Data
-
-The database starts with three example notes:
-1. "First note - Welcome to the notes CRUD example!"
-2. "Second note - Add, edit, and delete notes."
-3. "Third note - All data is stored in memory."
-
-## Technical Details
-
-### Python Implementation
-- Uses FastAPI for the web framework
-- Form handling with FastAPI's `Form` dependency
-- In-memory dictionary for storage
-- Redirect pattern after POST operations (Post/Redirect/Get)
-
-### Go Implementation
-- Uses standard library `net/http`
-- Form parsing with `r.ParseForm()`
-- In-memory map for storage
-- HTTP 303 redirects after POST operations
-
-### Shared Features
-- Bulma CSS for styling
-- lofigui table rendering
-- Controller pattern for template management
-- No external database required
-
-## Learning Points
-
-This example demonstrates:
-1. **CRUD Operations**: The four fundamental database operations
-2. **Form Handling**: POST requests with form data
-3. **State Management**: In-memory data structure
-4. **User Feedback**: Success/error messages for each operation
-5. **Data Display**: Formatted table rendering
-6. **Web Patterns**: Post/Redirect/Get pattern to prevent duplicate submissions
-
-## Extending the Example
-
-This example can be extended to:
-- Add persistence (save to file/database)
-- Implement search functionality
-- Add timestamps to notes
-- Support markdown in note content
-- Add categories or tags
-- Implement user authentication
-- Add pagination for large datasets
-
-## File Structure
+## Project structure
 
 ```
 06_notes_crud/
-├── README.md                 # This file
-├── templates/
-│   └── notes.html           # Shared HTML template
-├── python/
-│   ├── notes.py             # Python implementation
-│   └── pyproject.toml       # Python dependencies
-└── go/
-    ├── main.go              # Go implementation
-    └── go.mod               # Go dependencies
+├── README.md
+├── index.md                    # Rendered docs page (screenshots, walkthrough)
+├── go/
+│   ├── main.go                 # //go:build !(js && wasm) — server entry
+│   ├── main_wasm.go            # //go:build js && wasm    — WASM entry (SW)
+│   ├── model.go                # Shared: notesDB, flash, CRUD ops, buildMux
+│   ├── go.mod / go.sum
+│   └── templates/
+│       └── notes.html          # <base href="{{.base}}"> + {{.content}}
+└── python/
+    ├── notes.py                # FastAPI implementation (no flash bridge)
+    ├── pyproject.toml          # uv-managed; lofigui pinned to ../../../
+    ├── uv.lock
+    └── templates/
+        └── notes.html
 ```
+
+## What the Go and Python builds share
+
+- Same in-memory map (`{1: "First note…", 2: "Second…", 3: "Third…"}`, `nextID = 4`)
+- Same four CRUD form actions (`create`, `read`, `update`, `delete`)
+- Same redirect-after-POST flow (`303 See Other` → `GET /`)
+- Same Bulma-styled table and notification colours
+
+## What only the Go build has
+
+- A single shared `*http.ServeMux` between server and WASM via build tags
+- `lofigui.NewControllerFromFS` reading `//go:embed templates`
+- A package-level **flash variable** so notifications survive the redirect (the simpler Python version puts notifications inside the POST handler before the redirect, so the message is lost on next render — see `index.md` for why the Go version splits these)
 
 ## License
 
-This example is part of the lofigui project and shares the same license.
+Part of the lofigui project; shares the same license.

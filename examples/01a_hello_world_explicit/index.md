@@ -7,6 +7,9 @@
 
 Same model as [example 01](../01_hello_world/index.html), but with everything unbundled. Where 01 uses `app.Run()` (one call does everything), this example shows the explicit wiring: custom template, separate route handlers, and a service worker for the WASM build.
 
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 1 — Teletype (async polling)
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build, per-browser SW process)
+
 <div class="buttons">
 <a href="wasm_demo/sw/" class="button is-primary">Launch Service Worker Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>

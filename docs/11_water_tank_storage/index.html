@@ -50,7 +50,8 @@
             <div class="content">
                 <h1 id="11--water-tank-storage">11 — Water Tank Storage</h1>
 <p>WASM frontend with a Go API server and persistent state storage. The water tank simulation runs in the browser while data is persisted server-side.</p>
-<p><strong>Interactivity level:</strong> 7 — WASM + API server</p>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 7 — WASM + API server
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (the API server holds shared state — all browsers see the same persisted tank). Adding auth would shift this toward Personalised.</p>
 <!-- TODO: Add screenshots, annotated code walkthrough -->
 <hr>
 <h2 id="architecture">Architecture</h2>

@@ -48,22 +48,403 @@
             </nav>
 
             <div class="content">
-                <h1 id="06--notes-crud">06 — Notes CRUD</h1>
-<p>A simple CRUD application with form POST handlers. Demonstrates the redirect-after-POST pattern using <code>Controller</code> directly (no <code>App</code> polling).</p>
-<p><strong>Interactivity level:</strong> 4 — Static + forms (CRUD pattern)</p>
-<!-- TODO: Add screenshots, annotated code walkthrough -->
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; width: 100%; height: auto; }
+</style>
+<h1 id="06--notes-crud">06 — Notes CRUD</h1>
+<p>Smallest interesting CRUD app: a numeric-keyed in-memory map of notes, a <strong>master / detail</strong> UI with per-row Read / Edit / Delete buttons, and the <strong>Post / Redirect / Get</strong> pattern. One Go codebase, <strong>two deployment targets</strong> — a real HTTP server (<code>main.go</code>) and a browser-only WASM build that runs the same <code>*http.ServeMux</code> inside a service worker (<code>main_wasm.go</code>). A Python implementation alongside the Go one shows the same shape with FastAPI.</p>
+<p>Each POST handler mutates the notes map, stashes a one-shot <strong>flash message</strong> describing what it just did, and redirects with <code>303 See Other</code> — to <code>./</code> (back to the list) for create / delete, or to <code>../{id}</code> (back to the detail page) for update. The next GET consumes the flash, prepends it as a Bulma notification, and renders the requested view.</p>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 4 — Static + forms (CRUD pattern, no polling)
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build — one shared notes map) / Individual (WASM build — each browser's SW has its own seeded notes)</p>
+<div class="buttons">
+<a href="wasm_demo/" class="button is-primary">Launch Demo</a>
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
+</div>
+<div class="columns is-vcentered">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../06_initial.svg" alt="Initial state — three seeded notes, each row has Read / Edit / Delete buttons, empty Create form below">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Initial — three seeded notes, per-row action buttons, Create form</figcaption>
+</figure>
+</div>
+<div class="column is-narrow has-text-centered">
+<span style="font-size: 2rem; color: #999;">&rarr;</span>
+</div>
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../06_populated.svg" alt="After the curl-driven CRUD sequence — flash notification at the top, two new notes, note 2 updated, note 3 deleted">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">After a curl-driven CRUD sequence — flash + updated table</figcaption>
+</figure>
+</div>
+</div>
+<figure class="image screenshot mt-4" style="max-width: 60%; margin: 1.5em auto">
+<img src="../06_detail.svg" alt="Detail view of note 1 — full text in a box, Back / Edit / Delete buttons">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Detail view (the "Read" button target) — full text, no truncation</figcaption>
+</figure>
+<p class="has-text-grey is-size-7 has-text-centered">All three captures are produced by <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml"><code>task docs:capture:06</code></a>, which drives the server with a sequence of <code>curl</code> POSTs. The capture asserts every POST returns <code>303 See Other</code>, the validation cases (oversized text, non-existent ID) flash the right error, and the rendered SVGs contain the expected note text — the screenshots double as an integration test.</p>
 <hr>
-<h2 id="the-model">The model</h2>
-<!-- TODO: Form handlers, StateDict, RenderTemplate -->
+<h2 id="how-lofigui-helps-here">How lofigui helps here</h2>
+<p>Six things from the library are doing real work in this example:</p>
+<ol>
+<li><strong><code>lofigui.Reset</code> + <code>lofigui.Buffer</code></strong> — the lofigui buffer is a process-global accumulator. Every handler resets it, prints the page-specific content, and reads <code>Buffer()</code> into the template's <code>{{.content}}</code> slot.</li>
+<li><strong><code>lofigui.HTML</code></strong> — writes raw HTML into the buffer (use this for chrome and notification markup; use <code>html.EscapeString</code> separately on user-supplied text). The original version of this example used <code>lofigui.Print(&quot;&lt;h2&gt;…&lt;/h2&gt;&quot;)</code> and ended up with literal angle brackets on screen — <code>Print</code> escapes by default; <code>HTML</code> does not.</li>
+<li><strong><code>lofigui.NewControllerFromFS</code></strong> — parses the embedded <code>notes.html</code> template once at startup (read from <code>//go:embed templates</code>, the only filesystem a WASM build can reach).</li>
+<li><strong><code>Controller.RenderTemplate</code></strong> — writes to any <code>http.ResponseWriter</code>, so the same call works for <code>net/http.ListenAndServe</code> and <code>go-wasm-http-server</code> inside a service worker.</li>
+<li><strong><code>Controller.StateDict</code></strong> — pre-fills the template context with <code>version</code>, <code>name</code>, <code>polling</code>, <code>refresh</code> (no-op here since this example doesn't poll) so the handler only adds CRUD-specific keys (<code>content</code>, <code>base</code>).</li>
+<li><strong><code>lofigui.ServeFavicon</code> + <code>lofigui.ServeBulma</code></strong> — registered alongside the CRUD routes. Bulma loads from local <code>/assets/bulma.min.css</code> on both server and WASM builds — no CDN round-trip.</li>
+</ol>
+<p>Everything else — the redirect-after-POST cycle, the form parsing, the in-memory map — is plain Go standard library.</p>
 <hr>
-<h2 id="the-server">The server</h2>
-<!-- TODO: POST /create, /update, /delete with redirects -->
+<h2 id="the-route-table">The route table</h2>
+<table>
+<thead>
+<tr>
+<th>Method + Path</th>
+<th>View</th>
+<th>Redirects to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>Master list — table of notes with per-row Read / Edit / Delete</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>GET /notes/{id}</code></td>
+<td>Detail page (the &quot;Read&quot; button target)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>GET /notes/{id}/edit</code></td>
+<td>Edit form pre-filled with the current text</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /create</code></td>
+<td>(form on master)</td>
+<td><code>./</code> (list)</td>
+</tr>
+<tr>
+<td><code>POST /notes/{id}/update</code></td>
+<td>(form on edit page)</td>
+<td><code>../{id}</code> (detail page, so the user sees what they saved)</td>
+</tr>
+<tr>
+<td><code>POST /notes/{id}/delete</code></td>
+<td>(form on master + detail)</td>
+<td><code>../../</code> (list)</td>
+</tr>
+<tr>
+<td><code>GET /favicon.ico</code></td>
+<td>(<code>lofigui.ServeFavicon</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>GET /assets/bulma.min.css</code></td>
+<td>(<code>lofigui.ServeBulma</code>)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<div class="annotation">
+<strong>Master / detail, not one-page-with-ID-fields.</strong> An earlier version had four side-by-side forms on the master page where the user typed the note ID by hand. Now each row carries its own buttons that already know the ID — no copy-pasting numbers. Read becomes a real navigation to a detail page (full text, no truncation); Edit lands on a pre-filled form; Delete is a one-button POST. The example demonstrates the simplest CRUD UX you'd actually ship.
+</div>
 <hr>
-<h2 id="how-it-works">How it works</h2>
-<!-- TODO: Redirect-after-POST pattern, no polling needed -->
+<h2 id="the-model--modelgo">The model — <code>model.go</code></h2>
+<p><code>model.go</code> is shared between the server and WASM builds. It owns the notes map, the CRUD operations, the flash channel, the view renderers, and the <code>*http.ServeMux</code> builder.</p>
+<h3 id="state--flash">State + flash</h3>
+<pre><code class="language-go">const MaxNoteSize = 4 &lt;&lt; 10 // 4 KiB cap on note text
+
+//go:embed templates
+var templateFS embed.FS
+
+var (
+    mu       sync.Mutex
+    notesDB  = seedNotes()
+    nextID   = 4
+    flashMsg string // one-shot notification carried across PRG redirects
+)
+
+func seedNotes() map[int]string {
+    return map[int]string{
+        1: &quot;First note - Welcome to the notes CRUD example!&quot;,
+        2: &quot;Second note - Add, edit, and delete notes.&quot;,
+        3: &quot;Third note - All data is stored in memory.&quot;,
+    }
+}
+</code></pre>
+<div class="annotation">
+<strong>State resets on restart.</strong> Package-level initializers run once per process: a Go server restart wipes all user-created notes and rebuilds the seeded three. The WASM build's "process" is the lifetime of the service worker — clearing it means unregistering the SW (the <code>demo.html</code> recovery stub does that, then redirects back to the entry point).
+</div>
+<div class="annotation">
+<strong>The flash variable bridges the redirect.</strong> POST handlers mutate the map and write a single HTML fragment into <code>flashMsg</code>; the redirect tells the browser to GET something; the GET handler calls <code>consumeFlash()</code> which atomically reads-and-clears the variable and prepends it to the buffer. That is how the user sees "Created note #4" / "Updated note #2" / "Deleted note #3" exactly once even though the work happened during a different request.
+</div>
+<h3 id="crud-operations-validate-and-flash">CRUD operations validate and flash</h3>
+<pre><code class="language-go">func createNote(text string) (int, error) {
+    if text == &quot;&quot; { return 0, fmt.Errorf(&quot;note text cannot be empty&quot;) }
+    if len(text) &gt; MaxNoteSize {
+        return 0, fmt.Errorf(&quot;note is %d bytes; maximum is %d&quot;, len(text), MaxNoteSize)
+    }
+    mu.Lock()
+    id := nextID
+    notesDB[id] = text
+    nextID++
+    mu.Unlock()
+    setFlash(fmt.Sprintf(`&lt;div class=&quot;notification is-success&quot;&gt;Created note #%d: %s&lt;/div&gt;`,
+        id, html.EscapeString(text)))
+    return id, nil
+}
+
+func updateNote(id int, newText string) error { /* …same shape, returns error if id missing… */ }
+func deleteNoteByID(id int) error              { /* …flashes is-warning on success, is-danger if missing… */ }
+</code></pre>
+<div class="annotation">
+<strong>Why <code>html.EscapeString</code>, not <code>template.HTMLEscapeString</code>?</strong> Both work. <code>html.EscapeString</code> is the canonical choice for escaping into raw HTML strings; <code>template.HTMLEscapeString</code> is a thin wrapper. The user-supplied text in the flash and the table is the only thing that needs escaping — everything else in the page is generated by the example itself.
+</div>
+<h3 id="view-renderers--three-pages-one-template">View renderers — three pages, one template</h3>
+<p>Three view functions print into the lofigui buffer; the single <code>notes.html</code> template just slots <code>{{.content}}</code> into the page chrome:</p>
+<pre><code class="language-go">func renderListView()         // master: table + per-row buttons + Create form
+func renderDetailView(id int) // single note, Back / Edit / Delete buttons
+func renderEditView(id int)   // form pre-filled with current text + Save / Cancel
+</code></pre>
+<p>The master view's per-row buttons use base-relative URLs so they resolve correctly under both <code>&lt;base href=&quot;/&quot;&gt;</code> (server) and <code>&lt;base href=&quot;/06_notes_crud/wasm_demo/&quot;&gt;</code> (WASM):</p>
+<pre><code class="language-html">&lt;a href=&quot;notes/4&quot; class=&quot;button is-info&quot;&gt;Read&lt;/a&gt;
+&lt;a href=&quot;notes/4/edit&quot; class=&quot;button is-warning&quot;&gt;Edit&lt;/a&gt;
+&lt;form action=&quot;notes/4/delete&quot; method=&quot;post&quot; style=&quot;display:inline&quot;&gt;
+  &lt;button class=&quot;button is-danger&quot; type=&quot;submit&quot;&gt;Delete&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<h3 id="buildmux--every-route-in-one-place"><code>buildMux</code> — every route in one place</h3>
+<pre><code class="language-go">func buildMux(basePrefix string) *http.ServeMux {
+    ctrl, _ := lofigui.NewControllerFromFS(templateFS, &quot;templates&quot;, &quot;notes.html&quot;)
+    mux := http.NewServeMux()
+
+    render := func(w http.ResponseWriter, r *http.Request) {
+        ctx := ctrl.StateDict(r)
+        ctx[&quot;content&quot;] = template.HTML(lofigui.Buffer())
+        ctx[&quot;base&quot;]    = basePrefix       // → &lt;base href=&quot;…&quot;&gt;
+        ctrl.RenderTemplate(w, ctx)
+    }
+    prepBuf := func() { lofigui.Reset(); if msg := consumeFlash(); msg != &quot;&quot; { lofigui.HTML(msg) } }
+
+    mux.HandleFunc(&quot;GET /{$}&quot;, func(w http.ResponseWriter, r *http.Request) {
+        prepBuf(); renderListView(); render(w, r)
+    })
+    mux.HandleFunc(&quot;GET /notes/{id}&quot;, func(w http.ResponseWriter, r *http.Request) {
+        prepBuf(); renderDetailView(idOf(r)); render(w, r)
+    })
+    mux.HandleFunc(&quot;GET /notes/{id}/edit&quot;, func(w http.ResponseWriter, r *http.Request) {
+        prepBuf(); renderEditView(idOf(r)); render(w, r)
+    })
+
+    mux.HandleFunc(&quot;POST /create&quot;, func(w http.ResponseWriter, r *http.Request) {
+        _ = r.ParseForm()
+        if _, err := createNote(r.FormValue(&quot;note_text&quot;)); err != nil { setErrFlash(err) }
+        http.Redirect(w, r, basePrefix, http.StatusSeeOther)                       // → list
+    })
+    mux.HandleFunc(&quot;POST /notes/{id}/update&quot;, func(w http.ResponseWriter, r *http.Request) {
+        _ = r.ParseForm()
+        id := idOf(r)
+        if err := updateNote(id, r.FormValue(&quot;new_text&quot;)); err != nil { setErrFlash(err) }
+        http.Redirect(w, r, fmt.Sprintf(&quot;%snotes/%d&quot;, basePrefix, id), http.StatusSeeOther) // → detail page
+    })
+    mux.HandleFunc(&quot;POST /notes/{id}/delete&quot;, func(w http.ResponseWriter, r *http.Request) {
+        if err := deleteNoteByID(idOf(r)); err != nil { setErrFlash(err) }
+        http.Redirect(w, r, basePrefix, http.StatusSeeOther)                       // → list
+    })
+
+    mux.HandleFunc(&quot;GET /favicon.ico&quot;,          lofigui.ServeFavicon)
+    mux.HandleFunc(&quot;GET /assets/bulma.min.css&quot;, lofigui.ServeBulma)
+    return mux
+}
+</code></pre>
+<div class="annotation">
+<strong>Why absolute redirects from <code>basePrefix</code>?</strong> <code>net/http.Redirect</code> rewrites a relative <code>Location</code> against <code>r.URL.Path</code> <em>before</em> writing the header. Under WASM, <code>go-wasm-http-server</code> has already <code>StripPrefix</code>'d the SW scope from <code>r.URL.Path</code> by the time the handler runs — so a redirect to <code>"./"</code> from <code>POST /create</code> resolves against <code>/create</code>, lands on <code>/</code>, and the browser navigates out of the SW scope onto the host root (where the CRUD handlers don't exist). Building the redirect URL from <code>basePrefix</code> (which is <code>"/"</code> on the server and <code>"/06_notes_crud/wasm_demo/"</code> under WASM) sidesteps the rewrite — Go leaves absolute paths alone — and keeps every redirect inside the scope.
+</div>
+<hr>
+<h2 id="the-template--noteshtml">The template — <code>notes.html</code></h2>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;base href=&quot;{{.base}}&quot;&gt;
+  &lt;title&gt;Notes CRUD - Lofigui Example&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;/assets/bulma.min.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;container&quot;&gt;
+    &lt;h1 class=&quot;title&quot;&gt;Notes CRUD Example&lt;/h1&gt;
+    &lt;p class=&quot;subtitle&quot;&gt;Simple database operations with lofigui&lt;/p&gt;
+    &lt;hr&gt;
+    &lt;div class=&quot;content&quot;&gt;{{.content}}&lt;/div&gt;
+    &lt;hr&gt;
+    &lt;footer&gt;&lt;a href=&quot;&quot;&gt;Refresh&lt;/a&gt;&lt;/footer&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p><code>{{.content}}</code> is the lofigui buffer — flash + view-specific HTML. <code>&lt;a href=&quot;&quot;&gt;Refresh&lt;/a&gt;</code> resolves against <code>&lt;base&gt;</code> — empty href means &quot;the page itself,&quot; which in WASM means the home page inside the SW scope (not the host root).</p>
+<p><code>/assets/bulma.min.css</code> keeps its leading slash because absolute URLs ignore <code>&lt;base&gt;</code> — the SW scope rewrites <code>/assets/...</code> to its local copy, and the server registers <code>lofigui.ServeBulma</code> at the same path.</p>
+<hr>
+<h2 id="the-server--maingo">The server — <code>main.go</code></h2>
+<pre><code class="language-go">//go:build !(js &amp;&amp; wasm)
+
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;net/http&quot;
+)
+
+func main() {
+    fmt.Println(&quot;Notes CRUD running at http://localhost:1340&quot;)
+    http.ListenAndServe(&quot;:1340&quot;, buildMux(&quot;/&quot;))
+}
+</code></pre>
+<p>Three lines. Base prefix <code>&quot;/&quot;</code> because the server hosts the app at the site root.</p>
+<hr>
+<h2 id="the-wasm-entry-point--main-wasmgo">The WASM entry point — <code>main_wasm.go</code></h2>
+<pre><code class="language-go">//go:build js &amp;&amp; wasm
+
+package main
+
+import (
+    &quot;strings&quot;
+
+    &quot;codeberg.org/hum3/lofigui&quot;
+    wasmhttp &quot;github.com/nlepage/go-wasm-http-server/v2&quot;
+)
+
+func main() {
+    base := strings.TrimSuffix(lofigui.WASMScopePath(), &quot;/&quot;) + &quot;/&quot;
+    if _, err := wasmhttp.Serve(buildMux(base)); err != nil { panic(err) }
+    select {} // keep the Go runtime alive to service SW fetches
+}
+</code></pre>
+<p><code>lofigui.WASMScopePath()</code> reads the SW scope from <code>go-wasm-http-server</code>'s JS bridge (e.g. <code>/06_notes_crud/wasm_demo/</code>). Normalising to a single trailing slash gives a clean <code>&lt;base href&gt;</code>. The handlers on the mux don't know they're running in a service worker — <code>wasmhttp.Serve</code> translates <code>fetch</code> events into <code>*http.Request</code>s and forwards them to Go.</p>
+<div class="annotation">
+<strong>No JS bridge for CRUD.</strong> Forms POST normally; the SW intercepts the <code>fetch</code>, hands it to Go, the handler returns 303, the browser follows the redirect, the SW forwards the GET, Go renders. The JavaScript layer is only ever the SW shim — there's no <code>syscall/js</code> exposed to the page.
+</div>
+<hr>
+<h2 id="same-code-two-targets">Same code, two targets</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Server (<code>main.go</code>)</th>
+<th>WASM (<code>main_wasm.go</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build tag</td>
+<td><code>!(js &amp;&amp; wasm)</code></td>
+<td><code>js &amp;&amp; wasm</code></td>
+</tr>
+<tr>
+<td>App setup</td>
+<td><code>buildMux(&quot;/&quot;)</code></td>
+<td><code>buildMux(scopePath)</code></td>
+</tr>
+<tr>
+<td>Serving runtime</td>
+<td><code>http.ListenAndServe(&quot;:1340&quot;, mux)</code></td>
+<td><code>wasmhttp.Serve(mux)</code> + <code>select{}</code></td>
+</tr>
+<tr>
+<td>Request shape</td>
+<td><code>http.Request</code> / <code>http.ResponseWriter</code></td>
+<td><code>http.Request</code> / <code>http.ResponseWriter</code></td>
+</tr>
+<tr>
+<td>Form POST</td>
+<td>HTTP request → Go handler</td>
+<td><code>fetch</code> intercepted by SW → Go handler</td>
+</tr>
+<tr>
+<td><code>&lt;base href&gt;</code></td>
+<td><code>&quot;/&quot;</code></td>
+<td><code>&quot;/06_notes_crud/wasm_demo/&quot;</code></td>
+</tr>
+<tr>
+<td>Redirect targets</td>
+<td><code>basePrefix + …</code> → <code>/…</code></td>
+<td><code>basePrefix + …</code> → <code>/06_notes_crud/wasm_demo/…</code></td>
+</tr>
+<tr>
+<td>State lifetime</td>
+<td>until process exits</td>
+<td>until SW unregistered</td>
+</tr>
+</tbody>
+</table>
+<p><code>buildMux</code>, <code>model.go</code>, and <code>notes.html</code> are the same source for both builds. The entry-point files exist purely because <code>syscall/js</code> (transitively imported by <code>go-wasm-http-server</code>) doesn't link on non-WASM targets, and <code>http.ListenAndServe</code> is a runtime no-op under WASM.</p>
+<hr>
+<h2 id="the-capture-is-the-integration-test">The capture <em>is</em> the integration test</h2>
+<p><code>task docs:capture:06</code> does both jobs in one shell block: it depends on <code>clean-ports</code> (so a leftover server from a previous run doesn't block port 1340), runs the CRUD sequence, and asserts both the HTTP behaviour and the rendered SVG content:</p>
+<pre><code class="language-bash">check_303() {
+  code=$(curl -sf -o /dev/null -w '%{http_code}' &quot;$@&quot;)
+  [ &quot;$code&quot; = &quot;303&quot; ] || { echo &quot;FAIL: expected 303, got $code&quot;; exit 1; }
+}
+
+# Two creates + delete seed #3 + update seed #2 (last action — its flash shows on the populated screenshot)
+check_303 -X POST -d 'note_text=Buy milk and eggs'                                               http://localhost:1340/create
+check_303 -X POST -d 'note_text=Pay electricity bill'                                            http://localhost:1340/create
+check_303 -X POST                                                                                 http://localhost:1340/notes/3/delete
+check_303 -X POST --data-urlencode 'new_text=Add, edit, and delete notes — and now WASM!'         http://localhost:1340/notes/2/update
+
+url2svg --url http://localhost:1340/         -o docs/06_populated.svg     # master, &quot;Updated note #2&quot; flash
+url2svg --url http://localhost:1340/notes/1  -o docs/06_detail.svg        # detail page
+
+# 4 KiB cap is enforced
+big=$(printf 'x%.0s' $(seq 1 4097))
+check_303 -X POST --data-urlencode &quot;note_text=${big}&quot; http://localhost:1340/create
+curl -sf http://localhost:1340/ | grep -q &quot;maximum is 4096&quot; || { echo &quot;FAIL: oversize flash missing&quot;; exit 1; }
+
+# Non-existent ID is a no-op + flash
+check_303 -X POST http://localhost:1340/notes/9999/delete
+curl -sf http://localhost:1340/ | grep -q &quot;note #9999 not found&quot; || { echo &quot;FAIL: not-found flash missing&quot;; exit 1; }
+
+# Final SVG content asserts
+for needle in &quot;Buy milk and eggs&quot; &quot;Pay electricity bill&quot; &quot;now WASM&quot; &quot;Updated note #2&quot;; do
+  grep -q &quot;$needle&quot; docs/06_populated.svg || { echo &quot;FAIL: '$needle' missing&quot;; exit 1; }
+done
+grep -q &quot;Welcome to the notes CRUD example&quot; docs/06_detail.svg || { echo &quot;FAIL: detail text missing&quot;; exit 1; }
+</code></pre>
+<div class="annotation">
+<strong>Authenticity over hand-crafting.</strong> The screenshots aren't posed — they are the actual server's output after a real CRUD sequence. Every <code>check_303</code> call asserts the POST handler returned <code>303 See Other</code>; if any handler regresses (returns <code>200</code>, <code>500</code>, etc.) the capture task fails. The <code>grep</code> assertions on the final SVGs verify that the create/update/delete operations actually mutated the visible state and that the validation flashes fired. Adding new CRUD operations means adding to this sequence — the documentation, the screenshots, and the test grow together.
+</div>
+<p>After the sequence:</p>
+<ul>
+<li>Note #1 — original, full text visible on the detail page (the screenshot)</li>
+<li>Note #2 — updated (text now ends &quot;…and now WASM!&quot;)</li>
+<li>Note #3 — deleted (gone from the table, total count down by one)</li>
+<li>Note #4 — newly created (&quot;Buy milk and eggs&quot;)</li>
+<li>Note #5 — newly created (&quot;Pay electricity bill&quot;)</li>
+<li>Plus a flash: <strong>Updated note #2</strong> at the top of the master view</li>
+</ul>
+<hr>
+<h2 id="running-it">Running it</h2>
+<pre><code class="language-bash">task go-example:06       # Go server  → http://localhost:1340
+task example-06          # Python      → http://localhost:1340
+
+task docs:capture:06     # capture all three SVGs and run the integration test
+</code></pre>
+<hr>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><strong>Add HTMX</strong> — <a href="../09_water_tank_htmx/">09 Water Tank HTMX</a> drops the redirect entirely and uses HTMX <code>hx-post</code> to swap a fragment in place. The flash-message variable disappears.</li>
+<li><strong>Multiple pages</strong> — <a href="../03_style_sampler/">03 Style Sampler</a> shows the same &quot;shared mux + WASM&quot; story with multiple routes and template inheritance.</li>
+<li><strong>Persistence</strong> — <a href="../11_water_tank_storage/">11 Water Tank Storage</a> shows a WASM frontend pointed at a separate Go API server using SeaweedFS; the in-memory map here is what graduates into a real backend in 11.</li>
+</ul>
 <hr>
 <h2 id="links">Links</h2>
 <ul>
+<li><a href="wasm_demo/">Launch Demo</a></li>
 <li><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud">Source on Codeberg</a></li>
 </ul>
 

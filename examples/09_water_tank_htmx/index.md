@@ -2,7 +2,8 @@
 
 Replaces full-page HTTP Refresh polling with HTMX partial updates. Only the results div is swapped — forms, buttons, and inputs remain functional during live updates.
 
-**Interactivity level:** 5 — HTMX partial updates
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 5 — HTMX partial updates
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build)
 
 <!-- TODO: Add screenshots, annotated code walkthrough -->
 

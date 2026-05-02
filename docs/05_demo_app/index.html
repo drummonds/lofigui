@@ -48,13 +48,275 @@
             </nav>
 
             <div class="content">
-                <h1 id="05--demo-app">05 — Demo App</h1>
-<p>Python-only example demonstrating Jinja2 template inheritance with lofigui.</p>
-<p><strong>Interactivity level:</strong> 3 — Polling (whole page refresh)</p>
-<!-- TODO: Add screenshots, Python code walkthrough -->
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; width: 100%; height: auto; }
+.python-only { border-left: 4px solid #3776ab; background: #eef6fc; padding: 1em 1.25em; margin: 1em 0; border-radius: 0 4px 4px 0; }
+.python-only strong { color: #3776ab; }
+</style>
+<h1 id="05--demo-app">05 — Demo App</h1>
+<p>Multi-page Python application built around <strong>Jinja2 template inheritance</strong>. Every page extends a single <code>base.html</code> that owns the navbar, layout columns, and status panel; child templates only fill in the page-specific blocks. The example also wires the lofigui <code>Controller</code> to a long-running background process so the page auto-refreshes while work is in flight.</p>
+<div class="python-only">
+<strong>Python-only example.</strong> There is no Go or WASM build of 05 — Jinja2's <code>{% extends %}</code> / <code>{% block %}</code> inheritance is the lesson, and the equivalent Go-template story (using <code>html/template</code>'s <code>{{block}}</code> / <code>{{define}}</code>) lives in <a href="../03_style_sampler/">example 03</a>. If you came here looking for a Go starting point, jump to 03 instead.
+</div>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 3 — Polling (whole-page refresh while a process runs)
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (single FastAPI process — every browser sees the same accumulated buffer)</p>
+<div class="buttons">
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/05_demo_app" class="button is-light">Source on Codeberg</a>
+</div>
+<div class="columns is-vcentered">
+<div class="column is-6">
+<figure class="image screenshot">
+<img src="../05_home.svg" alt="Home page — feature cards in main column, status panel on the right">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Home — <code>home.html</code> fills the <code>mainpanel</code> block with feature cards</figcaption>
+</figure>
+</div>
+<div class="column is-6">
+<figure class="image screenshot">
+<img src="../05_data.svg" alt="Data Tables page — same navbar, table content in main column">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Data Tables — <code>data.html</code> fills the same block with rendered tables</figcaption>
+</figure>
+</div>
+</div>
+<p class="has-text-grey is-size-7 has-text-centered">Same <code>base.html</code> on both pages — only the <code>mainpanel</code> block changes. The navbar, columns, status panel, and footer are inherited unchanged.</p>
 <hr>
-<h2 id="template-inheritance">Template inheritance</h2>
-<!-- TODO: Jinja2 extends/blocks pattern -->
+<h2 id="how-lofigui-helps-here">How lofigui helps here</h2>
+<p>Five things from the library do real work in this example:</p>
+<ol>
+<li><strong><code>lg.markdown</code> / <code>lg.table</code> / <code>lg.print</code> accumulate HTML</strong> in the lofigui buffer; routes flush the buffer into a Jinja2 context variable (<code>table_html</code>, <code>chart_content</code>, <code>process_output</code>) and render the template.</li>
+<li><strong><code>App.template_response(request, name, extra)</code></strong> locates <code>templates/&lt;name&gt;</code> (Jinja2 <code>FileSystemLoader</code>), injects lofigui state (<code>refresh</code>, <code>polling</code>, <code>version</code>, <code>name</code>), merges <code>extra</code>, and returns an <code>HTMLResponse</code> — the only call needed in each route handler.</li>
+<li><strong><code>Controller.start_action(refresh_time)</code> / <code>end_action()</code></strong> drive the polling lifecycle. While the action is running, <code>template_response</code> emits a <code>&lt;meta http-equiv=&quot;Refresh&quot; ...&gt;</code> tag into the rendered page, so the browser reloads on a timer.</li>
+<li><strong>Built-in <code>/assets/bulma.min.css</code></strong> is served by <code>App</code> next to your routes — <code>base.html</code> links to it directly with no CDN round-trip.</li>
+<li><strong><code>lg.get_favicon_response()</code></strong> returns a ready-made favicon so the navbar's logo slot doesn't 404.</li>
+</ol>
+<p>Everything else — Jinja2, FastAPI, Bulma — is plain ecosystem code.</p>
+<hr>
+<h2 id="template-inheritance--the-point-of-this-example">Template inheritance — the point of this example</h2>
+<p><code>base.html</code> declares every layout element exactly once and exposes named blocks for child templates to override:</p>
+<pre><code class="language-html">&lt;!-- base.html (abridged) --&gt;
+&lt;head&gt;
+  {% block title %}&lt;title&gt;Lofigui Demo App&lt;/title&gt;{% endblock %}
+  {{refresh | safe}}
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;/assets/bulma.min.css&quot;/&gt;
+  &lt;style&gt;{% block extra_css %}{% endblock %}&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;nav class=&quot;navbar is-primary is-fixed-top&quot;&gt;…shared navbar…&lt;/nav&gt;
+
+  &lt;div class=&quot;main-content&quot;&gt;&lt;div class=&quot;container&quot;&gt;
+    {% block content %}
+      &lt;div class=&quot;columns&quot;&gt;
+        &lt;div class=&quot;column is-8&quot;&gt;&lt;div class=&quot;box&quot;&gt;
+          {% block mainpanel %}&lt;div id=&quot;content&quot;&gt;Main content&lt;/div&gt;{% endblock %}
+        &lt;/div&gt;&lt;/div&gt;
+        &lt;div class=&quot;column is-4&quot;&gt;&lt;div class=&quot;box&quot;&gt;
+          {% block statuspanel %}
+            &lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; {{status | default('Ready')}}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Polling:&lt;/strong&gt; {{polling | default('Stopped')}}&lt;/p&gt;
+          {% endblock %}
+        &lt;/div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    {% endblock %}
+  &lt;/div&gt;&lt;/div&gt;
+
+  &lt;footer class=&quot;footer&quot;&gt;…shared footer…&lt;/footer&gt;
+&lt;/body&gt;
+</code></pre>
+<p>Child pages declare only what they change. <code>home.html</code> extends the base and overrides just the title and the main-column content:</p>
+<pre><code class="language-html">&lt;!-- home.html --&gt;
+{% extends &quot;base.html&quot; %}
+
+{% block title %}&lt;title&gt;Home - Lofigui Demo App&lt;/title&gt;{% endblock %}
+
+{% block mainpanel %}
+  &lt;h1 class=&quot;title&quot;&gt;Welcome to Lofigui Demo&lt;/h1&gt;
+  &lt;div class=&quot;columns is-multiline&quot;&gt;
+    &lt;div class=&quot;column is-6&quot;&gt;&lt;div class=&quot;box&quot;&gt;…feature card…&lt;/div&gt;&lt;/div&gt;
+    …
+  &lt;/div&gt;
+{% endblock %}
+</code></pre>
+<p><code>data.html</code> overrides the <strong>same <code>mainpanel</code> block</strong> with table HTML produced by <code>lg.table</code> — the navbar and status panel come through unchanged from <code>base.html</code>:</p>
+<pre><code class="language-html">&lt;!-- data.html --&gt;
+{% extends &quot;base.html&quot; %}
+{% block title %}&lt;title&gt;Data Tables - Lofigui Demo App&lt;/title&gt;{% endblock %}
+{% block mainpanel %}
+  &lt;h2 class=&quot;title&quot;&gt;Data Tables Demo&lt;/h2&gt;
+  &lt;div class=&quot;content&quot;&gt;{{table_html | safe}}&lt;/div&gt;
+  &lt;hr&gt;
+  &lt;div class=&quot;content&quot;&gt;{{comparison_table | safe}}&lt;/div&gt;
+{% endblock %}
+</code></pre>
+<div class="annotation">
+<strong>Block override granularity.</strong> Each child template overrides only the blocks it cares about. The navbar lives in <code>base.html</code> and is inherited by every page; adding a new nav item is a one-file change. The two-column <code>content</code> block, the <code>statuspanel</code>, the footer, and the burger-menu JS are all shared the same way. Compare this to copying a navbar into seven separate templates.
+</div>
+<h3 id="available-blocks">Available blocks</h3>
+<table>
+<thead>
+<tr>
+<th>Block</th>
+<th>Where</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td><code>&lt;head&gt;</code></td>
+<td>Per-page <code>&lt;title&gt;</code></td>
+</tr>
+<tr>
+<td><code>extra_css</code></td>
+<td><code>&lt;head&gt;</code></td>
+<td>Per-page CSS additions</td>
+</tr>
+<tr>
+<td><code>extra_js</code></td>
+<td><code>&lt;script&gt;</code> (end of body)</td>
+<td>Per-page JS additions</td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>Main area</td>
+<td>Replace the entire two-column layout (rare)</td>
+</tr>
+<tr>
+<td><code>mainpanel</code></td>
+<td>Left column</td>
+<td>Page-specific content (most common)</td>
+</tr>
+<tr>
+<td><code>statuspanel</code></td>
+<td>Right column</td>
+<td>Override the default Status / Polling display</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="the-routes--turning-lofigui-buffers-into-template-context">The routes — turning lofigui buffers into template context</h2>
+<p>Each route resets the lofigui buffer, prints page-specific output, snapshots the buffer with <code>lg.buffer()</code>, and passes that snapshot as a context variable to <code>template_response</code>:</p>
+<pre><code class="language-python">import lofigui as lf
+from lofigui import App
+
+app_instance = App(template_dir=&quot;templates&quot;)
+app_instance.controller = Controller()
+fastapi_app = FastAPI(title=&quot;Lofigui Demo&quot;)
+
+@fastapi_app.get(&quot;/data&quot;, response_class=HTMLResponse)
+async def data_tables(request: Request):
+    lf.reset()
+    lf.markdown(&quot;### Employee Data&quot;)
+    lf.table(employee_data, header=[&quot;Name&quot;, &quot;Role&quot;, &quot;Skills&quot;, &quot;Experience&quot;])
+    table_html = lf.buffer()                 # snapshot one section
+
+    lf.reset()
+    lf.markdown(&quot;### Framework Comparison&quot;)
+    lf.table(comparison_data, header=[…])
+    comparison_table = lf.buffer()           # snapshot the second
+
+    return app_instance.template_response(request, &quot;data.html&quot;, {
+        &quot;table_html&quot;: table_html,
+        &quot;comparison_table&quot;: comparison_table,
+        &quot;status&quot;: &quot;Ready&quot;,
+        &quot;polling&quot;: &quot;Stopped&quot;,
+    })
+</code></pre>
+<div class="annotation">
+<strong>Why <code>reset</code> + <code>buffer</code> twice.</strong> The lofigui buffer is process-global. Each <code>reset()</code> clears it; each <code>buffer()</code> returns a snapshot of what has been printed since. Pulling two snapshots in a single handler lets a single template render two independent regions (the employee table and the comparison table) without merging them. The same idea generalises to any number of named regions.
+</div>
+<hr>
+<h2 id="process-management--controllerstart-action--end-action">Process management — <code>Controller.start_action</code> / <code>end_action</code></h2>
+<p>The <code>/start_demo_process</code> route runs a long simulated job and shows the auto-refresh polling pattern in action:</p>
+<pre><code class="language-python">@fastapi_app.post(&quot;/start_demo_process&quot;)
+async def start_demo_process(duration: int = Form(10)):
+    app_instance.start_action(refresh_time=2)        # turn on auto-refresh
+    lf.reset()
+    lf.markdown(&quot;## Demo Process Started&quot;)
+    duration = max(1, min(duration, 60))
+    for i in range(duration):
+        lf.print(f&quot;Step {i + 1}/{duration} - Progress: {int((i + 1) / duration * 100)}%&quot;)
+        await asyncio.sleep(1)
+    lf.markdown(&quot;### Process Complete!&quot;)
+    app_instance.end_action()                        # turn off auto-refresh
+    return RedirectResponse(url=&quot;/display&quot;, status_code=303)
+</code></pre>
+<p>While the action is running, <code>template_response</code> injects a <code>&lt;meta http-equiv=&quot;Refresh&quot; content=&quot;2; URL=…&quot;&gt;</code> tag into every rendered page, so the browser reloads every two seconds and re-reads the live <code>lf.buffer()</code>. Once <code>end_action()</code> returns, the meta tag is omitted and the page stops reloading.</p>
+<div class="annotation">
+<strong>Cancel from anywhere.</strong> The shared navbar carries a Cancel button that POSTs to <code>/stop</code>, which calls <code>end_action()</code>. Because every page extends <code>base.html</code>, the Cancel button is present on every screen — the user can interrupt the process from the Home, Data, or Charts page without losing context.
+</div>
+<hr>
+<h2 id="routes-at-a-glance">Routes at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Method + Path</th>
+<th>Template</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td><code>home.html</code></td>
+<td>Feature overview, links into the rest of the demo</td>
+</tr>
+<tr>
+<td><code>GET /data</code></td>
+<td><code>data.html</code></td>
+<td>Two <code>lg.table</code> snapshots rendered side-by-side</td>
+</tr>
+<tr>
+<td><code>GET /charts</code></td>
+<td><code>charts.html</code></td>
+<td>Markdown + code blocks demonstrating chart integration points</td>
+</tr>
+<tr>
+<td><code>GET /process</code></td>
+<td><code>process.html</code></td>
+<td>Form + status; redirects to <code>/display</code> when running</td>
+</tr>
+<tr>
+<td><code>POST /start_demo_process</code></td>
+<td>(redirect)</td>
+<td>Kicks off the simulated job</td>
+</tr>
+<tr>
+<td><code>POST /stop</code></td>
+<td>(redirect)</td>
+<td>Cancels a running job</td>
+</tr>
+<tr>
+<td><code>GET /display</code></td>
+<td><code>display.html</code></td>
+<td>Renders the final <code>lf.buffer()</code> after the job completes</td>
+</tr>
+<tr>
+<td><code>GET /about</code></td>
+<td><code>about.html</code></td>
+<td>Static info page (still inherits the shared layout)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="running-it">Running it</h2>
+<pre><code class="language-bash">task example-05            # or: task py05, task demo
+# Server listens on http://localhost:8050
+</code></pre>
+<p>The <code>example-05</code> task lives in <code>Taskfile.yml</code> and runs:</p>
+<pre><code class="language-bash">cd examples/05_demo_app/python
+uv sync --no-install-project
+uv run --no-project python demo_app.py
+</code></pre>
+<p><code>pyproject.toml</code> pins lofigui to a relative editable install (<code>../../../</code>) so the demo always uses the in-tree library.</p>
+<hr>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><strong>The same inheritance idea in Go</strong> — <a href="../03_style_sampler/">03 Style Sampler</a> does five layouts on top of one <code>base.html</code> using Go's <code>html/template</code> <code>{{block}}</code> / <code>{{define}}</code>. Same idea, different engine, plus a WASM build.</li>
+<li><strong>A simpler polling example</strong> — <a href="../01_hello_world/">01 Hello World</a> is the minimum: one route, one template, one model.</li>
+<li><strong>Forms / CRUD</strong> — <a href="../06_notes_crud/">06 Notes CRUD</a> shows the redirect-after-POST pattern with no polling at all.</li>
+</ul>
 <hr>
 <h2 id="links">Links</h2>
 <ul>

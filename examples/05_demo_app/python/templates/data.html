@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Data Tables - Lofigui Demo App</title>
+{% endblock %}
+
+{% block mainpanel %}
+<h1 class="title">Data Tables</h1>
+<h2 class="subtitle">Display tabular data with lofigui</h2>
+
+<div class="content">
+    <p>This page demonstrates how lofigui can render tables from Python data structures.</p>
+
+    <h3 class="title is-4 mt-4">Sample Data Table</h3>
+
+    {{table_html | safe}}
+
+    <h3 class="title is-4 mt-5">Technology Comparison</h3>
+
+    {{comparison_table | safe}}
+
+    <div class="notification is-info is-light mt-5">
+        <p class="has-text-weight-bold"><span class="icon"><i class="fas fa-info-circle"></i></span> How it works</p>
+        <p>Tables are generated using lofigui's <code>table()</code> function with optional headers and styling:</p>
+        <pre><code>import lofigui as lf
+
+data = [
+    ["Alice", "Developer", "5 years"],
+    ["Bob", "Designer", "3 years"],
+]
+lf.table(data, header=["Name", "Role", "Experience"])</code></pre>
+    </div>
+</div>
+{% endblock %}

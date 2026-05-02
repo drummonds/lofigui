@@ -54,6 +54,8 @@
 </style>
 <h1 id="01b--hello-world-explicit--gzip">01b — Hello World Explicit + gzip</h1>
 <p>Same as <a href="../01a_hello_world_explicit/index.html">01a</a> — explicit routes, hand-written service worker — plus one optimisation: the WASM binary is shipped gzipped and decompressed in the browser. The Go code is byte-identical to 01a; all the interesting work happens in the SW bootstrap.</p>
+<p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 1 — Teletype (async polling)
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Individual (WASM-only demo, per-browser SW process)</p>
 <div class="buttons">
 <a href="wasm_demo/sw/" class="button is-primary">Launch Demo</a>
 <a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01b_hello_world_explicit_gzip" class="button is-light">Source on Codeberg</a>

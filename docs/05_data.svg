@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <clipPath id="clip1">
+      <rect x="8" y="106" width="993" height="2" />
+    </clipPath>
+  </defs>
+  <rect x="0" y="0" width="1024" height="768" fill="white"/>
+  <a xlink:href="http://localhost:8050/">
+    <image x="8" y="8" width="32" height="32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABMElEQVR4AeyU3WkCQRSFL5OQP6IvIYGAFpCkACFlpJDUkBpSSGqIL4IFqAUoCIovKv6h6P0WR1gVZnBd52VgPzhzRrxnzg5rRGQdEgLo/HBPDBC+gUrpUVy8Pd9L4fYql4tivj9fxcXXx5OUijf5BKiUC+JGWyorHm252tzf97oDnJ4WXE2dsu8VoHh3Le8vDx5N+bSZ/o1XgFxe/vZPY4DYQGwgNmDq7ZFYmr2JDGfLBDSw3n4zzu4z1/zWumL5awykM1wkoIG1DYDGA3RWn7mm3hnLjrbqo9iW9vcz+jo7dQk5FacDNKBJCmg8QOMBGg/QeIDGAzQeoPFoMBVgNF9Jqz9NQANr2xAaD9BZ/YMAGJeGBv51aDAI8KMBgkGAqgYIBgF0frgnBsi9AdfL3QAAAP//panM/AAAAAZJREFUAwDy2fhQr1uBvAAAAABJRU5ErkJggg=="/>
+    <text x="44" y="39.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">Lofigui Demo</text>
+  </a>
+  <a xlink:href="http://localhost:8050/">
+    <text x="30" y="57.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">Home</text>
+  </a>
+  <a xlink:href="http://localhost:8050/data">
+    <text x="93.1" y="57.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">Data Tables</text>
+  </a>
+  <a xlink:href="http://localhost:8050/charts">
+    <text x="192.6" y="57.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">Charts</text>
+  </a>
+  <text x="27.1" y="75.6" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Actions</text>
+  <a xlink:href="http://localhost:8050/process">
+    <text x="24" y="93.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">Run Process</text>
+  </a>
+  <g clip-path="url(#clip1)">
+    <rect x="8" y="106" width="993" height="2" fill="none" stroke="rgb(128,128,128)" stroke-width="1"/>
+  </g>
+  <a xlink:href="http://localhost:8050/display">
+    <text x="29.7" y="129.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">View Results</text>
+  </a>
+  <rect x="8" y="134" width="71.2" height="21" fill="rgb(239,239,239)" stroke="rgb(0,0,0)" stroke-width="2"/>
+  <text x="29.7" y="149" fill="rgb(0,0,0)" font-family="Arial" font-size="13.3">Cancel</text>
+  <text x="8" y="168.6" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">More</text>
+  <a xlink:href="http://localhost:8050/about">
+    <text x="27.1" y="186.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">About</text>
+  </a>
+  <a xlink:href="https://github.com/drummonds/lofigui">
+    <text x="90.6" y="186.6" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16">GitHub</text>
+  </a>
+  <text x="8" y="293.2" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="32" font-weight="700">Data Tables</text>
+  <text x="8" y="343.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="24" font-weight="700">Display tabular data with lofigui</text>
+  <text x="8" y="383.4" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">This page demonstrates how lofigui can render tables from Python data structures.</text>
+  <text x="8" y="423.3" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="18.7" font-weight="700">Sample Data Table</text>
+  <text x="8" y="464" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="18.7" font-weight="700">Employee Data</text>
+  <text x="36.6" y="504.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Name</text>
+  <text x="147.6" y="504.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Role</text>
+  <text x="251.8" y="504.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Skills</text>
+  <text x="320.7" y="504.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Experience</text>
+  <text x="11" y="526.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Alice Johnson</text>
+  <text x="106.1" y="526.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Senior Developer</text>
+  <text x="224.3" y="526.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Python, Go</text>
+  <text x="320.7" y="526.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">5 years</text>
+  <text x="11" y="548.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Bob Smith</text>
+  <text x="106.1" y="548.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">UX Designer</text>
+  <text x="224.3" y="548.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Figma, Sketch</text>
+  <text x="320.7" y="548.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">3 years</text>
+  <text x="11" y="570.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Carol White</text>
+  <text x="106.1" y="570.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">DevOps Engineer</text>
+  <text x="224.3" y="570.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Docker, K8s</text>
+  <text x="320.7" y="570.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">4 years</text>
+  <text x="11" y="592.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">David Brown</text>
+  <text x="106.1" y="592.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Product Manager</text>
+  <text x="224.3" y="592.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Agile, Scrum</text>
+  <text x="320.7" y="592.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">6 years</text>
+  <text x="8" y="635.5" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="18.7" font-weight="700">Technology Comparison</text>
+  <text x="8" y="676.2" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="18.7" font-weight="700">Framework Comparison</text>
+  <text x="11" y="716.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Framework</text>
+  <text x="96.7" y="716.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Language</text>
+  <text x="210.9" y="716.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Type</text>
+  <text x="340.4" y="716.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Features</text>
+  <text x="11" y="738.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Lofigui</text>
+  <text x="95.9" y="738.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Python/Go</text>
+  <text x="169.2" y="738.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Lightweight</text>
+  <text x="290" y="738.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Templates + Controller</text>
+  <text x="11" y="760.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Flask</text>
+  <text x="95.9" y="760.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Python</text>
+  <text x="169.2" y="760.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Micro-framework</text>
+  <text x="290" y="760.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Full web framework</text>
+  <text x="11" y="782.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">FastAPI</text>
+  <text x="95.9" y="782.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Python</text>
+  <text x="169.2" y="782.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">High performance</text>
+  <text x="290" y="782.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">API-first, async</text>
+  <text x="11" y="804.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Gin</text>
+  <text x="95.9" y="804.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Go</text>
+  <text x="169.2" y="804.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Fast</text>
+  <text x="290" y="804.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Minimal web framework</text>
+  <text x="24" y="841.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">How it works</text>
+  <text x="8" y="875.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Tables are generated using lofigui's</text>
+  <text x="292.5" y="875.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">function with optional headers and styling:</text>
+  <text x="237.7" y="876.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">table()</text>
+  <text x="8" y="908.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">import lofigui as lf</text>
+  <text x="8" y="938.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">data = [</text>
+  <text x="8" y="953.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">[&quot;Alice&quot;, &quot;Developer&quot;, &quot;5 years&quot;],</text>
+  <text x="8" y="968.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">[&quot;Bob&quot;, &quot;Designer&quot;, &quot;3 years&quot;],</text>
+  <text x="8" y="983.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">]</text>
+  <text x="8" y="998.1" fill="rgb(0,0,0)" font-family="monospace" font-size="13">lf.table(data, header=[&quot;Name&quot;, &quot;Role&quot;, &quot;Experience&quot;])</text>
+  <text x="8" y="1030.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Status</text>
+  <text x="56" y="1064.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Ready</text>
+  <text x="8" y="1064.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Status:</text>
+  <text x="72.3" y="1098.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">0%</text>
+  <text x="8" y="1098.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Progress:</text>
+  <text x="61.3" y="1132.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Stopped</text>
+  <text x="8" y="1132.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Polling:</text>
+  <text x="184.9" y="1182.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">- Demonstrating template inheritance and features.</text>
+  <text x="8" y="1182.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16" font-weight="700">Lofigui Demo Application</text>
+  <text x="8" y="1216.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">Built with</text>
+  <text x="124.5" y="1216.7" fill="rgb(0,0,0)" font-family="&quot;Times New Roman&quot;" font-size="16">, FastAPI, and Bulma.</text>
+  <a xlink:href="https://github.com/drummonds/lofigui">
+    <text x="76.5" y="1216.7" fill="rgb(0,0,238)" font-family="&quot;Times New Roman&quot;" font-size="16" text-decoration="underline">Lofigui</text>
+  </a>
+  <rect x="0" y="0" width="1024" height="768" fill="none" stroke="#ccc" stroke-width="1"/>
+</svg>

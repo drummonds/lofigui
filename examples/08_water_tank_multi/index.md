@@ -2,7 +2,8 @@
 
 Extends example 07 with multiple routes rendering different views of the same simulation. Each page auto-refreshes independently via HTTP Refresh headers.
 
-**Interactivity level:** 3 — Polling (whole page refresh)
+**[Interactivity level](../research-philosophy.html#the-interactivity-spectrum):** 3 — Polling (whole page refresh)
+**[State scope](../research-philosophy.html#the-state-dimension):** Global (server) / Individual (WASM build)
 
 <!-- TODO: Add screenshots, annotated code walkthrough -->
 
