@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.38] - 2026-05-02
+
+ - 06: master/detail UI + WASM build; 05: move under python/; doc sweep
+
 ## [0.17.37] - 2026-04-24
 
  - Rebuild docs + WASM inside post:release
