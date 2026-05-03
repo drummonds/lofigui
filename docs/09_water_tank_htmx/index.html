@@ -48,26 +48,76 @@
             </nav>
 
             <div class="content">
-                <h1 id="09--water-tank-htmx">09 — Water Tank HTMX</h1>
-<p>Replaces full-page HTTP Refresh polling with HTMX partial updates. Only the results div is swapped — forms, buttons, and inputs remain functional during live updates.</p>
+                <style>
+.annotation { border-left: 3px solid #3273dc; background: #f0f4ff; padding: 0.75em 1em; margin: 0.75em 0; border-radius: 0 4px 4px 0; font-size: 0.9em; }
+.annotation strong { color: #3273dc; }
+.screenshot { border: 1px solid #dbdbdb; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; }
+.screenshot img { display: block; width: 100%; height: auto; }
+</style>
+<h1 id="09--water-tank-htmx">09 — Water Tank HTMX</h1>
+<p>The same multi-page tank as <a href="../08_water_tank_multi/">08</a>, upgraded from full-page Refresh polling to <strong>HTMX partial updates</strong>. Only the results div is swapped each second — forms, buttons, and any in-flight click are not interrupted. No <code>App</code> is needed; the example talks to a <code>Controller</code> directly.</p>
 <p><strong><a href="../research-philosophy.html#the-interactivity-spectrum">Interactivity level</a>:</strong> 5 — HTMX partial updates
-<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server) / Individual (WASM build)</p>
-<!-- TODO: Add screenshots, annotated code walkthrough -->
+<strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build) / Individual (WASM build)</p>
+<div class="buttons">
+<a href="demo.html" class="button is-primary">Launch Demo</a>
+<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx" class="button is-light">Source on Codeberg</a>
+</div>
+<div class="columns is-vcentered">
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../09_schematic.png" alt="Schematic page with HTMX partial updates">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">/ — schematic (HTMX-polled)</figcaption>
+</figure>
+</div>
+<div class="column is-narrow has-text-centered">
+<span style="font-size: 2rem; color: #999;">&rarr;</span>
+</div>
+<div class="column is-5">
+<figure class="image screenshot">
+<img src="../09_diagnostics.png" alt="Diagnostics page with HTMX partial updates">
+<figcaption class="has-text-centered has-text-grey is-size-7 mt-1">/diagnostics — counters & history</figcaption>
+</figure>
+</div>
+</div>
+<div class="annotation">
+<strong>What HTMX buys here:</strong> in 08, the whole page reloads every second — focus is lost, forms are reset, an in-flight POST may race the next refresh. In 09, only the results div is swapped via <code>hx-get="/fragment" hx-trigger="every 1s"</code>. The page chrome (navbar, buttons, forms) is stable; the schematic updates underneath.
+</div>
 <hr>
-<h2 id="why-htmx">Why HTMX?</h2>
-<!-- TODO: The polling limitation — forms reset, clicks interrupted -->
+<h2 id="the-page--fragment-pair">The page + fragment pair</h2>
+<p>Each route has two endpoints: a full page that mounts the HTMX wiring, and a fragment endpoint that returns just the inner HTML.</p>
+<pre><code>GET /                     → full page, hx-get=&quot;/fragment&quot;
+GET /fragment             → just the schematic HTML
+
+GET /diagnostics          → full page, hx-get=&quot;/fragment/diagnostics&quot;
+GET /fragment/diagnostics → just the diagnostics HTML
+</code></pre>
+<pre><code class="language-html">&lt;div id=&quot;results&quot;
+     hx-get=&quot;/fragment&quot;
+     hx-trigger=&quot;every 1s&quot;
+     hx-swap=&quot;innerHTML&quot;&gt;
+  {{.results}}
+&lt;/div&gt;
+</code></pre>
+<p>The first render fills <code>{{.results}}</code> from the controller; HTMX takes over from there.</p>
 <hr>
-<h2 id="fragment-endpoints">Fragment endpoints</h2>
-<!-- TODO: hx-get, hx-trigger, renderAndCapture mutex -->
+<h2 id="concurrency-renderandcapture">Concurrency: <code>renderAndCapture</code></h2>
+<p><code>lofigui.Print</code>, <code>Reset</code>, and <code>Buffer</code> all touch a shared global. Multiple HTMX clients hitting <code>/fragment</code> concurrently would interleave their writes. A small mutex around reset+render+capture keeps each request's output isolated:</p>
+<pre><code class="language-go">var renderMu sync.Mutex
+
+func renderAndCapture(fn func()) string {
+    renderMu.Lock(); defer renderMu.Unlock()
+    lofigui.Reset()
+    fn()
+    return lofigui.Buffer()
+}
+</code></pre>
+<p>Each fragment endpoint calls <code>renderAndCapture(func() { renderSchematic(sim) })</code> and writes the captured string to the response.</p>
+<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx">Source on Codeberg</a></p>
 <hr>
-<h2 id="controller-without-app">Controller without App</h2>
-<!-- TODO: No App needed, ctrl.RenderTemplate directly -->
-<hr>
-<h2 id="links">Links</h2>
-<ul>
-<li><a href="demo.html">Launch Demo</a></li>
-<li><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx">Source on Codeberg</a></li>
-</ul>
+<h2 id="running">Running</h2>
+<pre><code class="language-bash">task go-example:09         # server on :1349
+task docs:capture:09       # capture the two screenshots above
+</code></pre>
 
             </div>
         </div>

@@ -8,11 +8,12 @@ import (
 	"net/http"
 
 	"codeberg.org/hum3/lofigui"
+	"codeberg.org/hum3/lofigui/widgets/watertank"
 )
 
 // render writes the SVG schematic and controls into the lofigui buffer.
 func (s *Simulation) render() {
-	lofigui.HTML(s.buildSVG())
+	lofigui.HTML(watertank.Render(s.Snapshot()))
 
 	s.mu.Lock()
 	level := s.tankLevel
