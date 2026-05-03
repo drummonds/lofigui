@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"codeberg.org/hum3/lofigui"
+	"codeberg.org/hum3/lofigui/widgets/watertank"
 )
 
 var sim = &Simulation{pumpOn: true}
 
 func goRenderSchematic(this js.Value, args []js.Value) any {
 	lofigui.Reset()
-	lofigui.HTML(sim.buildSVG())
+	lofigui.HTML(watertank.Render(sim.Snapshot()))
 
 	sim.mu.Lock()
 	level := sim.tankLevel

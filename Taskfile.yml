@@ -225,58 +225,69 @@ tasks:
     dir: examples/01_hello_world/go
     cmds:
       - |
-        LOFIGUI_HOLD=1 go run . &
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
         SERVER_PID=$!
-        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        # Detect the port the server actually bound to (lofigui falls back to
+        # the next port if the requested one is busy).
         for i in $(seq 1 30); do
-          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
           sleep 0.5
         done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
         # First curl triggered model — wait for partial progress
         sleep 2
-        url2svg --url http://localhost:1340 -o ../../../docs/01_polling.svg
+        url2svg --url "$URL" -o ../../../docs/01_polling.svg
         # Wait for model completion (~5s loop + margin)
         sleep 5
-        url2svg --url http://localhost:1340 -o ../../../docs/01_complete.svg
+        url2svg --url "$URL" -o ../../../docs/01_complete.svg
 
   docs:capture:02:
     desc: Capture screenshots for example 02 documentation
     dir: examples/02_svg_graph/go
     cmds:
       - |
-        LOFIGUI_HOLD=1 go run . &
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
         SERVER_PID=$!
-        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
         for i in $(seq 1 30); do
-          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
           sleep 0.5
         done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
         # First curl triggered model — wait for partway through the showcase
         sleep 6
-        url2svg --url http://localhost:1340 -o ../../../docs/02_polling.svg
+        url2svg --url "$URL" -o ../../../docs/02_polling.svg
         # Showcase runs ~16s total — wait for completion
         sleep 14
-        url2svg --url http://localhost:1340 -o ../../../docs/02_complete.svg
+        url2svg --url "$URL" -o ../../../docs/02_complete.svg
 
   docs:capture:03:
     desc: Capture screenshots for example 03 documentation
     dir: examples/03_style_sampler/go
     cmds:
       - |
-        go run . &
+        LOG=$(mktemp); go run . >"$LOG" 2>&1 &
         SERVER_PID=$!
-        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
         for i in $(seq 1 30); do
-          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
           sleep 0.5
         done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
         # Stopped state — navbar shows "Stopped" + Start button, no output yet
-        url2svg --url http://localhost:1340/style/scrolling -o ../../../docs/03_stopped.svg
+        url2svg --url "$URL/style/scrolling" -o ../../../docs/03_stopped.svg
         # Kick off the model, returning to the scrolling page
-        curl -sf -o /dev/null "http://localhost:1340/start?from=%2Fstyle%2Fscrolling"
+        curl -sf -o /dev/null "$URL/start?from=%2Fstyle%2Fscrolling"
         # Running state — wait for partial output (~2s into a 5s loop)
         sleep 2
-        url2svg --url http://localhost:1340/style/scrolling -o ../../../docs/03_running.svg
+        url2svg --url "$URL/style/scrolling" -o ../../../docs/03_running.svg
 
   docs:capture:05:
     desc: Capture screenshots for example 05 documentation
@@ -284,35 +295,41 @@ tasks:
     cmds:
       - |
         uv sync --no-install-project
-        uv run --no-project python demo_app.py &
+        LOG=$(mktemp); uv run --no-project python demo_app.py >"$LOG" 2>&1 &
         SERVER_PID=$!
-        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        # uvicorn logs e.g. "Uvicorn running on http://0.0.0.0:8050"
         for i in $(seq 1 30); do
-          curl -sf http://localhost:8050/ > /dev/null 2>&1 && break
+          PORT=$(grep -oE '(://[^/[:space:]]+):[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
           sleep 0.5
         done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
         # Home page — feature cards + status panel
-        url2svg --url http://localhost:8050/ -o ../../../docs/05_home.svg
+        url2svg --url "$URL/" -o ../../../docs/05_home.svg
         # Data Tables page — same base.html, different mainpanel
-        url2svg --url http://localhost:8050/data -o ../../../docs/05_data.svg
+        url2svg --url "$URL/data" -o ../../../docs/05_data.svg
 
   docs:capture:06:
     desc: 'Capture screenshots for example 06 (CRUD via curl — also acts as integration test)'
-    deps: [clean-ports]
     dir: examples/06_notes_crud/go
     cmds:
       - |
         set -e
-        go run . &
+        LOG=$(mktemp); go run . >"$LOG" 2>&1 &
         SERVER_PID=$!
-        trap "kill $SERVER_PID 2>/dev/null" EXIT
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
         for i in $(seq 1 30); do
-          curl -sf http://localhost:1340/ > /dev/null 2>&1 && break
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
           sleep 0.5
         done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
 
         # ---- Initial state: three seeded notes, empty Create form ----
-        url2svg --url http://localhost:1340/ -o ../../../docs/06_initial.svg
+        url2svg --url "$URL/" -o ../../../docs/06_initial.svg
 
         # ---- CRUD test sequence (the capture is also the integration test) ----
         # Every POST must redirect with 303 See Other.
@@ -321,28 +338,28 @@ tasks:
           if [ "$code" != "303" ]; then echo "FAIL: expected 303, got $code for $*" >&2; exit 1; fi
         }
         # Create two notes
-        check_303 -X POST -d 'note_text=Buy milk and eggs' http://localhost:1340/create
-        check_303 -X POST -d 'note_text=Pay electricity bill' http://localhost:1340/create
+        check_303 -X POST -d 'note_text=Buy milk and eggs' "$URL/create"
+        check_303 -X POST -d 'note_text=Pay electricity bill' "$URL/create"
         # Delete the third seed
-        check_303 -X POST http://localhost:1340/notes/3/delete
+        check_303 -X POST "$URL/notes/3/delete"
         # Update note 2 (last action — its flash is what the populated screenshot will show)
-        check_303 -X POST --data-urlencode 'new_text=Add, edit, and delete notes — and now WASM!' http://localhost:1340/notes/2/update
+        check_303 -X POST --data-urlencode 'new_text=Add, edit, and delete notes — and now WASM!' "$URL/notes/2/update"
 
         # Master view with the "Updated note #2" flash visible
-        url2svg --url http://localhost:1340/ -o ../../../docs/06_populated.svg
+        url2svg --url "$URL/" -o ../../../docs/06_populated.svg
         # Detail page (the "Read" button target) for note 1
-        url2svg --url http://localhost:1340/notes/1 -o ../../../docs/06_detail.svg
+        url2svg --url "$URL/notes/1" -o ../../../docs/06_detail.svg
 
         # ---- Validation tests (4 KiB cap + non-existent ID) ----
         # Oversized note must be rejected, redirected, and flash a danger notification.
         # POSIX way to build a 4097-byte string of 'x' (printf '%.0s' is bash-only).
         big=$(head -c 4097 /dev/zero | tr '\0' x)
-        check_303 -X POST --data-urlencode "note_text=${big}" http://localhost:1340/create
-        curl -sf http://localhost:1340/ | grep -q "maximum is 4096" \
+        check_303 -X POST --data-urlencode "note_text=${big}" "$URL/create"
+        curl -sf "$URL/" | grep -q "maximum is 4096" \
           || { echo "FAIL: oversized note flash missing" >&2; exit 1; }
         # Non-existent delete is a no-op + flash
-        check_303 -X POST http://localhost:1340/notes/9999/delete
-        curl -sf http://localhost:1340/ | grep -q "note #9999 not found" \
+        check_303 -X POST "$URL/notes/9999/delete"
+        curl -sf "$URL/" | grep -q "note #9999 not found" \
           || { echo "FAIL: not-found flash missing" >&2; exit 1; }
 
         # Sanity: the populated SVG must contain proof the CRUD ran
@@ -355,6 +372,99 @@ tasks:
           || { echo "FAIL: note 1 text missing from 06_detail.svg" >&2; exit 1; }
         echo "06 CRUD test sequence passed"
 
+  docs:capture:07:
+    desc: Capture screenshots for example 07 documentation
+    dir: examples/07_water_tank/go
+    cmds:
+      - |
+        # url2svg breaks on the inline schematic SVG (renders nested <image>
+        # elements as Chrome's broken-image placeholder). Use Chrome PNG
+        # capture instead — the live page renders correctly.
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        for i in $(seq 1 30); do
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
+          sleep 0.5
+        done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
+        # Stopped state — sim not yet running, level=0, pump=on (default)
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,720 --screenshot=../../../docs/07_stopped.png "$URL/"
+        # Start the simulation, wait for level to mid-fill (~30%)
+        curl -sf -X POST "$URL/start" > /dev/null
+        sleep 5
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,720 --screenshot=../../../docs/07_running.png "$URL/"
+
+  docs:capture:08:
+    desc: Capture screenshots for example 08 documentation
+    dir: examples/08_water_tank_multi/go
+    cmds:
+      - |
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        for i in $(seq 1 30); do
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
+          sleep 0.5
+        done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
+        # Schematic view (running with mid-fill water)
+        curl -sf -X POST "$URL/start" > /dev/null
+        sleep 5
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,720 --screenshot=../../../docs/08_schematic.png "$URL/"
+        # Diagnostics view (after some accumulated runtime)
+        sleep 5
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,900 --screenshot=../../../docs/08_diagnostics.png "$URL/diagnostics"
+
+  docs:capture:09:
+    desc: Capture screenshots for example 09 documentation
+    dir: examples/09_water_tank_htmx/go
+    cmds:
+      - |
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        for i in $(seq 1 30); do
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
+          sleep 0.5
+        done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
+        curl -sf -X POST "$URL/start" > /dev/null
+        sleep 5
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,720 --screenshot=../../../docs/09_schematic.png "$URL/"
+        sleep 5
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,900 --screenshot=../../../docs/09_diagnostics.png "$URL/diagnostics"
+
+  docs:capture:10:
+    desc: Capture screenshots for example 10 documentation
+    dir: examples/10_water_tank_maintenance/go
+    cmds:
+      - |
+        LOG=$(mktemp); LOFIGUI_HOLD=1 go run . >"$LOG" 2>&1 &
+        SERVER_PID=$!
+        trap "kill $SERVER_PID 2>/dev/null; rm -f $LOG" EXIT
+        for i in $(seq 1 30); do
+          PORT=$(grep -oE 'http://localhost:[0-9]+' "$LOG" | head -1 | grep -oE '[0-9]+$' || true)
+          if [ -n "$PORT" ] && curl -sf "http://localhost:$PORT/" > /dev/null 2>&1; then break; fi
+          sleep 0.5
+        done
+        [ -n "$PORT" ] || { echo "FAIL: server did not start (log: $(cat $LOG))" >&2; exit 1; }
+        URL="http://localhost:$PORT"
+        # Idle state — running simulation, no maintenance op
+        curl -sf -X POST "$URL/start" > /dev/null
+        sleep 4
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,820 --screenshot=../../../docs/10_idle.png "$URL/"
+        # Maintenance running — kicks off a pump maintenance op (mid-progress)
+        curl -sf -X POST "$URL/maintenance/pump" > /dev/null
+        sleep 3
+        google-chrome --headless --disable-gpu --no-sandbox --hide-scrollbars --window-size=1024,820 --screenshot=../../../docs/10_maintenance.png "$URL/"
+
   docs:capture:
     desc: Capture all example screenshots
     cmds:
@@ -363,6 +473,10 @@ tasks:
       - task: docs:capture:03
       - task: docs:capture:05
       - task: docs:capture:06
+      - task: docs:capture:07
+      - task: docs:capture:08
+      - task: docs:capture:09
+      - task: docs:capture:10
 
   docs:open:01:
     desc: Start example 01 in HOLD mode for manual inspection
@@ -372,42 +486,43 @@ tasks:
       - LOFIGUI_HOLD=1 go run .
 
   docs:build:
-    desc: Build documentation (markdown to HTML)
+    desc: 'Build documentation (markdown to HTML — `tp md2html` skips files whose source is older than the output; pass --rebuild to force)'
     cmds:
       # Vendored Bulma lives at repo root for go:embed; mirror into docs/assets for the static site.
       - mkdir -p docs/assets
-      - cp bulma.min.css docs/assets/bulma.min.css
-      - task-plus md2html --file README.md --dst docs
-      - task-plus md2html --file CHANGELOG.md --dst docs
-      - task-plus md2html --file ROADMAP.md --dst docs
-      - task-plus md2html --file RESEARCH.md --dst docs
-      - task-plus md2html --file docs/research-philosophy.md --dst docs
-      - task-plus md2html --file docs/research-charts.md --dst docs
-      - task-plus md2html --file docs/research-layouts.md --dst docs
-      - task-plus md2html --file docs/research-technical.md --dst docs
-      - task-plus md2html --file docs/research-python.md --dst docs
-      - task-plus md2html --file docs/research-wasm-service-workers.md --dst docs
-      - task-plus md2html --file docs/research-wasm-external-apis.md --dst docs
-      - task-plus md2html --file docs/research-wasm-tinygo.md --dst docs
-      - task-plus md2html --file docs/recipes.md --dst docs
-      - task-plus md2html --file docs/examples.md --dst docs
-      - task-plus md2html --file docs/index.md --dst docs
-      # Example documentation pages (from examples/NN_name/docs.md)
-      - task-plus md2html --file examples/01_hello_world/index.md --dst docs/01_hello_world
-      - task-plus md2html --file examples/01a_hello_world_explicit/index.md --dst docs/01a_hello_world_explicit
-      - task-plus md2html --file examples/01b_hello_world_explicit_gzip/index.md --dst docs/01b_hello_world_explicit_gzip
-      - task-plus md2html --file examples/02_svg_graph/index.md --dst docs/02_svg_graph
-      - task-plus md2html --file examples/03_style_sampler/index.md --dst docs/03_style_sampler
-      - task-plus md2html --file examples/05_demo_app/index.md --dst docs/05_demo_app
-      - task-plus md2html --file examples/06_notes_crud/index.md --dst docs/06_notes_crud
-      - task-plus md2html --file examples/07_water_tank/index.md --dst docs/07_water_tank
-      - task-plus md2html --file examples/08_water_tank_multi/index.md --dst docs/08_water_tank_multi
-      - task-plus md2html --file examples/09_water_tank_htmx/index.md --dst docs/09_water_tank_htmx
-      - task-plus md2html --file examples/10_water_tank_maintenance/index.md --dst docs/10_water_tank_maintenance
-      - task-plus md2html --file examples/11_water_tank_storage/index.md --dst docs/11_water_tank_storage
-      - task-plus md2html --file examples/12_batch_yield/index.md --dst docs/12_batch_yield
+      - cp -u bulma.min.css docs/assets/bulma.min.css
+      - tp md2html --file README.md --dst docs
+      - tp md2html --file CHANGELOG.md --dst docs
+      - tp md2html --file ROADMAP.md --dst docs
+      - tp md2html --file RESEARCH.md --dst docs
+      - tp md2html --file docs/research-philosophy.md --dst docs
+      - tp md2html --file docs/research-charts.md --dst docs
+      - tp md2html --file docs/research-layouts.md --dst docs
+      - tp md2html --file docs/research-technical.md --dst docs
+      - tp md2html --file docs/research-python.md --dst docs
+      - tp md2html --file docs/research-wasm-service-workers.md --dst docs
+      - tp md2html --file docs/research-wasm-external-apis.md --dst docs
+      - tp md2html --file docs/research-wasm-tinygo.md --dst docs
+      - tp md2html --file docs/recipes.md --dst docs
+      - tp md2html --file docs/examples.md --dst docs
+      - tp md2html --file docs/index.md --dst docs
+      # Example documentation pages (from examples/NN_name/index.md)
+      - tp md2html --file examples/01_hello_world/index.md --dst docs/01_hello_world
+      - tp md2html --file examples/01a_hello_world_explicit/index.md --dst docs/01a_hello_world_explicit
+      - tp md2html --file examples/01b_hello_world_explicit_gzip/index.md --dst docs/01b_hello_world_explicit_gzip
+      - tp md2html --file examples/02_svg_graph/index.md --dst docs/02_svg_graph
+      - tp md2html --file examples/03_style_sampler/index.md --dst docs/03_style_sampler
+      - tp md2html --file examples/05_demo_app/index.md --dst docs/05_demo_app
+      - tp md2html --file examples/06_notes_crud/index.md --dst docs/06_notes_crud
+      - tp md2html --file examples/07_water_tank/index.md --dst docs/07_water_tank
+      - tp md2html --file examples/08_water_tank_multi/index.md --dst docs/08_water_tank_multi
+      - tp md2html --file examples/09_water_tank_htmx/index.md --dst docs/09_water_tank_htmx
+      - tp md2html --file examples/10_water_tank_maintenance/index.md --dst docs/10_water_tank_maintenance
+      - tp md2html --file examples/11_water_tank_storage/index.md --dst docs/11_water_tank_storage
+      - tp md2html --file examples/12_batch_yield/index.md --dst docs/12_batch_yield
       # Fix breadcrumb/navbar links for nested example pages (md2html generates same-dir links)
-      # and rewrite CDN Bulma link to the vendored local copy at docs/assets/bulma.min.css
+      # and rewrite CDN Bulma link to the vendored local copy at docs/assets/bulma.min.css.
+      # sed is idempotent so running on already-fixed files is a no-op.
       - |
         for f in docs/*/index.html docs/*.html; do
           [ -f "$f" ] || continue

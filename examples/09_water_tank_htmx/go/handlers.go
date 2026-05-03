@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"codeberg.org/hum3/lofigui"
+	"codeberg.org/hum3/lofigui/widgets/watertank"
 )
 
 const htmxLayout = `<!DOCTYPE html>
@@ -63,7 +64,7 @@ func renderAndCapture(fn func()) string {
 
 // renderSchematic writes the SVG schematic and controls into the lofigui buffer.
 func renderSchematic(sim *Simulation) {
-	lofigui.HTML(sim.buildSVG())
+	lofigui.HTML(watertank.Render(sim.Snapshot()))
 
 	sim.mu.Lock()
 	level := sim.tankLevel
