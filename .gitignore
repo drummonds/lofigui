@@ -140,6 +140,22 @@ poetry.lock
 # Generated WASM build artifacts
 docs/**/*.wasm.gz
 
+# Compiled example binaries — `go build .` in examples/NN_name/go/ outputs a
+# binary whose filename matches the example directory.
+examples/01_hello_world/go/01_hello_world
+examples/01a_hello_world_explicit/go/01a_hello_world_explicit
+examples/01b_hello_world_explicit_gzip/go/01b_hello_world_explicit_gzip
+examples/02_svg_graph/go/02_svg_graph
+examples/03_style_sampler/go/03_style_sampler
+examples/06_notes_crud/go/06_notes_crud
+examples/07_water_tank/go/07_water_tank
+examples/08_water_tank_multi/go/08_water_tank_multi
+examples/09_water_tank_htmx/go/09_water_tank_htmx
+examples/10_water_tank_maintenance/go/10_water_tank_maintenance
+examples/11_seaweedfs/go/11_seaweedfs
+examples/11_water_tank_storage/go/11_water_tank_storage
+examples/12_batch_yield/go/12_batch_yield
+
 # Example 11 persistent data
 examples/11_water_tank_storage/go/data/
 .claude/settings.json
