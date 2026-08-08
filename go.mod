@@ -1,4 +1,4 @@
-module codeberg.org/hum3/lofigui
+module git.bytestone.uk/hum3/lofigui
 
 go 1.22
 

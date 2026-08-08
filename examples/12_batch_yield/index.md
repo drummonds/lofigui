@@ -18,4 +18,4 @@ Demonstrates cooperative scheduling with `lofigui.Yield()` for long-running comp
 ## Links
 
 - [Launch Demo](demo.html)
-- [Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/12_batch_yield)
+- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/12_batch_yield)

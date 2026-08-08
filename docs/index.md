@@ -50,7 +50,7 @@ A minimalist Go library for creating simple web-based GUIs. Some parts available
 
 ## Links
 
-- [pkg.go.dev](https://pkg.go.dev/codeberg.org/hum3/lofigui)
+- [pkg.go.dev](https://pkg.go.dev/git.bytestone.uk/hum3/lofigui)
 
 <!-- auto:links -->
 <!-- /auto:links -->

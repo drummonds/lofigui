@@ -18,7 +18,7 @@ Every page's navbar carries a **Start / Cancel** widget driven by the library â€
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/03_style_sampler" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -327,4 +327,4 @@ The WASM binary includes `html/template`, `net/http`, the embedded templates, `g
 ## Links
 
 - [Launch Demo](wasm_demo/)
-- [Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/03_style_sampler)
+- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/03_style_sampler)

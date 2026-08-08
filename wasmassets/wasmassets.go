@@ -18,7 +18,7 @@ import (
 	"text/template"
 	"time"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 //go:embed templates

@@ -14,7 +14,7 @@ Extends [09](../09_water_tank_htmx/) with long-running background maintenance go
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -36,7 +36,7 @@ Extends [09](../09_water_tank_htmx/) with long-running background maintenance go
 </div>
 
 <div class="annotation">
-<strong>What changed:</strong> the user clicked <em>Pump Maintenance</em>. A goroutine kicks off a multi-step procedure ("Inspecting impeller", …) that emits progress every second; the orange dashed ring on the pump and the "MAINT 38%" caption come from the shared <a href="https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank">watertank</a> widget reading <code>State.MaintType</code> / <code>State.MaintProgress</code>. The <em>Pump On</em> button is disabled (lockout); the float-switch stops auto-toggling the pump too.
+<strong>What changed:</strong> the user clicked <em>Pump Maintenance</em>. A goroutine kicks off a multi-step procedure ("Inspecting impeller", …) that emits progress every second; the orange dashed ring on the pump and the "MAINT 38%" caption come from the shared <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank">watertank</a> widget reading <code>State.MaintType</code> / <code>State.MaintProgress</code>. The <em>Pump On</em> button is disabled (lockout); the float-switch stops auto-toggling the pump too.
 </div>
 
 ---
@@ -88,7 +88,7 @@ Three independent `context.Context`s are at play:
 
 All three terminate cleanly via `select { case <-ctx.Done(): ... }`. There's no shared "I'm done" flag; the context tree is the single source of truth.
 
-[Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance)
+[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance)
 
 ---
 

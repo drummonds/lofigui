@@ -1,9 +1,9 @@
-module codeberg.org/hum3/lofigui/examples/03_style_sampler
+module git.bytestone.uk/hum3/lofigui/examples/03_style_sampler
 
 go 1.25
 
 require (
-	codeberg.org/hum3/lofigui v0.17.33
+	git.bytestone.uk/hum3/lofigui v0.17.33
 	github.com/nlepage/go-wasm-http-server/v2 v2.2.1
 )
 
@@ -13,4 +13,4 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 )
 
-replace codeberg.org/hum3/lofigui => ../../..
+replace git.bytestone.uk/hum3/lofigui => ../../..

@@ -35,7 +35,7 @@ package main
 
 import (
     "net/http"
-    "codeberg.org/hum3/lofigui"
+    "git.bytestone.uk/hum3/lofigui"
 )
 
 func model(app *lofigui.App) {
@@ -77,7 +77,7 @@ In order to decouple the display from the output and be able to refresh, you nee
 ## Installation
 
 ```bash
-go get codeberg.org/hum3/lofigui
+go get git.bytestone.uk/hum3/lofigui
 ```
 
 ## Examples & Documentation
@@ -118,6 +118,6 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 |---|---|
 | Documentation | https://h3-lofigui.statichost.page/ |
 | PyPI | https://pypi.org/project/lofigui/ |
-| Source (Codeberg) | https://codeberg.org/hum3/lofigui |
+| Source (Codeberg) | https://git.bytestone.uk/hum3/lofigui |
 | Mirror (GitHub) | https://github.com/drummonds/lofigui |
 <!-- /auto:links -->

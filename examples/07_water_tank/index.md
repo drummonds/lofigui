@@ -14,7 +14,7 @@ A real-time SCADA-style dashboard with a simulated water tank. The model is a ba
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -63,7 +63,7 @@ Each tick adds 3 if the pump is on, subtracts 1 if the valve is open, and trips 
 
 ## Schematic — shared widget
 
-The SVG is rendered by [`watertank.Render(state)`](https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank), shared across examples 07–11. The example's only schematic-related code is `Snapshot()`, which copies the simulation state into a `watertank.State`:
+The SVG is rendered by [`watertank.Render(state)`](https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank), shared across examples 07–11. The example's only schematic-related code is `Snapshot()`, which copies the simulation state into a `watertank.State`:
 
 ```go
 func (s *Simulation) Snapshot() watertank.State {
@@ -97,7 +97,7 @@ func main() {
 }
 ```
 
-[Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/07_water_tank)
+[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank)
 
 ---
 

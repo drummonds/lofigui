@@ -16,7 +16,7 @@ Each POST handler mutates the notes map, stashes a one-shot **flash message** de
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -42,7 +42,7 @@ Each POST handler mutates the notes map, stashes a one-shot **flash message** de
 <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Detail view (the "Read" button target) — full text, no truncation</figcaption>
 </figure>
 
-<p class="has-text-grey is-size-7 has-text-centered">All three captures are produced by <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml"><code>task docs:capture:06</code></a>, which drives the server with a sequence of <code>curl</code> POSTs. The capture asserts every POST returns <code>303 See Other</code>, the validation cases (oversized text, non-existent ID) flash the right error, and the rendered SVGs contain the expected note text — the screenshots double as an integration test.</p>
+<p class="has-text-grey is-size-7 has-text-centered">All three captures are produced by <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/Taskfile.yml"><code>task docs:capture:06</code></a>, which drives the server with a sequence of <code>curl</code> POSTs. The capture asserts every POST returns <code>303 See Other</code>, the validation cases (oversized text, non-existent ID) flash the right error, and the rendered SVGs contain the expected note text — the screenshots double as an integration test.</p>
 
 ---
 
@@ -277,7 +277,7 @@ package main
 import (
     "strings"
 
-    "codeberg.org/hum3/lofigui"
+    "git.bytestone.uk/hum3/lofigui"
     wasmhttp "github.com/nlepage/go-wasm-http-server/v2"
 )
 
@@ -385,4 +385,4 @@ task docs:capture:06     # capture all three SVGs and run the integration test
 ## Links
 
 - [Launch Demo](wasm_demo/)
-- [Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud)
+- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud)

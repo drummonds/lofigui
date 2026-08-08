@@ -7,7 +7,7 @@
 - Direct rendering with custom context — no `App` lifecycle
 - Hot template reload during development
 
-For the API reference, see [pkg.go.dev](https://pkg.go.dev/codeberg.org/hum3/lofigui) or `controller.go` directly. For the bigger architecture picture (App, buffer, Print, examples), see [`CLAUDE.md`](./CLAUDE.md). This file documents the extension patterns that aren't obvious from the godoc.
+For the API reference, see [pkg.go.dev](https://pkg.go.dev/git.bytestone.uk/hum3/lofigui) or `controller.go` directly. For the bigger architecture picture (App, buffer, Print, examples), see [`CLAUDE.md`](./CLAUDE.md). This file documents the extension patterns that aren't obvious from the godoc.
 
 ## Constructors
 

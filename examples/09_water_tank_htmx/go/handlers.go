@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"codeberg.org/hum3/lofigui"
-	"codeberg.org/hum3/lofigui/widgets/watertank"
+	"git.bytestone.uk/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui/widgets/watertank"
 )
 
 const htmxLayout = `<!DOCTYPE html>

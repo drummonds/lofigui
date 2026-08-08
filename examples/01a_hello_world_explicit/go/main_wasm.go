@@ -7,7 +7,7 @@ import (
 
 	wasmhttp "github.com/nlepage/go-wasm-http-server/v2"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 func main() {

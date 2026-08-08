@@ -16,7 +16,7 @@ A scrolling demonstration of every output type lofigui supports. The model runs 
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -283,7 +283,7 @@ func model(app *lofigui.App) {
 <strong>Scrolling output</strong> — because the buffer is append-only, each refresh shows everything printed so far. The user sees the page grow as new sections appear — like a terminal session rendered as styled HTML.
 </div>
 
-[model.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/model.go)
+[model.go source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/model.go)
 
 ---
 
@@ -297,7 +297,7 @@ lofigui.HTML(pieChartSVG(slices, "Title"))
 ```
 
 <div class="annotation">
-<strong>These are demo mocks.</strong> They illustrate that any SVG string can be streamed into the buffer via <code>lofigui.HTML()</code>, but they skip the things a real charting library handles — proper axes, tick spacing, legends, theming, time-series scales. For production use, reach for <a href="https://codeberg.org/hum3/gogal">gogal</a>, which the live line chart in <code>sectionStaticCharts</code> already uses:
+<strong>These are demo mocks.</strong> They illustrate that any SVG string can be streamed into the buffer via <code>lofigui.HTML()</code>, but they skip the things a real charting library handles — proper axes, tick spacing, legends, theming, time-series scales. For production use, reach for <a href="https://git.bytestone.uk/hum3/gogal">gogal</a>, which the live line chart in <code>sectionStaticCharts</code> already uses:
 </div>
 
 ```go
@@ -326,7 +326,7 @@ for _, n := range []int{2, 4, 6, 8, 10} {
 <strong>Updating by re-printing</strong> — each iteration appends a new chart below the previous one. The user sees the chart "grow" through the sequence. No DOM manipulation, no JavaScript — just print and refresh.
 </div>
 
-[charts.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/charts.go)
+[charts.go source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/charts.go)
 
 ---
 
@@ -342,7 +342,7 @@ func main() {
 }
 ```
 
-[main.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main.go)
+[main.go source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main.go)
 
 ---
 
@@ -364,7 +364,7 @@ The same model compiles to WebAssembly with no changes — and, like example 01,
 
 package main
 
-import "codeberg.org/hum3/lofigui"
+import "git.bytestone.uk/hum3/lofigui"
 
 func main() {
     app := lofigui.NewApp()
@@ -377,4 +377,4 @@ func main() {
 <a href="wasm_demo/" class="button is-primary is-small">Go WASM Demo</a>
 </div>
 
-[main_wasm.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go)
+[main_wasm.go source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go)

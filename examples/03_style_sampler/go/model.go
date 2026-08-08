@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 // templateFS ships every page layout with the binary — usable both from the

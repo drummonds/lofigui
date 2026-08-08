@@ -60,7 +60,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build) / Individual (WASM build — each browser runs its own maintenance ops)</p>
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -80,7 +80,7 @@
 </div>
 </div>
 <div class="annotation">
-<strong>What changed:</strong> the user clicked <em>Pump Maintenance</em>. A goroutine kicks off a multi-step procedure ("Inspecting impeller", …) that emits progress every second; the orange dashed ring on the pump and the "MAINT 38%" caption come from the shared <a href="https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank">watertank</a> widget reading <code>State.MaintType</code> / <code>State.MaintProgress</code>. The <em>Pump On</em> button is disabled (lockout); the float-switch stops auto-toggling the pump too.
+<strong>What changed:</strong> the user clicked <em>Pump Maintenance</em>. A goroutine kicks off a multi-step procedure ("Inspecting impeller", …) that emits progress every second; the orange dashed ring on the pump and the "MAINT 38%" caption come from the shared <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank">watertank</a> widget reading <code>State.MaintType</code> / <code>State.MaintProgress</code>. The <em>Pump On</em> button is disabled (lockout); the float-switch stops auto-toggling the pump too.
 </div>
 <hr>
 <h2 id="the-maintenance-goroutine">The maintenance goroutine</h2>
@@ -118,7 +118,7 @@
 <li>The maintenance goroutine — cancelled by <code>CancelMaintenance()</code> or by stopping the simulation.</li>
 </ul>
 <p>All three terminate cleanly via <code>select { case &lt;-ctx.Done(): ... }</code>. There's no shared &quot;I'm done&quot; flag; the context tree is the single source of truth.</p>
-<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance">Source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance">Source on Codeberg</a></p>
 <hr>
 <h2 id="running">Running</h2>
 <pre><code class="language-bash">task go-example:10         # server on :1349

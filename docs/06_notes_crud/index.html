@@ -61,7 +61,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build — one shared notes map) / Individual (WASM build — each browser's SW has its own seeded notes)</p>
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -84,7 +84,7 @@
 <img src="../06_detail.svg" alt="Detail view of note 1 — full text in a box, Back / Edit / Delete buttons">
 <figcaption class="has-text-centered has-text-grey is-size-7 mt-1">Detail view (the "Read" button target) — full text, no truncation</figcaption>
 </figure>
-<p class="has-text-grey is-size-7 has-text-centered">All three captures are produced by <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml"><code>task docs:capture:06</code></a>, which drives the server with a sequence of <code>curl</code> POSTs. The capture asserts every POST returns <code>303 See Other</code>, the validation cases (oversized text, non-existent ID) flash the right error, and the rendered SVGs contain the expected note text — the screenshots double as an integration test.</p>
+<p class="has-text-grey is-size-7 has-text-centered">All three captures are produced by <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/Taskfile.yml"><code>task docs:capture:06</code></a>, which drives the server with a sequence of <code>curl</code> POSTs. The capture asserts every POST returns <code>303 See Other</code>, the validation cases (oversized text, non-existent ID) flash the right error, and the rendered SVGs contain the expected note text — the screenshots double as an integration test.</p>
 <hr>
 <h2 id="how-lofigui-helps-here">How lofigui helps here</h2>
 <p>Six things from the library are doing real work in this example:</p>
@@ -315,7 +315,7 @@ package main
 import (
     &quot;strings&quot;
 
-    &quot;codeberg.org/hum3/lofigui&quot;
+    &quot;git.bytestone.uk/hum3/lofigui&quot;
     wasmhttp &quot;github.com/nlepage/go-wasm-http-server/v2&quot;
 )
 
@@ -445,7 +445,7 @@ task docs:capture:06     # capture all three SVGs and run the integration test
 <h2 id="links">Links</h2>
 <ul>
 <li><a href="wasm_demo/">Launch Demo</a></li>
-<li><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/06_notes_crud">Source on Codeberg</a></li>
+<li><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud">Source on Codeberg</a></li>
 </ul>
 
             </div>

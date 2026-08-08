@@ -135,27 +135,27 @@ func testGoExampleModules(t *testing.T) {
 		{
 			name:       "01_hello_world",
 			path:       "examples/01_hello_world/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/01_hello_world",
+			moduleName: "git.bytestone.uk/hum3/lofigui/examples/01_hello_world",
 		},
 		{
 			name:       "02_svg_graph",
 			path:       "examples/02_svg_graph/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/02_svg_graph",
+			moduleName: "git.bytestone.uk/hum3/lofigui/examples/02_svg_graph",
 		},
 		{
 			name:       "03_style_sampler",
 			path:       "examples/03_style_sampler/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/03_style_sampler",
+			moduleName: "git.bytestone.uk/hum3/lofigui/examples/03_style_sampler",
 		},
 		{
 			name:       "06_notes_crud",
 			path:       "examples/06_notes_crud/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/06_notes_crud",
+			moduleName: "git.bytestone.uk/hum3/lofigui/examples/06_notes_crud",
 		},
 		{
 			name:       "08_water_tank_multi",
 			path:       "examples/08_water_tank_multi/go",
-			moduleName: "codeberg.org/hum3/lofigui/examples/08_water_tank_multi",
+			moduleName: "git.bytestone.uk/hum3/lofigui/examples/08_water_tank_multi",
 		},
 	}
 
@@ -179,11 +179,11 @@ func testGoExampleModules(t *testing.T) {
 				t.Errorf("go.mod does not contain expected module name %s", ex.moduleName)
 			}
 
-			if !strings.Contains(modContent, "codeberg.org/hum3/lofigui") {
+			if !strings.Contains(modContent, "git.bytestone.uk/hum3/lofigui") {
 				t.Errorf("go.mod does not require lofigui package")
 			}
 
-			if !strings.Contains(modContent, "replace codeberg.org/hum3/lofigui => ../../..") {
+			if !strings.Contains(modContent, "replace git.bytestone.uk/hum3/lofigui => ../../..") {
 				t.Errorf("go.mod does not have correct replace directive")
 			}
 		})
@@ -210,7 +210,7 @@ func testGoExampleHTTPHandlers(t *testing.T) {
 				t.Fatalf("Failed to list modules: %v\nOutput: %s", err, output)
 			}
 
-			if !strings.Contains(string(output), "codeberg.org/hum3/lofigui") {
+			if !strings.Contains(string(output), "git.bytestone.uk/hum3/lofigui") {
 				t.Error("Example does not properly import lofigui")
 			}
 		})

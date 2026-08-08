@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"codeberg.org/hum3/lofigui"
-	"codeberg.org/hum3/lofigui/widgets/watertank"
+	"git.bytestone.uk/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui/widgets/watertank"
 )
 
 // renderSchematic writes the SVG schematic and controls into the lofigui buffer.

@@ -62,7 +62,7 @@
 <a href="wasm_demo/" class="button is-primary">Launch 01 (compact)</a>
 <a href="../01a_hello_world_explicit/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01a (explicit)</a>
 <a href="../01b_hello_world_explicit_gzip/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01b (explicit + gzip)</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="annotation">
 <strong>Three variants of the same app:</strong> 01 uses the compact <code>app.RunWASM(model)</code> call — the library auto-generates the SW bootstrap so the example itself has no <code>templates/</code> directory. <a href="../01a_hello_world_explicit/">01a</a> is the same behaviour with every wire visible (explicit <code>setupRoutes()</code>, hand-written SW bootstrap). <a href="../01b_hello_world_explicit_gzip/">01b</a> adds gzipped WASM on top of 01a, showing the <code>DecompressionStream</code> + cache plumbing.
@@ -107,7 +107,7 @@ func model(app *lofigui.App) {
 <div class="annotation">
 <strong>StartAction / EndAction</strong> — <code>Handle</code> calls <code>StartAction()</code> before launching the model goroutine, which enables auto-refresh polling. When the model function returns, <code>Handle</code> calls <code>EndAction()</code> automatically — the browser stops refreshing and the output stays put.
 </div>
-<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go source on Codeberg</a></p>
 <hr>
 <h2 id="the-server--wiring-it-up">The server — wiring it up</h2>
 <p>Two lines: create an app, run the model.</p>
@@ -122,7 +122,7 @@ func model(app *lofigui.App) {
 <div class="annotation">
 <strong>Defaults</strong> — <code>NewApp()</code> provides a built-in template (Bulma-styled navbar with cancel button), 1-second refresh, and a <code>/favicon.ico</code> handler. Later examples unbundle <code>Run</code> into <code>Handle</code>, <code>HandleCancel</code>, and <code>ListenAndServe</code> when they need custom routes or multiple endpoints.
 </div>
-<p>The full source is split across two files: <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">main.go</a> (the server) and <a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go</a> (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single <code>main.go</code> is all you need.</p>
+<p>The full source is split across two files: <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go">main.go</a> (the server) and <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go">model.go</a> (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single <code>main.go</code> is all you need.</p>
 <hr>
 <h2 id="how-it-works">How it works</h2>
 <p>The browser hits <code>/</code>, the server starts the model and returns a page with a Refresh header. The browser reloads every second, showing new output as the model prints. When the model returns, polling stops and the server exits cleanly.</p>
@@ -147,7 +147,7 @@ http.HandleFunc(&quot;/cancel&quot;, app.HandleCancel(&quot;/&quot;))
 
 package main
 
-import &quot;codeberg.org/hum3/lofigui&quot;
+import &quot;git.bytestone.uk/hum3/lofigui&quot;
 
 func main() {
     app := lofigui.NewApp()
@@ -158,9 +158,9 @@ func main() {
 <strong>App.RunWASM</strong> is the service worker equivalent of <code>App.Run</code>. It registers the same routes (display, start, cancel, favicon) on an <code>http.ServeMux</code> and serves them via <a href="https://github.com/nlepage/go-wasm-http-server">go-wasm-http-server</a>. The browser page uses a service worker (<code>sw.js</code>) that loads the WASM binary and intercepts fetch events. No custom JavaScript polling — just standard HTTP.
 </div>
 <div class="annotation">
-<strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
+<strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
 </div>
-<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go">WASM source on Codeberg</a></p>
 <h3 id="gzipped-wasm">Gzipped WASM</h3>
 <p>Example 01 itself only ships the plain (~11 MB) WASM binary — the compact API accepts that trade for a one-line deployment. Projects that want a smaller download follow <a href="../01b_hello_world_explicit_gzip/">example 01b</a>, which layers <code>DecompressionStream</code> + a cached decompressed binary on top of 01a's explicit SW wiring. The decompression plumbing is visible enough that it's worth reading as its own tutorial rather than hidden behind a flag.</p>
 <h3 id="server-vs-wasm-lifecycle">Server vs WASM lifecycle</h3>

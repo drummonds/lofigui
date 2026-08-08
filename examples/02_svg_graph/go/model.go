@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/hum3/gogal"
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/gogal"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 // model demonstrates every output type lofigui supports.

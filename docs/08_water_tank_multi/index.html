@@ -60,7 +60,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build) / Individual (WASM build)</p>
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -80,7 +80,7 @@
 </div>
 </div>
 <div class="annotation">
-<strong>Same simulation, two views:</strong> the schematic page polls <code>/</code>, the diagnostics page polls <code>/diagnostics</code>. Both views read from the same shared <code>Simulation</code>. The schematic uses the shared <a href="https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank</code></a> widget; the diagnostics view is rendered straight to the buffer via <code>lofigui.Print</code>/<code>Table</code>.
+<strong>Same simulation, two views:</strong> the schematic page polls <code>/</code>, the diagnostics page polls <code>/diagnostics</code>. Both views read from the same shared <code>Simulation</code>. The schematic uses the shared <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank</code></a> widget; the diagnostics view is rendered straight to the buffer via <code>lofigui.Print</code>/<code>Table</code>.
 </div>
 <hr>
 <h2 id="diagnostics-counters">Diagnostics counters</h2>
@@ -103,7 +103,7 @@
 GET /diagnostics  → renderDiagnostics() → app.HandleDisplay(w, r)
 </code></pre>
 <p><code>app.HandleDisplay</code> writes a Refresh header pointing at <code>r.URL.Path</code>. Hitting <code>/diagnostics</code> keeps refreshing <code>/diagnostics</code>; hitting <code>/</code> keeps refreshing <code>/</code>. Add a third page and it just works.</p>
-<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/08_water_tank_multi">Source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi">Source on Codeberg</a></p>
 <hr>
 <h2 id="running">Running</h2>
 <pre><code class="language-bash">task go-example:08         # server on :1348

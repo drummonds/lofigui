@@ -16,7 +16,7 @@ If you can write a Go program that prints to stdout, you can write a lofigui app
 <a href="wasm_demo/" class="button is-primary">Launch 01 (compact)</a>
 <a href="../01a_hello_world_explicit/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01a (explicit)</a>
 <a href="../01b_hello_world_explicit_gzip/wasm_demo/sw/" class="button is-primary is-outlined">Launch 01b (explicit + gzip)</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="annotation">
@@ -72,7 +72,7 @@ func model(app *lofigui.App) {
 <strong>StartAction / EndAction</strong> — <code>Handle</code> calls <code>StartAction()</code> before launching the model goroutine, which enables auto-refresh polling. When the model function returns, <code>Handle</code> calls <code>EndAction()</code> automatically — the browser stops refreshing and the output stays put.
 </div>
 
-[model.go source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go)
+[model.go source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go)
 
 ---
 
@@ -95,7 +95,7 @@ func main() {
 <strong>Defaults</strong> — <code>NewApp()</code> provides a built-in template (Bulma-styled navbar with cancel button), 1-second refresh, and a <code>/favicon.ico</code> handler. Later examples unbundle <code>Run</code> into <code>Handle</code>, <code>HandleCancel</code>, and <code>ListenAndServe</code> when they need custom routes or multiple endpoints.
 </div>
 
-The full source is split across two files: [main.go](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go) (the server) and [model.go](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go) (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single `main.go` is all you need.
+The full source is split across two files: [main.go](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main.go) (the server) and [model.go](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/model.go) (the application logic). The model is in its own file so it can be shared with the WASM build — if you don't need a WASM version, a single `main.go` is all you need.
 
 ---
 
@@ -137,7 +137,7 @@ Because the model lives in its own file (`model.go`), both the server and WASM b
 
 package main
 
-import "codeberg.org/hum3/lofigui"
+import "git.bytestone.uk/hum3/lofigui"
 
 func main() {
     app := lofigui.NewApp()
@@ -150,10 +150,10 @@ func main() {
 </div>
 
 <div class="annotation">
-<strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://codeberg.org/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
+<strong>Building:</strong> <code>GOOS=js GOARCH=wasm go build -o main.wasm .</code> produces the binary. Go provides <code>wasm_exec.js</code> as a loader. The <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/Taskfile.yml">Taskfile.yml</a> <code>docs:build-wasm</code> task automates this for all examples.
 </div>
 
-[WASM source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go)
+[WASM source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01_hello_world/go/main_wasm.go)
 
 ### Gzipped WASM
 

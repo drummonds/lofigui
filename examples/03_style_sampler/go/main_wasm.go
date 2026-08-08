@@ -5,7 +5,7 @@ package main
 import (
 	"strings"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 	wasmhttp "github.com/nlepage/go-wasm-http-server/v2"
 )
 

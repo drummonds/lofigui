@@ -19,7 +19,7 @@ Multi-page Python application built around **Jinja2 template inheritance**. Ever
 **[State scope](../research-philosophy.html#the-state-dimension):** Global (single FastAPI process — every browser sees the same accumulated buffer)
 
 <div class="buttons">
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/05_demo_app" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/05_demo_app" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -247,4 +247,4 @@ uv run --no-project python demo_app.py
 
 ## Links
 
-- [Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/05_demo_app)
+- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/05_demo_app)

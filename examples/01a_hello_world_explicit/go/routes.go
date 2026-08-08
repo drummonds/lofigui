@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"net/http"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 // helloTemplate is loaded from templates/hello.html via go:embed so the

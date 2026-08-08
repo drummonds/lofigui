@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 //go:embed templates

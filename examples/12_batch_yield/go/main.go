@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"time"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 const batchSize = 40

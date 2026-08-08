@@ -14,7 +14,7 @@ Same simulation as [07](../07_water_tank/), but with a second page (`/diagnostic
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -36,7 +36,7 @@ Same simulation as [07](../07_water_tank/), but with a second page (`/diagnostic
 </div>
 
 <div class="annotation">
-<strong>Same simulation, two views:</strong> the schematic page polls <code>/</code>, the diagnostics page polls <code>/diagnostics</code>. Both views read from the same shared <code>Simulation</code>. The schematic uses the shared <a href="https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank</code></a> widget; the diagnostics view is rendered straight to the buffer via <code>lofigui.Print</code>/<code>Table</code>.
+<strong>Same simulation, two views:</strong> the schematic page polls <code>/</code>, the diagnostics page polls <code>/diagnostics</code>. Both views read from the same shared <code>Simulation</code>. The schematic uses the shared <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank</code></a> widget; the diagnostics view is rendered straight to the buffer via <code>lofigui.Print</code>/<code>Table</code>.
 </div>
 
 ---
@@ -72,7 +72,7 @@ GET /diagnostics  → renderDiagnostics() → app.HandleDisplay(w, r)
 
 `app.HandleDisplay` writes a Refresh header pointing at `r.URL.Path`. Hitting `/diagnostics` keeps refreshing `/diagnostics`; hitting `/` keeps refreshing `/`. Add a third page and it just works.
 
-[Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/08_water_tank_multi)
+[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi)
 
 ---
 

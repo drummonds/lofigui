@@ -1,10 +1,10 @@
-module codeberg.org/hum3/lofigui/examples/02_svg_graph
+module git.bytestone.uk/hum3/lofigui/examples/02_svg_graph
 
 go 1.25
 
 require (
-	codeberg.org/hum3/gogal v0.1.3
-	codeberg.org/hum3/lofigui v0.17.33
+	git.bytestone.uk/hum3/gogal v0.1.3
+	git.bytestone.uk/hum3/lofigui v0.17.33
 )
 
 require (
@@ -14,4 +14,4 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 )
 
-replace codeberg.org/hum3/lofigui => ../../..
+replace git.bytestone.uk/hum3/lofigui => ../../..

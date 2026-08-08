@@ -14,7 +14,7 @@ The same multi-page tank as [08](../08_water_tank_multi/), upgraded from full-pa
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx" class="button is-light">Source on Codeberg</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -83,7 +83,7 @@ func renderAndCapture(fn func()) string {
 
 Each fragment endpoint calls `renderAndCapture(func() { renderSchematic(sim) })` and writes the captured string to the response.
 
-[Source on Codeberg](https://codeberg.org/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx)
+[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/09_water_tank_htmx)
 
 ---
 

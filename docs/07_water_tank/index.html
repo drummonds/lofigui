@@ -60,7 +60,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build — one shared simulation) / Individual (WASM build — each browser runs its own tank)</p>
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Codeberg</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -98,7 +98,7 @@
 <p>Each tick adds 3 if the pump is on, subtracts 1 if the valve is open, and trips the float switches at 5% and 95%. <code>Stop()</code> cancels the context; the goroutine exits cleanly.</p>
 <hr>
 <h2 id="schematic--shared-widget">Schematic — shared widget</h2>
-<p>The SVG is rendered by <a href="https://codeberg.org/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank.Render(state)</code></a>, shared across examples 07–11. The example's only schematic-related code is <code>Snapshot()</code>, which copies the simulation state into a <code>watertank.State</code>:</p>
+<p>The SVG is rendered by <a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/widgets/watertank"><code>watertank.Render(state)</code></a>, shared across examples 07–11. The example's only schematic-related code is <code>Snapshot()</code>, which copies the simulation state into a <code>watertank.State</code>:</p>
 <pre><code class="language-go">func (s *Simulation) Snapshot() watertank.State {
     s.mu.Lock(); defer s.mu.Unlock()
     return watertank.State{
@@ -123,7 +123,7 @@ func main() {
     log.Fatal(http.ListenAndServe(&quot;:1347&quot;, nil))
 }
 </code></pre>
-<p><a href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/07_water_tank">Source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank">Source on Codeberg</a></p>
 <hr>
 <h2 id="running">Running</h2>
 <pre><code class="language-bash">task go-example:07         # server on :1347

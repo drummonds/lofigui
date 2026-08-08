@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 // model contains the business logic — shared by server and WASM builds.

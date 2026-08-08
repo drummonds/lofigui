@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"codeberg.org/hum3/lofigui/widgets/watertank"
+	"git.bytestone.uk/hum3/lofigui/widgets/watertank"
 )
 
 // Simulation holds the water tank state.

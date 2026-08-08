@@ -3,7 +3,7 @@
 // Typical use inside a Taskfile build step:
 //
 //	GOOS=js GOARCH=wasm go build -o main.wasm .
-//	go run codeberg.org/hum3/lofigui/cmd/wasm-deploy \
+//	go run git.bytestone.uk/hum3/lofigui/cmd/wasm-deploy \
 //	    --dir=docs/NN_example/wasm_demo \
 //	    --wasm=main.wasm \
 //	    --title="NN — Example"
@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"codeberg.org/hum3/lofigui/wasmassets"
+	"git.bytestone.uk/hum3/lofigui/wasmassets"
 )
 
 func main() {

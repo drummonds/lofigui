@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"codeberg.org/hum3/lofigui"
+	"git.bytestone.uk/hum3/lofigui"
 )
 
 const htmxLayout = `<!DOCTYPE html>

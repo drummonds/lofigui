@@ -12,7 +12,7 @@ Same as [01a](../01a_hello_world_explicit/index.html) — explicit routes, hand-
 
 <div class="buttons">
 <a href="wasm_demo/sw/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://codeberg.org/hum3/lofigui/src/branch/main/examples/01b_hello_world_explicit_gzip" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01b_hello_world_explicit_gzip" class="button is-light">Source on Codeberg</a>
 </div>
 
 ---
