@@ -54,7 +54,7 @@ The favicon is embedded in the `lofigui` package:
 #### 1. Serve with net/http (Recommended)
 
 ```go
-import "github.com/drummonds/lofigui/go/lofigui"
+import "git.bytestone.uk/hum3/lofigui/go/lofigui"
 
 http.HandleFunc("/favicon.ico", lofigui.ServeFavicon)
 ```

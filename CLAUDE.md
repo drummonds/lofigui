@@ -149,7 +149,7 @@ from lofigui import get_favicon_response, get_favicon_html_tag, save_favicon_ico
 ### Output functions
 
 ```go
-import "github.com/drummonds/lofigui"
+import "git.bytestone.uk/hum3/lofigui"
 
 lofigui.Print("Hello world")                                       // <p>Hello world</p>
 lofigui.Print("inline", lofigui.WithEnd(""))                       // &nbsp;inline&nbsp;
@@ -423,7 +423,7 @@ import (
     "html/template"
     "net/http"
     "sync"
-    "github.com/drummonds/lofigui"
+    "git.bytestone.uk/hum3/lofigui"
 )
 
 // Template with HTMX: results div polls a fragment endpoint every 1s
