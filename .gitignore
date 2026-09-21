@@ -137,8 +137,20 @@ temp/
 # Note: examples should have their own poetry.lock
 poetry.lock
 
-# Generated WASM build artifacts
-docs/**/*.wasm.gz
+# Generated WASM demo outputs — produced by `task docs:build-wasm`, which
+# `tp pages` / `tp pages deploy` run before serving. Built at deploy time only;
+# the deployed docs site is the release channel for these binaries, so they are
+# never committed (keeps the repo small).
+docs/*/wasm_demo/
+docs/*/main.wasm
+docs/*/main.wasm.gz
+docs/*/wasm_exec.js
+docs/*/app.js
+docs/*/demo.html
+docs/*/demo-sw.html
+docs/*/sw.js
+examples/11_seaweedfs/go/templates/main.wasm
+examples/11_seaweedfs/go/templates/wasm_exec.js
 
 # Compiled example binaries — `go build .` in examples/NN_name/go/ outputs a
 # binary whose filename matches the example directory.
