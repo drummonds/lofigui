@@ -118,6 +118,6 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 |---|---|
 | Documentation | https://h3-lofigui.statichost.page/ |
 | PyPI | https://pypi.org/project/lofigui/ |
-| Source (Codeberg) | https://git.bytestone.uk/hum3/lofigui |
+| Source | https://git.bytestone.uk/hum3/lofigui |
 | Mirror (GitHub) | https://github.com/drummonds/lofigui |
 <!-- /auto:links -->

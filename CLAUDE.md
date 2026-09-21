@@ -67,7 +67,7 @@ lofigui/
 Each example has two separate locations under `docs/NN_name/`:
 
 - **`index.html`** — documentation page, rendered from `examples/NN_name/index.md` via `task-plus md2html`. Contains screenshots, annotated code walkthrough, explanation. **Never overwritten by `docs:build-wasm`.**
-- **`wasm_demo/`** — self-contained service-worker demo directory emitted by `go run ./cmd/wasm-deploy`. Contains the SW bootstrap (`index.html`), `sw.js`, `wasmhttp_sw.js`, `main.wasm`, `wasm_exec.js`, vendored `bulma.min.css`, and one or more recovery stubs (`demo.html`, `demo-gz.html`). The docs `index.html` links to `wasm_demo/` from its "Launch Demo" button.
+- **`wasm_demo/`** — self-contained service-worker demo directory emitted by `go run ./cmd/wasm-deploy`. Contains the SW bootstrap (`index.html`), `sw.js`, `wasmhttp_sw.js`, `main.wasm`, `wasm_exec.js`, vendored `bulma.min.css`, and one or more recovery stubs (`demo.html`, `demo-gz.html`). The docs `index.html` links to `wasm_demo/` from its "Launch Demo" button. **Generated WASM outputs are gitignored** — `tp pages` / `tp pages deploy` run `docs:build-wasm` before serving, so the deployed site is the release channel and binaries never land in git.
 
 See `docs/examples.md` for the full standard: required sections, CSS classes, build process, and interactivity spectrum mapping.
 
@@ -705,7 +705,7 @@ task go-example:09       # Water Tank HTMX (partial updates)
 task go-example:10       # Water Tank Maintenance (background operations)
 
 # WASM demos (via the docs static host) — served under docs/NN_*/wasm_demo/
-task docs:build-wasm     # Build all WASM binaries + stage into docs/
+task docs:build-wasm     # Build all WASM binaries + stage into docs/ (gitignored; tp pages runs this)
 tp pages                 # Serve docs/ on http://localhost:8080
 # Then visit (all served through the SW bootstrap):
 #   /01_hello_world/wasm_demo/                        (compact, App.RunWASM)

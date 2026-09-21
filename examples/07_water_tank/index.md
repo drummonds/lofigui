@@ -14,7 +14,7 @@ A real-time SCADA-style dashboard with a simulated water tank. The model is a ba
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank" class="button is-light">Source on Forgejo</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -97,7 +97,7 @@ func main() {
 }
 ```
 
-[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank)
+[Source on Forgejo](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/07_water_tank)
 
 ---
 

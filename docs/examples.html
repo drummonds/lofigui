@@ -116,7 +116,7 @@
     app.js                # WASM JavaScript glue
     hello.html            # Server-side template (if applicable)
   index.md                 # Documentation source (markdown)
-  README.md               # Brief description for browsing on Codeberg
+  README.md               # Brief description for browsing on Forgejo
 
 docs/NN_name/
   index.html              # Rendered from index.md — NEVER overwritten by build
@@ -137,7 +137,7 @@ One-paragraph introduction. What does this example demonstrate?
 Why would you start from this example?
 
 [Screenshots: polling state + complete state]
-[Buttons: Launch Demo | Source on Codeberg]
+[Buttons: Launch Demo | Source on Forgejo]
 
 ---
 
@@ -168,7 +168,7 @@ Build command: GOOS=js GOARCH=wasm go build -o main.wasm .
 
 ---
 
-[Footer: Back to docs | Source on Codeberg | pkg.go.dev]
+[Footer: Back to docs | Source on Forgejo | pkg.go.dev]
 </code></pre>
 <h3 id="styling-conventions">Styling conventions</h3>
 <p>The documentation page uses these custom elements (defined in shared CSS):</p>
@@ -284,7 +284,13 @@ loadWASM();
     # etc.
 </code></pre>
 <h3 id="docsbuild-wasm-compile--copy-assets">docs:build-wasm (compile + copy assets)</h3>
-<p>Builds WASM binaries and copies demo assets. Must <strong>not</strong> copy <code>index.html</code>:</p>
+<p>Builds WASM binaries and copies demo assets. Must <strong>not</strong> copy <code>index.html</code>.</p>
+<p>Everything this task writes (<code>wasm_demo/</code>, <code>main.wasm</code>, <code>main.wasm.gz</code>,
+<code>wasm_exec.js</code>, <code>app.js</code>, <code>demo.html</code>, <code>sw.js</code>) is <strong>gitignored</strong>. <code>tp pages</code>
+and <code>tp pages deploy</code> run <code>docs:build-wasm</code> before serving, so the deployed
+docs site is the release channel for the binaries and the git repo stays
+small. Only the hand-written sources under <code>examples/</code> and the rendered
+<code>index.html</code> pages are committed.</p>
 <pre><code class="language-yaml"># Per example:
 - mkdir -p docs/NN_name
 - cd examples/NN_name/go &amp;&amp; GOOS=js GOARCH=wasm go build -o main.wasm .

@@ -37,7 +37,7 @@ examples/NN_name/
     app.js                # WASM JavaScript glue
     hello.html            # Server-side template (if applicable)
   index.md                 # Documentation source (markdown)
-  README.md               # Brief description for browsing on Codeberg
+  README.md               # Brief description for browsing on Forgejo
 
 docs/NN_name/
   index.html              # Rendered from index.md — NEVER overwritten by build
@@ -65,7 +65,7 @@ One-paragraph introduction. What does this example demonstrate?
 Why would you start from this example?
 
 [Screenshots: polling state + complete state]
-[Buttons: Launch Demo | Source on Codeberg]
+[Buttons: Launch Demo | Source on Forgejo]
 
 ---
 
@@ -96,7 +96,7 @@ Build command: GOOS=js GOARCH=wasm go build -o main.wasm .
 
 ---
 
-[Footer: Back to docs | Source on Codeberg | pkg.go.dev]
+[Footer: Back to docs | Source on Forgejo | pkg.go.dev]
 ```
 
 ### Styling conventions
@@ -239,7 +239,14 @@ docs:build:
 
 ### docs:build-wasm (compile + copy assets)
 
-Builds WASM binaries and copies demo assets. Must **not** copy `index.html`:
+Builds WASM binaries and copies demo assets. Must **not** copy `index.html`.
+
+Everything this task writes (`wasm_demo/`, `main.wasm`, `main.wasm.gz`,
+`wasm_exec.js`, `app.js`, `demo.html`, `sw.js`) is **gitignored**. `tp pages`
+and `tp pages deploy` run `docs:build-wasm` before serving, so the deployed
+docs site is the release channel for the binaries and the git repo stays
+small. Only the hand-written sources under `examples/` and the rendered
+`index.html` pages are committed.
 
 ```yaml
 # Per example:

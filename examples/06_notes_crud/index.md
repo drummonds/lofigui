@@ -16,7 +16,7 @@ Each POST handler mutates the notes map, stashes a one-shot **flash message** de
 
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud" class="button is-light">Source on Forgejo</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -385,4 +385,4 @@ task docs:capture:06     # capture all three SVGs and run the integration test
 ## Links
 
 - [Launch Demo](wasm_demo/)
-- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud)
+- [Source on Forgejo](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/06_notes_crud)

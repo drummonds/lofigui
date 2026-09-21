@@ -6,6 +6,9 @@ pages_deploy:
     - site: h3-lofigui
       type: statichost
 remotes:
-    - origin
-    - github
+    - name: origin
+      forge: forgejo
+      token_env: BYTESTONE_FORGEJO_TOKEN
+    - name: github
+      forge: github
 retract_reviewed: v0.17.28

@@ -14,7 +14,7 @@ Extends [09](../09_water_tank_htmx/) with long-running background maintenance go
 
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance" class="button is-light">Source on Forgejo</a>
 </div>
 
 <div class="columns is-vcentered">
@@ -88,7 +88,7 @@ Three independent `context.Context`s are at play:
 
 All three terminate cleanly via `select { case <-ctx.Done(): ... }`. There's no shared "I'm done" flag; the context tree is the single source of truth.
 
-[Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance)
+[Source on Forgejo](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/10_water_tank_maintenance)
 
 ---
 

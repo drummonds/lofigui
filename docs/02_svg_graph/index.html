@@ -62,7 +62,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server) / Individual (WASM build, per-browser SW process)</p>
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph" class="button is-light">Source on Forgejo</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -297,7 +297,7 @@ lofigui.HTML(`&lt;p&gt;&lt;small&gt;small&lt;/small&gt;, &lt;ins&gt;ins&lt;/ins&
 <div class="annotation">
 <strong>Scrolling output</strong> — because the buffer is append-only, each refresh shows everything printed so far. The user sees the page grow as new sections appear — like a terminal session rendered as styled HTML.
 </div>
-<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/model.go">model.go source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/model.go">model.go source on Forgejo</a></p>
 <hr>
 <h2 id="svg-charts--hand-rolled-mocks-vs-a-real-library">SVG charts — hand-rolled mocks vs a real library</h2>
 <p><code>charts.go</code> ships two hand-rolled SVG helpers — bar and pie — so the example has zero charting dependencies:</p>
@@ -327,7 +327,7 @@ lofigui.HTML(svg)
 <div class="annotation">
 <strong>Updating by re-printing</strong> — each iteration appends a new chart below the previous one. The user sees the chart "grow" through the sequence. No DOM manipulation, no JavaScript — just print and refresh.
 </div>
-<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/charts.go">charts.go source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/charts.go">charts.go source on Forgejo</a></p>
 <hr>
 <h2 id="the-server">The server</h2>
 <p>Identical to example 01 — <code>Run</code> handles everything:</p>
@@ -337,7 +337,7 @@ lofigui.HTML(svg)
     app.Run(&quot;:1340&quot;, model)
 }
 </code></pre>
-<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main.go">main.go source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main.go">main.go source on Forgejo</a></p>
 <hr>
 <h2 id="running">Running</h2>
 <pre><code class="language-bash">task go-example:02        # Run the server
@@ -361,7 +361,7 @@ func main() {
 <div class="buttons">
 <a href="wasm_demo/" class="button is-primary is-small">Go WASM Demo</a>
 </div>
-<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go">main_wasm.go source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/02_svg_graph/go/main_wasm.go">main_wasm.go source on Forgejo</a></p>
 
             </div>
         </div>

@@ -12,7 +12,7 @@ Same model as [example 01](../01_hello_world/index.html), but with everything un
 
 <div class="buttons">
 <a href="wasm_demo/sw/" class="button is-primary">Launch Service Worker Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/01a_hello_world_explicit" class="button is-light">Source on Forgejo</a>
 </div>
 
 ---

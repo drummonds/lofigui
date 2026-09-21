@@ -18,4 +18,4 @@ WASM frontend with a Go API server and persistent state storage. The water tank 
 ## Links
 
 - [Launch Demo](demo.html)
-- [Source on Codeberg](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/11_water_tank_storage)
+- [Source on Forgejo](https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/11_water_tank_storage)

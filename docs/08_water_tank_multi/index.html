@@ -60,7 +60,7 @@
 <strong><a href="../research-philosophy.html#the-state-dimension">State scope</a>:</strong> Global (server build) / Individual (WASM build)</p>
 <div class="buttons">
 <a href="demo.html" class="button is-primary">Launch Demo</a>
-<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Codeberg</a>
+<a target="_blank" href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi" class="button is-light">Source on Forgejo</a>
 </div>
 <div class="columns is-vcentered">
 <div class="column is-5">
@@ -103,7 +103,7 @@
 GET /diagnostics  → renderDiagnostics() → app.HandleDisplay(w, r)
 </code></pre>
 <p><code>app.HandleDisplay</code> writes a Refresh header pointing at <code>r.URL.Path</code>. Hitting <code>/diagnostics</code> keeps refreshing <code>/diagnostics</code>; hitting <code>/</code> keeps refreshing <code>/</code>. Add a third page and it just works.</p>
-<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi">Source on Codeberg</a></p>
+<p><a href="https://git.bytestone.uk/hum3/lofigui/src/branch/main/examples/08_water_tank_multi">Source on Forgejo</a></p>
 <hr>
 <h2 id="running">Running</h2>
 <pre><code class="language-bash">task go-example:08         # server on :1348
