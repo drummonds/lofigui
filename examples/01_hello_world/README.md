@@ -142,6 +142,6 @@ The `results` variable contains the accumulated HTML from lofigui.
 
 ### Python equivalent
 
-The Python implementation uses FastAPI and has the same structure. See [Python Notes](https://h3-lofigui.statichost.page/research-python.html) for the Python API reference.
+The Python implementation uses FastAPI and has the same structure. See [Python Notes](https://lofigui.docs.bytestone.uk/research-python.html) for the Python API reference.
 
 See example 02 for a more complex example with charts.

@@ -3,8 +3,8 @@ pages_build:
     - task docs:build
     - task docs:build-wasm
 pages_deploy:
-    - site: h3-lofigui
-      type: statichost
+    - type: rsync
+      site: lofigui
 remotes:
     - name: origin
       forge: forgejo

@@ -175,3 +175,6 @@ examples/11_water_tank_storage/go/data/
 .task
 
 .tp-release-comment
+
+# Per-machine task-plus config (symlink to ~/Cloudstation/IT/task-plus/), never committed
+task-plus.local.yaml

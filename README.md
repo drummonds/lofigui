@@ -6,7 +6,7 @@
 
 The application is where you have a single real object (e.g. machine or long-running process) which then has a number of pages around it to show various aspects of it.
 
-In the spirit of [Niklaus Wirth](https://en.wikipedia.org/wiki/Niklaus_Wirth) — computer systems should be simpler and more readable. Every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML. See [Philosophy](https://h3-lofigui.statichost.page/research-philosophy.html) for the longer argument.
+In the spirit of [Niklaus Wirth](https://en.wikipedia.org/wiki/Niklaus_Wirth) — computer systems should be simpler and more readable. Every dependency, every JavaScript byte, every layer of indirection has to justify itself against the alternative of just printing HTML. See [Philosophy](https://lofigui.docs.bytestone.uk/research-philosophy.html) for the longer argument.
 
 [![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org/dl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -82,7 +82,7 @@ go get git.bytestone.uk/hum3/lofigui
 
 ## Examples & Documentation
 
-See the **[documentation site](https://h3-lofigui.statichost.page/)** for interactive examples (including WASM demos), research notes, and the roadmap.
+See the **[documentation site](https://lofigui.docs.bytestone.uk/)** for interactive examples (including WASM demos), research notes, and the roadmap.
 
 To run examples locally, use [Task](https://taskfile.dev/):
 
@@ -93,7 +93,7 @@ task go-example:09       # Run any Go example by number
 
 ## Python
 
-A Python implementation also exists with the same API using FastAPI and Jinja2. See [Python Notes](https://h3-lofigui.statichost.page/research-python.html) for installation, API reference, and development instructions.
+A Python implementation also exists with the same API using FastAPI and Jinja2. See [Python Notes](https://lofigui.docs.bytestone.uk/research-python.html) for installation, API reference, and development instructions.
 
 ## Roadmap
 
@@ -116,7 +116,7 @@ Humphrey Drummond - [hum3@drummond.info](mailto:hum3@drummond.info)
 <!-- auto:links -->
 | | |
 |---|---|
-| Documentation | https://h3-lofigui.statichost.page/ |
+| Documentation | https://lofigui.docs.bytestone.uk/ |
 | PyPI | https://pypi.org/project/lofigui/ |
 | Source | https://git.bytestone.uk/hum3/lofigui |
 | Mirror (GitHub) | https://github.com/drummonds/lofigui |
