@@ -3,7 +3,7 @@ module git.bytestone.uk/hum3/lofigui/examples/02_svg_graph
 go 1.25
 
 require (
-	git.bytestone.uk/hum3/gogal v0.1.3
+	git.bytestone.uk/hum3/gogal v0.1.4
 	git.bytestone.uk/hum3/lofigui v0.17.33
 )
 
